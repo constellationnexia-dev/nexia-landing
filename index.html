@@ -1047,7 +1047,10 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       <!-- Paso 4: personalización (sub-wizard) -->
       <div class="wiz-panel" id="wiz-4" style="display:none">
         <h3>Personaliza tu asistente</h3>
-        <p class="modal-sub">Esto es lo que tu asistente sabrá de memoria. Podrás cambiarlo cuando quieras desde Telegram.</p>
+        <p class="modal-sub">Esto es lo que tu asistente sabrá de memoria. Podrás cambiarlo cuando quieras desde Telegram o desde tu panel personal.</p>
+        <div style="background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:.83rem;line-height:1.5;color:var(--text)">
+          💡 <strong>Tip:</strong> mientras más completo esté este formulario, menos errores comete tu asistente y mejor atiende a tus clientes. Te recomendamos agregar todos tus servicios con precios, tus horarios reales y un mensaje de bienvenida personalizado.
+        </div>
 
         <div class="sub-progress">
           <div class="sub-label"><strong id="sub-name">Tu negocio</strong><span id="sub-count">Paso 1 de 3</span></div>
@@ -1164,7 +1167,10 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
           <h3>¡Tu asistente está listo!</h3>
           <p>Hemos enviado los pasos finales a tu correo: conectar tu Google Calendar, ver tu número de WhatsApp asignado y abrir tu panel de control en Telegram.</p>
           <a href="dashboard.html" class="btn btn-primary" style="width:100%">Ir a mi panel →</a>
-          <button type="button" class="btn btn-ghost" id="resend-email" style="width:100%;margin-top:10px">Reenviar correo</button>
+          <div style="background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:.82rem;line-height:1.55;color:var(--text);text-align:left">
+            💡 <strong>Recuerda:</strong> puedes seguir personalizando tu asistente en cualquier momento desde tu <strong>panel personal</strong> o enviando comandos a tu <strong>bot de Telegram</strong>. Mientras más información tenga, mejor atenderá a tus clientes.
+          </div>
+          <button type="button" class="btn btn-ghost" id="resend-email" style="width:100%;margin-top:4px">Reenviar correo</button>
           <p class="help-small">¿Necesitas ayuda? <a href="#" class="calendly-link">Agenda una llamada con nosotros</a></p>
         </div>
       </div>
