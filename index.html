@@ -1537,8 +1537,9 @@ document.getElementById('sub-3').addEventListener('submit', async e => {
   if (sl_web) social_links.web = sl_web;
   if (sl_email) social_links.email = sl_email;
 
-  /* Modo ecuatoriano */
-  const ec_mode = document.getElementById('ec-mode').checked;
+  /* Modo ecuatoriano (elemento puede no existir si fue removido del formulario) */
+  const ecModeEl = document.getElementById('ec-mode');
+  const ec_mode = ecModeEl ? ecModeEl.checked : false;
   const ec_expressions = ec_mode
     ? [...document.querySelectorAll('#expr-picker .chip.on')].map(c => c.textContent)
     : [];
