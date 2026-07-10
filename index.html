@@ -1464,23 +1464,157 @@ document.getElementById('sub-2').addEventListener('submit', e => {
     goSub(3);
   }
 });
-document.getElementById('sub-3').addEventListener('submit', e => {
+document.getElementById('sub-3').addEventListener('submit', async e => {
   e.preventDefault();
-  localStorage.setItem('nexiaSession', '1'); /* cuenta creada → sesión iniciada */
-  /* horarios, tono y contacto para precargar en el panel */
+
+  /* ── Recopilar datos de todos los pasos del wizard ── */
+  const email = document.getElementById('a-email').value.trim();
+  const bizName = document.getElementById('b-name').value.trim();
+  const bizType = document.getElementById('b-type').value.trim();
+  const orgEl = document.querySelector('input[name=org]:checked');
+  const org = orgEl ? orgEl.value : 'negocio';
+  const mode = document.getElementById('b-mode').value;
+  const address = document.getElementById('b-address').value.trim();
+  const tone = document.getElementById('h-tone').value;
+  const ownerPhone = document.getElementById('h-phone').value.trim();
+  const welcome = document.getElementById('h-welcome').value.trim();
+
+  /* Horarios → formato {lunes: {open, close} | {closed:true}} */
+  const DAY_KEYS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+  const working_hours = {};
+  [...hoursList.querySelectorAll('.day-row')].forEach((r, i) => {
+    const closed = r.querySelector('input[type=checkbox]').checked;
+    const times = r.querySelectorAll('input[type=time]');
+    working_hours[DAY_KEYS[i]] = closed
+      ? { closed: true }
+      : { open: times[0].value, close: times[1].value };
+  });
+
+  /* Servicios y productos */
+  const collectItems = list => [...list.querySelectorAll('.svc-row')].map(r => {
+    const nameEl = r.querySelector('input[type=text]');
+    const priceEl = r.querySelector('input[inputmode=decimal]');
+    const timeEl = r.querySelector('.prod-time input');
+    const name = nameEl ? nameEl.value.trim() : '';
+    const price = priceEl ? parseFloat(priceEl.value.replace(',','.')) || null : null;
+    const duration = timeEl ? timeEl.value.trim() || null : null;
+    return name ? { name, price, duration } : null;
+  }).filter(Boolean);
+
+  const services = collectItems(svcList);
+  const products = collectItems(prodList);
+
+  /* Métodos de pago */
+  const pmMap = { 'Efectivo':'efectivo', 'Tarjeta':'tarjeta', 'Transferencia':'transferencia' };
+  const payment_methods = [];
+  document.querySelectorAll('#sub-2 .chk-row label').forEach(lbl => {
+    const cb = lbl.querySelector('input[type=checkbox]');
+    if (cb && cb.checked) {
+      const text = lbl.textContent.trim();
+      payment_methods.push(pmMap[text] || text.toLowerCase());
+    }
+  });
+
+  /* Duración por defecto */
+  const durVal = document.getElementById('s-duration').value;
+  const durMap = { '15 minutos':15, '30 minutos':30, '45 minutos':45, '60 minutos':60 };
+  const appointment_duration = durMap[durVal] || 60;
+
+  /* Walk-in */
+  const walkinVal = document.getElementById('s-walkin').value;
+  const accepts_walkins = walkinVal !== 'Solo con cita';
+
+  /* Redes sociales */
+  const social_links = {};
+  const sl_ig = document.getElementById('b-ig').value.trim();
+  const sl_fb = document.getElementById('b-fb').value.trim();
+  const sl_tt = document.getElementById('b-tt').value.trim();
+  const sl_web = document.getElementById('b-web').value.trim();
+  const sl_email = document.getElementById('b-email').value.trim();
+  if (sl_ig) social_links.ig = sl_ig;
+  if (sl_fb) social_links.fb = sl_fb;
+  if (sl_tt) social_links.tt = sl_tt;
+  if (sl_web) social_links.web = sl_web;
+  if (sl_email) social_links.email = sl_email;
+
+  /* Modo ecuatoriano */
+  const ec_mode = document.getElementById('ec-mode').checked;
+  const ec_expressions = ec_mode
+    ? [...document.querySelectorAll('#expr-picker .chip.on')].map(c => c.textContent)
+    : [];
+
+  /* Guardar en localStorage para precargar el dashboard */
   const P = JSON.parse(localStorage.getItem('nexiaProfile') || '{}');
-  P.hours = [...hoursList.querySelectorAll('.day-row')].map(r => ({
-    day: r.querySelector('.dname').textContent,
-    closed: r.querySelector('input[type=checkbox]').checked,
-    from: r.querySelectorAll('input[type=time]')[0].value,
-    to: r.querySelectorAll('input[type=time]')[1].value
-  }));
-  P.tone = document.getElementById('h-tone').value;
-  P.phone = document.getElementById('h-phone').value.trim();
-  P.welcome = document.getElementById('h-welcome').value.trim();
+  P.name = bizName; P.type = bizType; P.address = address;
+  P.tone = tone; P.phone = ownerPhone; P.welcome = welcome;
+  P.ec_mode = ec_mode; P.ec_expressions = ec_expressions;
   localStorage.setItem('nexiaProfile', JSON.stringify(P));
-  goStep(5);
-  launchConfetti();
+  localStorage.setItem('nexiaServices', JSON.stringify(services));
+  localStorage.setItem('nexiaProducts', JSON.stringify(products));
+
+  /* ── POST al backend ── */
+  const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+  const submitBtn = document.querySelector('#sub-3 button[type=submit]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Guardando tu asistente…';
+
+  const payload = {
+    owner_email: email,
+    business_name: bizName,
+    business_type: org,
+    business_description: bizType,
+    address: address || null,
+    is_online: mode === 'online' || mode === 'ambas',
+    plan: selectedPlan ? selectedPlan.id : 'starter',
+    working_hours,
+    services,
+    products,
+    bot_tone: tone,
+    ec_mode,
+    ec_expressions,
+    social_links: Object.keys(social_links).length ? social_links : null,
+    owner_phone: ownerPhone || null,
+    welcome_message: welcome || null,
+    accepts_appointments: true,
+    accepts_orders: products.length > 0,
+    accepts_walkins,
+    appointment_duration,
+    payment_methods: payment_methods.length ? payment_methods : ['efectivo'],
+  };
+
+  try {
+    const resp = await fetch(BACKEND + '/onboarding/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok && resp.status !== 409) {
+      /* 409 = email duplicado → ya tiene cuenta, dejamos pasar */
+      throw new Error(data.error || 'Error al registrar');
+    }
+
+    if (data.business_id) localStorage.setItem('nexiaBusinessId', data.business_id);
+    localStorage.setItem('nexiaSession', '1');
+    goStep(5);
+    launchConfetti();
+
+  } catch (err) {
+    console.error('Error al registrar:', err);
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    let errEl = document.getElementById('sub3-error');
+    if (!errEl) {
+      errEl = document.createElement('p');
+      errEl.id = 'sub3-error';
+      errEl.style.cssText = 'color:#FF5C5C;font-size:.84rem;margin-top:10px;text-align:center';
+      submitBtn.parentNode.insertBefore(errEl, submitBtn.nextSibling);
+    }
+    errEl.textContent = '⚠️ ' + (err.message || 'Hubo un problema. Intenta de nuevo.');
+  }
 });
 
 /* Dirección: solo si es presencial o ambas */
