@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constellation Nexia — Tu negocio atendiendo clientes 24/7</title>
+<meta name="description" content="Un asistente con IA que responde WhatsApp, agenda citas y gestiona tu negocio. Desde $49/mes. Hecho en Ecuador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050508;
+  --bg2:#0F0F1A;
+  --card:#12121E;
+  --accent:#00FF88;
+  --accent-dim:rgba(0,255,136,.12);
+  --accent2:#7C3AED;
+  --text:#FFFFFF;
+  --muted:#A0A0B0;
+  --line:#1E1E2E;
+  --radius:16px;
+  --font-title:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;overflow-x:hidden}
+img{max-width:100%}
+a{color:inherit;text-decoration:none}
+section{padding:64px 24px;position:relative}
+.container{max-width:1100px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-title);line-height:1.15}
+h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;margin-bottom:16px}
+.section-sub{color:var(--muted);font-size:1.05rem;max-width:600px;margin:0 auto 36px}
+.center{text-align:center}
+.accent{color:var(--accent)}
+
+/* ===== Reveal animations ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease-out,transform .6s ease-out}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+.reveal-d4{transition-delay:.4s}.reveal-d5{transition-delay:.5s}
+
+/* ===== Promo banner ===== */
+#promo-banner{position:fixed;top:0;left:0;right:0;z-index:60;background:linear-gradient(90deg,#00cc6e,var(--accent));color:#04140b;font-weight:600;font-size:.9rem;text-align:center;padding:9px 40px;display:flex;align-items:center;justify-content:center;gap:8px}
+#promo-banner .close-banner{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#04140b;font-size:1.1rem;cursor:pointer;line-height:1}
+
+/* ===== Navbar ===== */
+nav{position:fixed;top:38px;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:rgba(5,5,8,.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transition:top .3s}
+body.banner-hidden nav{top:0}
+.logo{font-family:var(--font-title);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:9px}
+.logo .star{color:var(--accent);font-size:1.2rem;animation:pulse-star 3s ease-in-out infinite}
+.nexia-brand{font-size:1.45rem;font-weight:700;letter-spacing:.03em;color:var(--accent);animation:neon-breathe 5.4s ease-in-out infinite}
+@keyframes neon-breathe{
+  0%,100%{color:var(--accent);text-shadow:0 0 6px rgba(0,255,136,.4),0 0 18px rgba(0,255,136,.2)}
+  25%{color:var(--accent);text-shadow:0 0 14px rgba(0,255,136,.95),0 0 36px rgba(0,255,136,.5),0 0 64px rgba(124,58,237,.45)}
+  50%{color:#9D6BFF;text-shadow:0 0 14px rgba(124,58,237,.95),0 0 36px rgba(124,58,237,.55),0 0 64px rgba(124,58,237,.45)}
+  75%{color:var(--accent);text-shadow:0 0 10px rgba(0,255,136,.6),0 0 24px rgba(0,255,136,.3)}
+}
+@property --tw{syntax:'<color>';inherits:true;initial-value:#00FF88}
+.brand-line{font-family:var(--font-title);font-weight:700;font-size:clamp(2.4rem,5.8vw,4.2rem);line-height:1.12;letter-spacing:.02em;margin-bottom:8px;transition:--tw 2.8s ease}
+.bl-word{display:inline-block;white-space:nowrap}
+.brand-line .bl-ch{display:inline-block;color:#EAFFF5;animation:bl-in .5s ease-out var(--din) both,star-twinkle 5.5s ease-in-out calc(var(--din) + var(--d)) infinite}
+@keyframes bl-in{from{opacity:0;transform:translateY(16px) scale(.85)}to{opacity:1;transform:none}}
+@keyframes star-twinkle{
+  0%,100%{color:#EAFFF5;text-shadow:0 0 4px rgba(0,255,136,.2)}
+  50%{color:var(--tw,var(--accent));text-shadow:0 0 16px var(--tw,var(--accent)),0 0 42px rgba(124,58,237,.45)}
+}
+.brand-slogan{font-family:var(--font-title);color:var(--accent);font-size:1.05rem;font-weight:600;margin-bottom:20px;text-shadow:0 0 18px rgba(0,255,136,.3)}
+@keyframes pulse-star{0%,100%{opacity:1;text-shadow:0 0 8px var(--accent)}50%{opacity:.6;text-shadow:0 0 2px var(--accent)}}
+.btn{display:inline-block;padding:13px 26px;border-radius:12px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;font-family:var(--font-body);transition:all .3s ease-out;text-align:center}
+.btn-primary{background:var(--accent);color:#04140b;box-shadow:0 0 20px rgba(0,255,136,.35)}
+.btn-primary:hover{box-shadow:0 0 34px rgba(0,255,136,.6);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--accent);box-shadow:0 0 16px rgba(0,255,136,.25)}
+.btn-sm{padding:9px 18px;font-size:.85rem}
+.nav-right{display:flex;align-items:center;gap:18px}
+.nav-link{color:var(--muted);font-size:.9rem;font-weight:500;transition:color .3s;background:none;border:none;cursor:pointer;font-family:var(--font-body)}
+.nav-link:hover{color:var(--accent)}
+
+/* ===== Panel de cuenta (pantalla completa) ===== */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse 70% 50% at 80% 0%,rgba(124,58,237,.12),transparent),radial-gradient(ellipse 50% 40% at 10% 100%,rgba(0,255,136,.06),transparent),var(--bg);display:none;overflow-y:auto}
+.modal-overlay.open{display:block}
+.panel-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:16px 26px;background:rgba(5,5,8,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.back-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 18px;border-radius:11px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .3s}
+.back-btn:hover{color:var(--text);border-color:var(--accent);box-shadow:0 0 14px rgba(0,255,136,.2)}
+.panel-top .logo{font-size:1rem}
+.panel-top .spacer{width:104px}
+.modal{width:100%;max-width:480px;margin:0 auto;padding:44px 24px 80px;animation:modal-in .35s ease-out;transition:max-width .3s}
+/* Paso de planes: aprovecha el ancho completo en PC.
+   Flex centrado = nunca queda una tarjeta huérfana apachurrada */
+.modal.wide{max-width:1440px}
+.modal.wide .wiz-steps{max-width:620px;margin-left:auto;margin-right:auto}
+.modal.wide #wiz-1 h3,.modal.wide #wiz-1 .modal-sub{text-align:center}
+.modal.wide #wiz-1 h3{font-size:clamp(1.4rem,2.2vw,2.1rem)}
+.modal.wide #wiz-1 .modal-sub{font-size:clamp(.9rem,1.1vw,1.1rem)}
+.modal.wide #plan-options{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;align-items:stretch}
+/* todas las tarjetas con exactamente el mismo tamaño, en cualquier vista */
+.modal.wide .plan-option{width:clamp(218px,16vw,262px);flex:0 0 auto;min-height:clamp(300px,23vw,345px);flex-direction:column;align-items:stretch;justify-content:flex-start;margin-bottom:0;padding:24px 22px}
+.modal.wide .plan-option .pname{font-size:clamp(1.1rem,1.2vw,1.3rem)}
+.modal.wide .plan-option .pmsgs{font-size:clamp(.92rem,1.05vw,1.05rem);margin-top:8px;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.modal.wide .plan-option .pprice{text-align:left;margin-top:12px;font-size:clamp(1.35rem,1.5vw,1.65rem)}
+.modal.wide .plan-option .psub{font-size:clamp(.72rem,.78vw,.8rem)}
+.modal.wide .plan-option .po-feats{margin-top:14px;padding-top:14px;flex-direction:column;gap:8px}
+.modal.wide .plan-option .po-feats li{font-size:clamp(.78rem,.85vw,.88rem);padding-left:16px}
+.plan-option.popular{border-color:rgba(0,255,136,.5)}
+.plan-option.popular .ppop{background:var(--accent);color:#04140b;padding:2px 9px;border-radius:100px;font-size:.62rem}
+.modal.wide .plan-option.popular{border-color:var(--accent);background:linear-gradient(180deg,rgba(0,255,136,.07),var(--card) 45%);transform:translateY(-5px);animation:pro-glow 3s ease-in-out infinite}
+@keyframes pro-glow{
+  0%,100%{box-shadow:0 0 16px rgba(0,255,136,.18)}
+  50%{box-shadow:0 0 32px rgba(0,255,136,.35)}
+}
+.modal.wide #to-pay{max-width:430px;margin:26px auto 0;display:block;padding:16px 28px;font-size:1.02rem}
+@keyframes modal-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.modal-tabs{display:flex;gap:6px;background:var(--card);border-radius:11px;padding:5px;margin-bottom:24px}
+.modal-tab{flex:1;padding:9px;border:none;border-radius:8px;background:none;color:var(--muted);font-family:var(--font-body);font-weight:600;font-size:.88rem;cursor:pointer;transition:all .25s}
+.modal-tab.active{background:var(--accent);color:#04140b}
+.modal h3{font-size:1.3rem;margin-bottom:6px}
+.modal .modal-sub{color:var(--muted);font-size:.87rem;margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field input,.field select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font-body);font-size:.92rem;transition:border-color .3s;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+.modal .btn-primary{width:100%;margin-top:8px}
+.modal-msg{display:none;text-align:center;padding:10px 0}
+.modal-msg .big{font-size:2.4rem;display:block;margin-bottom:12px}
+.modal-msg p{color:var(--muted);font-size:.92rem;margin-bottom:18px}
+.modal-alt{text-align:center;margin-top:16px;font-size:.82rem;color:var(--muted)}
+.modal-alt a{color:var(--accent);font-weight:600}
+
+/* Wizard de registro */
+.wiz-steps{display:flex;justify-content:space-between;margin-bottom:28px;gap:4px;position:relative}
+.wiz-line{position:absolute;top:13px;left:12.5%;right:12.5%;height:2px;background:var(--line);z-index:0;border-radius:2px}
+.wiz-line-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 10px rgba(0,255,136,.55);transition:width .6s ease-out;border-radius:2px}
+.wstep{flex:1;text-align:center;font-size:.68rem;color:var(--muted);font-weight:500;position:relative;z-index:1}
+.wstep b{display:flex;width:27px;height:27px;border-radius:50%;background:var(--card);border:1px solid var(--line);align-items:center;justify-content:center;margin:0 auto 5px;font-family:var(--font-title);font-size:.78rem;transition:all .3s}
+.wstep.active{color:var(--text)}
+.wstep.active b{background:var(--accent);color:#04140b;border-color:var(--accent);box-shadow:0 0 12px rgba(0,255,136,.4)}
+.wstep.done b{border-color:var(--accent);color:var(--accent)}
+.plan-option{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:9px;cursor:pointer;transition:all .25s;background:var(--card)}
+.po-feats{width:100%;list-style:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 16px}
+.po-feats li{font-size:.7rem;color:var(--muted);position:relative;padding-left:13px}
+.po-feats li::before{content:'✓';position:absolute;left:0;color:var(--accent);font-weight:700}
+.plan-option:hover{border-color:rgba(0,255,136,.4)}
+.plan-option.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+.plan-option .pname{font-weight:600;font-family:var(--font-title);font-size:.95rem}
+.plan-option .ppop{font-size:.64rem;color:var(--accent);font-family:var(--font-body);font-weight:600;margin-left:4px}
+.plan-option .pmsgs{font-family:var(--font-title);font-weight:600;font-size:.88rem;color:var(--accent);white-space:nowrap}
+.plan-option .pprice{text-align:right;font-family:var(--font-title);font-weight:700;color:var(--accent);font-size:1.05rem;line-height:1.2}
+.plan-option .psub{font-size:.68rem;color:var(--muted);font-weight:400;font-family:var(--font-body)}
+#plan-options{margin-bottom:16px}
+.pay-summary{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:.92rem}
+.pay-summary .row{display:flex;justify-content:space-between;padding:3px 0}
+.wiz-back{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;margin-top:14px;font-family:var(--font-body);width:100%;text-align:center;transition:color .3s}
+.wiz-back:hover{color:var(--accent)}
+.mp-note{font-size:.73rem;color:var(--muted);margin-top:12px;text-align:center}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
+.field select{appearance:none;-webkit-appearance:none;cursor:pointer}
+.field textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font-body);font-size:.92rem;resize:vertical;outline:none;transition:border-color .3s}
+.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+.wiz-panel,.sub-screen{animation:modal-in .35s ease-out}
+
+/* Sub-wizard de personalización */
+.sub-progress{margin-bottom:22px}
+.sub-label{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;margin-bottom:7px}
+.sub-label strong{font-family:var(--font-title);color:var(--accent);font-size:.88rem}
+.sub-label span{color:var(--muted)}
+.sub-track{height:5px;background:var(--card);border:1px solid var(--line);border-radius:100px;overflow:hidden}
+.sub-fill{display:block;height:100%;width:33.3%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;box-shadow:0 0 10px rgba(0,255,136,.5);transition:width .5s ease-out}
+.opt{color:var(--muted);font-style:normal;font-size:.64rem;border:1px solid var(--line);padding:1px 8px;border-radius:100px;margin-left:6px;vertical-align:middle}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+.svc-row{display:grid;grid-template-columns:1fr 76px 70px 34px;gap:8px;margin-bottom:8px;align-items:center}
+.svc-head{display:grid;grid-template-columns:1fr 76px 70px 34px;gap:8px;font-size:.68rem;color:var(--muted);margin:4px 0 7px;align-items:end}
+.svc-head .opt{margin-left:0;display:inline-block;margin-top:2px}
+.hint{font-size:.72rem;color:var(--muted);margin:2px 0 8px}
+.perso-item{display:flex;gap:12px;align-items:flex-start;background:#1A1A2A;border-radius:12px;padding:13px 15px;margin-bottom:10px;font-size:.9rem;opacity:0;transform:translateY(10px);transition:all .5s ease-out}
+.perso-item:last-child{margin-bottom:0}
+.perso-item span{color:var(--muted);font-size:.8rem}
+.visible .perso-item{opacity:1;transform:none}
+.visible .perso-item:nth-child(2){transition-delay:.35s}
+.visible .perso-item:nth-child(3){transition-delay:.7s}
+/* Flechas de inputs numéricos: ocultas para look minimalista */
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+/* Demo de tono y chips de expresiones */
+.tone-tag{display:inline-block;font-size:.7rem;color:var(--accent);border:1px solid rgba(0,255,136,.35);border-radius:100px;padding:3px 12px;margin-bottom:12px;font-weight:600;font-family:var(--font-title);transition:opacity .4s}
+.tone-bubble{background:rgba(0,255,136,.13);border:1px solid rgba(0,255,136,.25);border-radius:14px;border-bottom-left-radius:4px;padding:12px 15px;font-size:.9rem;transition:opacity .4s;min-height:52px}
+.expr-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border:1px solid var(--line);border-radius:100px;padding:6px 14px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .25s;background:var(--card);user-select:none}
+.chip:hover{border-color:rgba(0,255,136,.5)}
+.chip.on{border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(0,255,136,.2)}
+.svc-row input{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--text);font-family:var(--font-body);font-size:.9rem;outline:none;transition:border-color .3s}
+.svc-row input:focus{border-color:var(--accent)}
+.svc-del{background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);cursor:pointer;height:36px;transition:all .3s}
+.svc-del:hover{color:#FF5C5C;border-color:#FF5C5C}
+.add-svc{background:none;border:1px dashed var(--line);border-radius:10px;color:var(--accent);width:100%;padding:10px;cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:.85rem;transition:all .3s;margin-top:2px}
+.add-svc:hover{border-color:var(--accent);box-shadow:0 0 12px rgba(0,255,136,.15)}
+.svc-tabs{display:flex;gap:6px;background:var(--card);border-radius:11px;padding:5px;margin-bottom:12px}
+.svc-tab{flex:1;padding:9px;border:none;border-radius:8px;background:none;color:var(--muted);font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .25s}
+.svc-tab.active{background:var(--accent);color:#04140b}
+.num-wrap{position:relative}
+.num-wrap input{padding-right:24px}
+.spin{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px}
+.spin button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:7px;line-height:1;padding:2px 5px;transition:color .2s}
+.spin button:hover{color:var(--accent)}
+.svc-row.err input{border-color:#FF5C5C}
+#svc-error{font-size:.76rem;color:#FF5C5C;margin-top:8px;display:none}
+.prod-row{grid-template-columns:1fr 76px 34px}
+.svc-head-prod{grid-template-columns:1fr 76px 34px}
+.prod-time{grid-column:1/-1;display:flex;gap:8px;align-items:center}
+.pt-label{font-size:.74rem;color:var(--muted);white-space:nowrap}
+.prod-time .num-wrap{width:88px;flex-shrink:0}
+.prod-time input[type=text]{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:.84rem;outline:none;font-family:var(--font-body);transition:border-color .3s;min-width:0}
+.prod-time input[type=text]:focus{border-color:var(--accent)}
+#support-fab{position:fixed;right:18px;bottom:18px;z-index:120;background:var(--accent);color:#04140b;font-weight:700;font-family:var(--font-body);padding:12px 18px;border-radius:100px;box-shadow:0 8px 30px rgba(0,0,0,.45),0 0 20px rgba(0,255,136,.35);display:flex;align-items:center;gap:7px;font-size:.86rem;transition:all .3s;text-decoration:none}
+#support-fab:hover{transform:translateY(-3px);box-shadow:0 0 34px rgba(0,255,136,.6)}
+.org-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.org-opt{position:relative}
+.org-opt input{position:absolute;opacity:0;pointer-events:none}
+.org-opt span{display:block;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 6px;font-size:.72rem;color:var(--muted);cursor:pointer;transition:all .25s;line-height:1.35}
+.org-opt span b{display:block;font-size:1.3rem;margin-bottom:4px}
+.org-opt span:hover{border-color:rgba(0,255,136,.5)}
+.org-opt input:checked + span{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(0,255,136,.2)}
+.org-row.two{grid-template-columns:1fr 1fr}
+.help-small{font-size:.78rem;color:var(--muted);margin-top:14px}
+.help-small a{color:var(--accent);font-weight:600;text-decoration:none}
+.help-small a:hover{text-decoration:underline}
+
+/* Modal de agendar cita */
+.cal-overlay{position:fixed;inset:0;z-index:150;background:rgba(3,3,6,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+.cal-overlay.open{display:flex}
+.cal-box{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:28px 26px;width:100%;max-width:420px;position:relative;animation:modal-in .3s ease-out;max-height:92vh;display:flex;flex-direction:column;transition:max-width .3s}
+.cal-box.expanded{max-width:720px;padding:16px}
+.cal-close{position:absolute;top:12px;right:14px;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;transition:color .3s;line-height:1}
+.cal-close:hover{color:var(--text)}
+.cal-box h3{font-size:1.25rem;margin-bottom:12px;padding-right:26px}
+.cal-intro{color:var(--muted);font-size:.9rem;margin-bottom:8px}
+.cal-list{list-style:none;margin-bottom:22px}
+.cal-list li{padding:9px 0 9px 28px;position:relative;font-size:.93rem;color:#D6D6E0;border-bottom:1px solid var(--line)}
+.cal-list li:last-child{border-bottom:none}
+.cal-list li::before{content:'✓';position:absolute;left:4px;color:var(--accent);font-weight:700}
+#cal-frame{width:100%;height:min(72vh,620px);border:none;border-radius:10px;background:#fff}
+.cal-disabled{opacity:.45;pointer-events:none;cursor:not-allowed;box-shadow:none!important}
+.chk-row{display:flex;gap:16px;flex-wrap:wrap}
+.chk-row label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.86rem;cursor:pointer}
+.chk-row input,.day-row input[type=checkbox]{accent-color:var(--accent)}
+.day-row{display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:.84rem}
+.day-row .dname{width:78px;color:var(--muted);flex-shrink:0}
+.day-row input[type=time]{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 7px;color:var(--text);font-family:var(--font-body);font-size:.8rem;outline:none;color-scheme:dark;transition:border-color .3s}
+.day-row input[type=time]:focus{border-color:var(--accent)}
+.day-row .dsep{color:var(--muted);font-size:.72rem}
+.day-row .dclosed{margin-left:auto;display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.74rem;cursor:pointer;white-space:nowrap}
+.day-row.closed input[type=time]{opacity:.3}
+
+/* Confirmación celebratoria */
+.celebrate{position:relative}
+.celebrate .big{display:inline-block;animation:pop-big .65s cubic-bezier(.22,1.6,.36,1)}
+@keyframes pop-big{from{transform:scale(0)}to{transform:scale(1)}}
+.celebrate h3{text-shadow:0 0 24px rgba(0,255,136,.35)}
+#confetti{position:absolute;inset:-24px 0 0 0;pointer-events:none;overflow:hidden}
+.confetti-p{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;opacity:.9;animation:cfall linear forwards}
+@keyframes cfall{to{transform:translateY(460px) rotate(560deg);opacity:0}}
+
+/* ===== Logos de marcas ===== */
+.brand-logo{height:34px;width:auto;display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 8px rgba(0,255,136,.15))}
+.tech-card .t-logo{min-height:40px}
+.logo-chip img{height:26px;width:auto;opacity:.75;transition:opacity .3s}
+.logo-chip:hover img{opacity:1}
+
+/* ===== Hero ===== */
+#hero{min-height:88vh;display:flex;align-items:center;padding-top:135px;padding-bottom:70px;background:radial-gradient(ellipse 80% 60% at 70% 20%,rgba(124,58,237,.16),transparent),radial-gradient(ellipse 60% 50% at 20% 80%,rgba(0,255,136,.07),transparent)}
+#particles{position:absolute;inset:0;pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;position:relative;z-index:2}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(0,255,136,.35);color:var(--accent);padding:7px 16px;border-radius:100px;font-size:.85rem;font-weight:600;margin-bottom:24px}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px var(--accent)}50%{opacity:.4}}
+.hero-title{font-size:clamp(1.55rem,3.4vw,2.4rem);font-weight:700;margin-bottom:20px}
+.hero-title .grad{background:linear-gradient(90deg,var(--accent),#7CFFCB,var(--accent2),var(--accent));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:grad-move 6s linear infinite}
+@keyframes grad-move{to{background-position:300% 0}}
+.hero-sub{color:var(--muted);font-size:1.15rem;max-width:520px;margin-bottom:34px}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
+
+/* Phone / chat mock */
+.phone{background:var(--bg2);border:1px solid var(--line);border-radius:28px;padding:18px;max-width:370px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(0,255,136,.06);position:relative}
+.phone-header{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1px solid var(--line);margin-bottom:13px}
+.phone-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.phone-header .name{font-weight:600;font-size:.92rem}
+.phone-header .status{font-size:.74rem;color:var(--accent)}
+.chat-area{display:flex;flex-direction:column;gap:9px;min-height:330px}
+.bubble{max-width:82%;padding:9px 13px;border-radius:14px;font-size:.85rem;line-height:1.45;opacity:0;transform:translateY(12px) scale(.96);transition:opacity .4s ease-out,transform .4s ease-out;white-space:pre-line}
+.bubble.show{opacity:1;transform:translateY(0) scale(1)}
+.bubble.in{background:#1A1A2A;border-bottom-left-radius:4px;align-self:flex-start}
+.bubble.out{background:rgba(0,255,136,.13);border:1px solid rgba(0,255,136,.25);border-bottom-right-radius:4px;align-self:flex-end}
+.typing{align-self:flex-start;background:#1A1A2A;border-radius:14px;padding:11px 15px;display:none;gap:5px}
+.typing.show{display:flex}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:tdot 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+
+/* ===== Problema ===== */
+#problema{background:var(--bg2)}
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:36px 0 32px}
+.pain-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;text-align:center;transition:border-color .4s,box-shadow .4s}
+.pain-card .icon{font-size:2.3rem;display:inline-block;margin-bottom:16px}
+.pain-card.visible .icon{animation:shake-err .5s ease-out .3s}
+@keyframes shake-err{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.pain-card.visible{border-color:rgba(255,80,80,.35)}
+.pain-card p{color:var(--muted);font-size:1rem}
+.transition-line{font-family:var(--font-title);font-size:1.5rem;font-weight:600;color:var(--accent);text-align:center}
+
+/* ===== Cómo funciona ===== */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:44px;position:relative}
+.steps::before{content:'';position:absolute;top:44px;left:14%;right:14%;height:2px;background:var(--line);z-index:0}
+.steps::after{content:'';position:absolute;top:44px;left:14%;height:2px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 12px rgba(0,255,136,.5);z-index:0;transition:width 1.6s ease-out}
+.steps.visible::after{width:72%}
+.step{position:relative;z-index:1;text-align:center}
+.step-icon{width:88px;height:88px;margin:0 auto 22px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:2rem;transition:all .4s}
+.step:hover .step-icon{border-color:var(--accent);box-shadow:0 0 26px rgba(0,255,136,.35)}
+.step-num{position:absolute;top:-6px;right:calc(50% - 56px);background:var(--accent);color:#04140b;font-weight:700;font-size:.8rem;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-title)}
+.step h3{font-size:1.2rem;margin-bottom:10px}
+.step p{color:var(--muted);font-size:.95rem}
+
+/* ===== Características ===== */
+#caracteristicas{background:var(--bg2)}
+.feature{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;margin-bottom:60px}
+.feature:last-child{margin-bottom:0}
+.feature:nth-child(even) .feature-visual{order:-1}
+.feature-tag{display:inline-block;color:var(--accent);font-weight:600;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.feature h3{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:16px}
+.feature p{color:var(--muted);font-size:1.05rem}
+.feature-visual{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;min-height:220px;display:flex;flex-direction:column;justify-content:center;transition:box-shadow .4s,border-color .4s}
+.feature-visual:hover{border-color:rgba(0,255,136,.4);box-shadow:0 0 34px rgba(0,255,136,.12)}
+
+/* 4A demo chat */
+.mini-chat{display:flex;flex-direction:column;gap:10px}
+.mini-bubble{padding:9px 14px;border-radius:13px;font-size:.86rem;max-width:85%;opacity:0;transform:translateY(10px);transition:all .5s ease-out}
+.visible .mini-bubble{opacity:1;transform:translateY(0)}
+.visible .mini-bubble:nth-child(1){transition-delay:.2s}
+.visible .mini-bubble:nth-child(2){transition-delay:.7s}
+.visible .mini-bubble:nth-child(3){transition-delay:1.2s}
+.visible .mini-bubble:nth-child(4){transition-delay:1.7s}
+.mini-bubble.c{background:#1A1A2A;align-self:flex-start;border-bottom-left-radius:4px}
+.mini-bubble.b{background:rgba(0,255,136,.13);border:1px solid rgba(0,255,136,.25);align-self:flex-end;border-bottom-right-radius:4px}
+
+/* 4B progress */
+.progress-wrap{text-align:center}
+.progress-time{font-family:var(--font-title);font-size:2.6rem;font-weight:700;color:var(--accent);margin-bottom:18px}
+.progress-bar{height:12px;background:#1A1A2A;border-radius:100px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;box-shadow:0 0 14px rgba(0,255,136,.5);transition:width 2.2s ease-out .3s}
+.visible .progress-fill{width:100%}
+.progress-label{margin-top:14px;color:var(--muted);font-size:.9rem}
+
+/* 4C calendar */
+.mini-cal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cal-slot{background:#1A1A2A;border:1px solid var(--line);border-radius:9px;padding:12px 6px;text-align:center;font-size:.78rem;color:var(--muted);transition:all .5s ease-out}
+.visible .cal-slot.filled{background:rgba(0,255,136,.13);border-color:rgba(0,255,136,.4);color:var(--accent)}
+.visible .cal-slot.filled:nth-of-type(2){transition-delay:.4s}
+.visible .cal-slot.filled:nth-of-type(5){transition-delay:.9s}
+.visible .cal-slot.filled:nth-of-type(7){transition-delay:1.4s}
+.visible .cal-slot.filled:nth-of-type(10){transition-delay:1.9s}
+.visible .cal-slot.filled:nth-of-type(12){transition-delay:2.4s}
+.cal-title{grid-column:1/-1;font-family:var(--font-title);font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-size:.95rem}
+.cal-title small{color:var(--muted);font-weight:400}
+
+/* 4D notification */
+.notif-phone{background:#0A0A14;border:1px solid var(--line);border-radius:22px;padding:22px 18px;max-width:290px;margin:0 auto;text-align:center}
+.notif-time{font-family:var(--font-title);font-size:1.9rem;font-weight:600;color:var(--muted);margin-bottom:18px}
+.notif-card{background:#1A1A2A;border-radius:13px;padding:13px 15px;text-align:left;font-size:.82rem;opacity:0;transform:translateY(-14px);transition:all .6s cubic-bezier(.22,1.2,.36,1) .4s;border-left:3px solid var(--accent)}
+.visible .notif-card{opacity:1;transform:translateY(0)}
+.notif-card .app{color:var(--accent);font-weight:600;font-size:.72rem;margin-bottom:4px}
+
+/* 4E telegram */
+.tg-chat{display:flex;flex-direction:column;gap:10px;font-size:.85rem}
+.tg-msg{padding:9px 14px;border-radius:13px;max-width:85%;opacity:0;transform:translateY(10px);transition:all .5s ease-out}
+.visible .tg-msg{opacity:1;transform:translateY(0)}
+.visible .tg-msg:nth-child(2){transition-delay:.6s}
+.visible .tg-msg:nth-child(3){transition-delay:1.2s}
+.visible .tg-msg:nth-child(4){transition-delay:1.8s}
+.tg-msg.owner{background:rgba(124,58,237,.22);border:1px solid rgba(124,58,237,.4);align-self:flex-end;border-bottom-right-radius:4px}
+.tg-msg.bot{background:#1A1A2A;align-self:flex-start;border-bottom-left-radius:4px;white-space:pre-line}
+
+/* ===== Para quién ===== */
+#paraquien{background:var(--bg2)}
+.audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.aud-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px;text-align:center;transition:all .35s ease-out;cursor:default}
+.aud-card:hover{border-color:var(--accent);box-shadow:0 0 28px rgba(0,255,136,.18);transform:translateY(-5px)}
+.aud-card .icon{font-size:2.2rem;display:block;margin-bottom:14px}
+.aud-card h3{font-size:1.05rem;font-weight:600}
+.aud-card p{color:var(--muted);font-size:.86rem;margin-top:8px}
+
+/* ===== Planes ===== */
+.plans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px;align-items:stretch}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 20px;display:flex;flex-direction:column;transition:all .35s ease-out;position:relative}
+.plan:hover{transform:translateY(-5px);border-color:rgba(0,255,136,.5)}
+.plan.popular{border:1px solid var(--accent);box-shadow:0 0 30px rgba(0,255,136,.18)}
+.plan.popular::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);padding:1px;background:linear-gradient(120deg,var(--accent),var(--accent2),var(--accent));background-size:250% 100%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:grad-move 4s linear infinite;pointer-events:none}
+.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04140b;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
+.plan h3{font-size:1.15rem;margin-bottom:4px}
+.plan .who{color:var(--muted);font-size:.78rem;margin-bottom:18px;min-height:2.2em}
+.plan .price-old{color:var(--muted);text-decoration:line-through;font-size:.95rem}
+.plan .price{font-family:var(--font-title);font-size:2rem;font-weight:700;color:var(--accent)}
+.plan .price small{font-size:.85rem;color:var(--muted);font-weight:400;font-family:var(--font-body)}
+.plan .offer-note{font-size:.72rem;color:var(--accent);margin-bottom:14px;min-height:1.2em}
+.plan-msgs{display:flex;align-items:baseline;justify-content:center;gap:6px;font-family:var(--font-title);margin-top:12px;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap}
+.plan-msgs b{color:var(--accent);font-size:1.12rem;font-weight:700}
+.plan-msgs span{font-size:.72rem;color:var(--muted);font-weight:400;font-family:var(--font-body)}
+.plan ul{list-style:none;margin:14px 0 22px;flex:1}
+.plan li{font-size:.83rem;color:var(--muted);padding:5px 0;padding-left:20px;position:relative}
+.plan li::before{content:'✓';position:absolute;left:0;color:var(--accent);font-weight:700}
+.plans-cta{text-align:center;margin-top:40px;color:var(--muted);font-size:.95rem}
+
+/* ===== FAQ ===== */
+#faq{background:var(--bg2)}
+.faq-list{max-width:760px;margin:36px auto 0}
+.faq-item{border:1px solid var(--line);border-radius:14px;margin-bottom:14px;background:var(--card);overflow:hidden;transition:border-color .3s}
+.faq-item.open{border-color:rgba(0,255,136,.45)}
+.faq-q{width:100%;background:none;border:none;color:var(--text);font-family:var(--font-body);font-size:1rem;font-weight:600;padding:20px 24px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-q .arrow{color:var(--accent);transition:transform .3s;flex-shrink:0}
+.faq-item.open .arrow{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease-out}
+.faq-a p{padding:0 24px 20px;color:var(--muted);font-size:.95rem}
+
+/* ===== Testimonios ===== */
+.testi-track-wrap{overflow:hidden;margin-top:36px;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.testi-track{display:flex;gap:24px;width:max-content;animation:marquee 40s linear infinite}
+.testi-track:hover{animation-play-state:paused}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.testi-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px;width:360px;flex-shrink:0}
+.testi-card .quote{font-size:.95rem;color:#D6D6E0;margin-bottom:20px;font-style:italic}
+.testi-who{display:flex;align-items:center;gap:13px}
+.testi-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-title);color:#fff}
+.testi-who .name{font-weight:600;font-size:.9rem}
+.testi-who .biz{color:var(--muted);font-size:.8rem}
+
+/* ===== Números ===== */
+#numeros{background:linear-gradient(180deg,var(--bg2),#0A0A18)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px}
+.metric{text-align:center;padding:24px 14px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.015)}
+.metric .num{font-family:var(--font-title);font-size:clamp(2.2rem,4vw,3.1rem);font-weight:700;color:var(--accent);text-shadow:0 0 24px rgba(0,255,136,.45)}
+.metric .label{color:var(--muted);font-size:.88rem;margin-top:8px}
+
+/* ===== Tecnología ===== */
+.tech-known{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:56px 0 72px}
+.tech-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:32px 24px;text-align:center;transition:all .35s}
+.tech-card:hover{border-color:rgba(0,255,136,.4);box-shadow:0 0 24px rgba(0,255,136,.12)}
+.tech-card .t-logo{font-family:var(--font-title);font-size:1.35rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px}
+.tech-card p{color:var(--muted);font-size:.88rem}
+.tech-ai{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.tech-ai .tech-card .t-logo{font-size:1.08rem;color:var(--accent);text-shadow:0 0 16px rgba(0,255,136,.4)}
+.tech-close{text-align:center;color:var(--muted);max-width:640px;margin:56px auto 0;font-size:1.02rem;font-style:italic}
+.logo-marquee-wrap{overflow:hidden;margin-top:64px;mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:26px 0}
+.logo-marquee{display:flex;gap:56px;width:max-content;animation:marquee 30s linear infinite;align-items:center}
+.logo-chip{font-family:var(--font-title);font-weight:600;font-size:1.05rem;color:var(--muted);white-space:nowrap;transition:color .3s;display:flex;align-items:center;gap:9px}
+.logo-chip:hover{color:var(--accent)}
+.logo-chip .lc-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2)}
+
+/* ===== Siempre disponible ===== */
+#disponible{background:var(--bg2);overflow:hidden}
+#disponible::before{content:'';position:absolute;top:50%;left:50%;width:640px;height:640px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(0,255,136,.05),transparent 65%);animation:pulse-bg 4s ease-in-out infinite}
+@keyframes pulse-bg{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.15);opacity:.55}}
+.avail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;position:relative;z-index:1}
+.avail-card{text-align:center;padding:26px 22px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+.avail-card .icon{font-size:2.4rem;display:block;margin-bottom:16px}
+.avail-card h3{font-size:1.15rem;margin-bottom:12px}
+.avail-card p{color:var(--muted);font-size:.93rem}
+.live-counter{text-align:center;margin-top:36px;position:relative;z-index:1;color:var(--muted);font-size:.95rem}
+.live-counter .lc-num{font-family:var(--font-title);font-size:1.6rem;font-weight:700;color:var(--accent);text-shadow:0 0 16px rgba(0,255,136,.5)}
+
+/* ===== CTA final ===== */
+#cta-final{background:linear-gradient(135deg,#071410,#0A0A18 45%,#150A28);position:relative;overflow:hidden;text-align:center;padding:88px 24px}
+#cta-final::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 0%,rgba(0,255,136,.14),transparent),radial-gradient(ellipse 50% 45% at 80% 100%,rgba(124,58,237,.2),transparent);animation:cta-glow 7s ease-in-out infinite alternate}
+@keyframes cta-glow{to{opacity:.55}}
+#cta-final .container{position:relative;z-index:1}
+#cta-final h2{font-size:clamp(2rem,4.6vw,3.2rem)}
+#cta-final .btn-primary{font-size:1.1rem;padding:18px 42px;margin-top:34px}
+.cta-small{margin-top:18px;color:var(--muted);font-size:.85rem}
+
+/* ===== Footer ===== */
+footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--bg)}
+.footer-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:44px}
+.footer-grid h4{font-family:var(--font-title);font-size:.95rem;margin-bottom:16px;color:var(--text)}
+.footer-grid a,.footer-grid p{color:var(--muted);font-size:.9rem;display:block;margin-bottom:10px;transition:color .3s}
+.footer-grid a:hover{color:var(--accent)}
+.footer-bottom{max-width:1100px;margin:48px auto 0;padding-top:26px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.85rem;flex-wrap:wrap;gap:14px}
+
+/* ===== Responsive ===== */
+@media(max-width:960px){
+  .hero-grid{grid-template-columns:1fr;gap:44px}
+  .plans-grid{grid-template-columns:repeat(2,1fr)}
+  .tech-ai{grid-template-columns:repeat(2,1fr)}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  section{padding:72px 18px}
+  #hero{padding-top:130px}
+  .pain-grid,.steps,.audience-grid,.avail-grid,.tech-known{grid-template-columns:1fr}
+  .steps::before,.steps::after{display:none}
+  .feature{grid-template-columns:1fr;gap:28px;margin-bottom:72px}
+  .feature:nth-child(even) .feature-visual{order:0}
+  .plans-grid{grid-template-columns:1fr}
+  .compare-table th,.compare-table td{padding:13px 10px;font-size:.83rem}
+  .footer-grid{grid-template-columns:1fr}
+  #promo-banner{font-size:.76rem;padding:8px 36px}
+  nav{padding:12px 16px}
+  .logo{font-size:1rem}
+  .nav-call{display:none}
+  .nav-right{gap:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- BANNER OFERTA -->
+<div id="promo-banner">
+  ⚡ Oferta de lanzamiento — Primer mes desde $29. Solo por tiempo limitado.
+  <button class="close-banner" onclick="closeBanner()" aria-label="Cerrar">✕</button>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#hero" class="logo"><span class="star">✦</span> <span class="nexia-brand">Nexia</span></a>
+  <div class="nav-right">
+    <button class="nav-link js-login">Iniciar sesión</button>
+    <button class="btn btn-primary btn-sm js-signup">Crear cuenta</button>
+    <a href="#" class="btn btn-ghost btn-sm calendly-link nav-call">Agendar cita</a>
+    <a href="dashboard.html" class="btn btn-primary btn-sm" id="nav-panel" style="display:none">Ir a mi panel</a>
+  </div>
+</nav>
+
+<!-- SECCIÓN 1: HERO -->
+<section id="hero">
+  <canvas id="particles"></canvas>
+  <div class="container hero-grid">
+    <div>
+      <div class="badge"><span class="dot"></span> ✦ Disponible en tu región</div>
+      <div class="brand-line">Constellation Nexia</div>
+      <p class="brand-slogan">La constelación que conecta tu negocio</p>
+      <h1 class="hero-title">Tu negocio atendiendo clientes <span class="grad">24/7</span> — sin contratar a nadie</h1>
+      <p class="hero-sub">Un asistente con IA que responde WhatsApp, agenda citas y gestiona tu negocio. Desde <strong style="color:var(--text)">$49/mes</strong>.</p>
+      <div class="hero-ctas">
+        <a href="#planes" class="btn btn-primary">Empieza ahora →</a>
+        <a href="#como-funciona" class="btn btn-ghost">Ver cómo funciona</a>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-header">
+        <div class="phone-avatar">✂️</div>
+        <div>
+          <div class="name">Peluquería Estilo</div>
+          <div class="status">● en línea</div>
+        </div>
+      </div>
+      <div class="chat-area" id="hero-chat"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: PROBLEMA -->
+<section id="problema">
+  <div class="container center">
+    <h2 class="reveal">¿Cuántos clientes pierdes por no contestar a tiempo?</h2>
+    <div class="pain-grid">
+      <div class="pain-card reveal"><span class="icon">📵</span><p>Clientes que escriben y no reciben respuesta</p></div>
+      <div class="pain-card reveal reveal-d2"><span class="icon">📅</span><p>Citas mal coordinadas o doble agendadas</p></div>
+      <div class="pain-card reveal reveal-d4"><span class="icon">💸</span><p>Pagar $480/mes a un empleado solo para responder WhatsApp</p></div>
+    </div>
+    <p class="transition-line reveal">Existe una mejor forma.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: CÓMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="container center">
+    <h2 class="reveal">Listo en menos de 10 minutos</h2>
+    <p class="section-sub reveal reveal-d1">Mantén a tus clientes conectados contigo.</p>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-icon">📝<span class="step-num">1</span></div>
+        <h3>Regístrate y configura tu negocio</h3>
+        <p>Llena un formulario con tus servicios, precios y horarios. Sin tecnicismos.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">📆<span class="step-num">2</span></div>
+        <h3>Conecta tu Google Calendar</h3>
+        <p>Un solo clic y tu agenda queda sincronizada automáticamente.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🤖<span class="step-num">3</span></div>
+        <h3>Tu bot empieza a trabajar</h3>
+        <p>Desde ese momento, responde clientes y agenda citas solo — las 24 horas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: CARACTERÍSTICAS -->
+<section id="caracteristicas">
+  <div class="container">
+    <div class="center">
+      <h2 class="reveal">Todo lo que hace por ti</h2>
+      <p class="section-sub reveal reveal-d1">Mientras tú te enfocas en tu trabajo, el asistente hace el resto.</p>
+    </div>
+
+    <!-- 4A -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">🧠 Inteligencia artificial</span>
+        <h3>Responde como una persona real</h3>
+        <p>Nuestro asistente usa inteligencia artificial para entender lo que escriben tus clientes y responder de forma natural. Conoce tus servicios, precios y horarios de memoria. Nunca parece un robot.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="mini-chat">
+          <div class="mini-bubble c">Hola, ¿atienden los sábados?</div>
+          <div class="mini-bubble b">¡Hola! 😊 Sí, los sábados atendemos de 9am a 6pm. ¿Desea reservar un espacio?</div>
+          <div class="mini-bubble c">Sí, por favor. Un corte de cabello</div>
+          <div class="mini-bubble b">Perfecto. Este sábado tenemos 10am, 2pm y 4pm disponibles. ¿Cuál le conviene más?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4B -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">⚡ Instalación rápida</span>
+        <h3>Sin técnicos, sin complicaciones</h3>
+        <p>Solo llenas un formulario con la información de tu negocio y conectas tu calendario. En menos de 10 minutos tu asistente ya está atendiendo clientes. No necesitas saber de tecnología.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="progress-wrap">
+          <div class="progress-time"><span class="counter" data-target="10" data-suffix=" min">0 min</span></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <p class="progress-label">Configuración completa — bot activo ✓</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4C -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">📆 Agenda automática</span>
+        <h3>Tu agenda, siempre organizada</h3>
+        <p>El asistente consulta tu Google Calendar en tiempo real, ofrece los horarios disponibles y agenda la cita directamente. Sin doble agendamiento, sin errores, sin llamadas.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="mini-cal">
+          <div class="cal-title">Julio <small>· sincronizado con Google Calendar</small></div>
+          <div class="cal-slot">9:00</div>
+          <div class="cal-slot filled">10:00 ✂️</div>
+          <div class="cal-slot">11:00</div>
+          <div class="cal-slot">12:00</div>
+          <div class="cal-slot filled">14:00 💇</div>
+          <div class="cal-slot">15:00</div>
+          <div class="cal-slot filled">16:00 ✂️</div>
+          <div class="cal-slot">17:00</div>
+          <div class="cal-slot">9:00</div>
+          <div class="cal-slot filled">10:30 💅</div>
+          <div class="cal-slot">11:30</div>
+          <div class="cal-slot filled">15:00 ✂️</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4D -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">🔔 Recordatorios 24h</span>
+        <h3>Nunca más un cliente que no aparece</h3>
+        <p>El sistema envía recordatorios automáticos por WhatsApp 24 horas antes de cada cita. Reduce las cancelaciones de último minuto y mantiene tu agenda llena.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="notif-phone">
+          <div class="notif-time">09:41</div>
+          <div class="notif-card">
+            <div class="app">💬 WhatsApp · ahora</div>
+            <strong>Peluquería Estilo</strong><br>
+            ¡Hola Juan! 👋 Te recordamos tu cita de mañana a las 10:00am — Corte de cabello. ¡Te esperamos!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4E -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">🎛️ Panel desde Telegram</span>
+        <h3>Controla todo desde tu celular</h3>
+        <p>Olvídate de entrar a plataformas complicadas. Desde Telegram puedes cambiar precios, ver las citas del día, agregar servicios o pausar el bot — todo con un simple mensaje.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="tg-chat">
+          <div class="tg-msg owner">Ver citas de hoy</div>
+          <div class="tg-msg bot">📋 Citas de hoy:
+· 10:00 — Juan Pérez (Corte)
+· 14:00 — Ana Ríos (Tinte)
+· 16:00 — Luis M. (Corte)</div>
+          <div class="tg-msg owner">Cambiar precio de corte a $10</div>
+          <div class="tg-msg bot">✅ Listo. Corte de cabello ahora cuesta $10.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4F -->
+    <div class="feature">
+      <div class="reveal">
+        <span class="feature-tag">🎨 Súper personalización</span>
+        <h3>Rápido de activar, personalizable a fondo</h3>
+        <p>Tu asistente se activa en minutos con un formulario compacto. Y cuando quieras llevarlo más lejos, te enviamos por correo un formulario de personalización avanzada: su nombre, su mensaje de bienvenida, su tono y hasta las expresiones exactas que usa. Cada negocio tiene un asistente único.</p>
+      </div>
+      <div class="feature-visual reveal reveal-d2">
+        <div class="perso-item">⚡ <div><strong>Activación rápida</strong><br><span>Un formulario compacto y tu asistente queda funcionando</span></div></div>
+        <div class="perso-item">📧 <div><strong>Personalización avanzada</strong><br><span>Te llega un formulario por correo para afinar cada detalle</span></div></div>
+        <div class="perso-item">🎨 <div><strong>Todo a tu medida</strong><br><span>Nombre, bienvenida, tono y expresiones propias de tu negocio</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 6: PARA QUIÉN -->
+<section id="paraquien">
+  <div class="container center">
+    <h2 class="reveal">Perfecto para tu negocio</h2>
+    <p class="section-sub reveal reveal-d1">De profesionales independientes a grandes empresas: si tus clientes te escriben por WhatsApp, Nexia trabaja para ti.</p>
+    <div class="audience-grid">
+      <div class="aud-card reveal"><span class="icon">🚀</span><h3>Profesionales y emprendedores</h3><p>Atiende cada mensaje sin dejar de hacer tu trabajo.</p></div>
+      <div class="aud-card reveal reveal-d2"><span class="icon">📈</span><h3>Negocios en crecimiento</h3><p>Escala tu atención al cliente sin escalar tu nómina.</p></div>
+      <div class="aud-card reveal reveal-d4"><span class="icon">🏢</span><h3>Empresas de alto calibre</h3><p>Alto volumen, múltiples agendas y atención de nivel corporativo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 7: PLANES -->
+<section id="planes">
+  <div class="container center">
+    <h2 class="reveal">Elige tu plan</h2>
+    <p class="section-sub reveal reveal-d1">Sin contratos. Cancela cuando quieras.</p>
+    <div class="plans-grid">
+      <div class="plan reveal">
+        <h3>Starter</h3>
+        <p class="who">Para empezar</p>
+        <div><span class="price-old">$49</span> <span class="price">$29<small>/mes 1</small></span></div>
+        <p class="offer-note">Luego $49/mes</p>
+        <div class="plan-msgs"><b>500</b><span>mensajes al mes</span></div>
+        <ul>
+          <li>Respuestas con IA 24/7</li>
+          <li>Agenda y recordatorios automáticos</li>
+          <li>Número WhatsApp dedicado</li>
+          <li>Panel desde Telegram</li>
+        </ul>
+        <button class="btn btn-ghost js-signup" data-plan="starter">Empezar</button>
+      </div>
+      <div class="plan reveal reveal-d1">
+        <h3>Básico</h3>
+        <p class="who">Negocios en crecimiento</p>
+        <div><span class="price-old">$99</span> <span class="price">$59<small>/mes 1</small></span></div>
+        <p class="offer-note">Luego $99/mes</p>
+        <div class="plan-msgs"><b>1.500</b><span>mensajes al mes</span></div>
+        <ul>
+          <li>Respuestas con IA 24/7</li>
+          <li>Agenda y recordatorios automáticos</li>
+          <li>Número WhatsApp dedicado</li>
+          <li>Panel desde Telegram</li>
+        </ul>
+        <button class="btn btn-ghost js-signup" data-plan="basico">Empezar</button>
+      </div>
+      <div class="plan popular reveal reveal-d2">
+        <span class="plan-badge">⭐ Más popular</span>
+        <h3>Pro</h3>
+        <p class="who">Negocio establecido</p>
+        <div><span class="price">$149<small>/mes</small></span></div>
+        <p class="offer-note"></p>
+        <div class="plan-msgs"><b>3.000</b><span>mensajes al mes</span></div>
+        <ul>
+          <li>Respuestas con IA 24/7</li>
+          <li>Agenda y recordatorios automáticos</li>
+          <li>Número WhatsApp dedicado</li>
+          <li>Panel desde Telegram</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <button class="btn btn-primary js-signup" data-plan="pro">Empezar</button>
+      </div>
+      <div class="plan reveal reveal-d3">
+        <h3>Business</h3>
+        <p class="who">Equipos y sucursales</p>
+        <div><span class="price">$199<small>/mes</small></span></div>
+        <p class="offer-note"></p>
+        <div class="plan-msgs"><b>5.000</b><span>mensajes al mes</span></div>
+        <ul>
+          <li>Respuestas con IA 24/7</li>
+          <li>Agenda y recordatorios automáticos</li>
+          <li>Número WhatsApp dedicado</li>
+          <li>Panel desde Telegram</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <button class="btn btn-ghost js-signup" data-plan="business">Empezar</button>
+      </div>
+      <div class="plan reveal reveal-d4">
+        <h3>Enterprise</h3>
+        <p class="who">Corporativo · alto volumen</p>
+        <div><span class="price">$299<small>/mes</small></span></div>
+        <p class="offer-note"></p>
+        <div class="plan-msgs"><b>7.000+</b><span>mensajes al mes</span></div>
+        <ul>
+          <li>Respuestas con IA 24/7</li>
+          <li>Agenda y recordatorios automáticos</li>
+          <li>Número WhatsApp dedicado</li>
+          <li>Panel desde Telegram</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <button class="btn btn-ghost js-signup" data-plan="enterprise">Empezar</button>
+      </div>
+    </div>
+    <p class="plans-cta reveal">Mensajes extra: $0.05 c/u · ¿No sabes cuál elegir? <a href="#" class="calendly-link accent" style="font-weight:600">Agenda una llamada gratis de 20 min →</a></p>
+  </div>
+</section>
+
+<!-- SECCIÓN 9: FAQ -->
+<section id="faq">
+  <div class="container center">
+    <h2 class="reveal">Lo que te estás preguntando</h2>
+    <div class="faq-list" style="text-align:left">
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Necesito saber de tecnología? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Para nada. Si sabes usar WhatsApp, puedes usar esto. El setup toma 10 minutos y te guiamos paso a paso.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Qué pasa si el bot no sabe responder algo? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>El bot conoce toda la información que tú le proporciones: mientras más completo esté tu perfil, menos pasará. Puedes ampliarla o actualizarla cuando quieras desde tu panel de control de Telegram o desde tu cuenta de Constellation Nexia. Y si aun así algo se le escapa, según tu preferencia: te avisa por Telegram y el cliente queda en espera sin notarlo (tú respondes cuando puedas), o deriva la conversación al número que hayas seleccionado.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Puedo cancelar cuando quiera? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Sí, sin contratos ni penalidades. Cancelas con un mensaje desde Telegram.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Es seguro? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Sí, completamente. Nexia usa la API oficial de WhatsApp Business avalada por Meta — el mismo sistema que utilizan empresas y marcas reconocidas a nivel mundial. Tus conversaciones y los datos de tus clientes están protegidos con cifrado de extremo a extremo, y toda la información se almacena en servidores certificados con los más altos estándares de seguridad. Nunca compartimos ni vendemos los datos de tu negocio ni de tus clientes.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Es seguro conectar mi Google Calendar? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Sí. Usamos la conexión oficial de Google. Nosotros nunca vemos ni guardamos el contenido de tu calendario.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Funciona con mi número de WhatsApp actual? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Tu número personal no se toca: te asignamos un número de WhatsApp dedicado exclusivo para tu negocio, lo que garantiza disponibilidad 24/7 y máxima estabilidad del servicio.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Por qué no puedo usar mi número de WhatsApp actual? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Por dos razones. Primero, WhatsApp no permite que un número funcione como bot y como app normal al mismo tiempo: para responder automáticamente las 24 horas, el asistente necesita un número exclusivo conectado a la API oficial de WhatsApp Business. Y segundo, usar tu número personal como bot automático viola los términos de WhatsApp y puede resultar en el baneo permanente de tu cuenta — perderías todos tus contactos y conversaciones. Por eso te asignamos un número dedicado: es el único método legal y seguro, y tu número personal queda completamente protegido.<br><br>¿Necesitas sí o sí operar con tu número actual? Es posible migrarlo a la API oficial, pero dejaría de funcionar en la app normal de WhatsApp — por eso no lo hacemos por defecto. Si tu negocio lo requiere, contáctanos y lo configuramos contigo.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Por qué el número de WhatsApp es de EEUU? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Para garantizar disponibilidad 24/7 y máxima estabilidad del servicio, usamos números internacionales de WhatsApp Business. Esto no afecta en nada la experiencia de tus clientes — el bot responde igual y el número aparece como cualquier contacto de WhatsApp.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">❓ ¿Qué pasa si se me acaban los mensajes? <span class="arrow">▾</span></button>
+        <div class="faq-a"><p>Te avisamos antes de llegar al límite. Si te pasas, cada mensaje extra cuesta $0.05 y se cobra automáticamente al final del mes.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 10: TESTIMONIOS -->
+<section id="testimonios">
+  <div class="container center">
+    <h2 class="reveal">Negocios que ya dejaron de perder clientes</h2>
+  </div>
+  <div class="testi-track-wrap reveal">
+    <div class="testi-track" id="testi-track">
+      <div class="testi-card">
+        <p class="quote">"Antes perdía citas porque no podía contestar mientras atendía. Ahora el bot agenda solo y yo me entero por Telegram. En el primer mes recuperé lo que pagué."</p>
+        <div class="testi-who"><div class="testi-avatar">M</div><div><div class="name">María V.</div><div class="biz">Peluquería Estilo · Quito</div></div></div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Mis pacientes escriben a cualquier hora y siempre reciben respuesta. Los recordatorios bajaron las citas perdidas casi a cero."</p>
+        <div class="testi-who"><div class="testi-avatar">C</div><div><div class="name">Dr. Carlos A.</div><div class="biz">Consultorio Odontológico · Guayaquil</div></div></div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Yo no sé nada de tecnología y lo configuré sola en una tarde. Cambio los precios desde Telegram como si le escribiera a un amigo."</p>
+        <div class="testi-who"><div class="testi-avatar">P</div><div><div class="name">Paola R.</div><div class="biz">Spa Serenity · Cuenca</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 11: NÚMEROS -->
+<section id="numeros">
+  <div class="container center">
+    <h2 class="reveal">Los números hablan solos</h2>
+    <p class="section-sub reveal reveal-d1">Siempre presente, siempre respondiendo.</p>
+    <div class="metrics">
+      <div class="metric reveal"><div class="num"><span class="counter" data-target="480" data-prefix="$" data-suffix="/mes">$0</span></div><div class="label">Lo que cuesta un empleado para WhatsApp</div></div>
+      <div class="metric reveal reveal-d1"><div class="num"><span class="counter" data-target="10" data-suffix=" min">0</span></div><div class="label">Tiempo de instalación</div></div>
+      <div class="metric reveal reveal-d2"><div class="num">24/7</div><div class="label">Horas que trabaja el bot</div></div>
+      <div class="metric reveal reveal-d3"><div class="num"><span class="counter" data-target="0">0</span></div><div class="label">Clientes perdidos por falta de respuesta</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 12: TECNOLOGÍA -->
+<section id="tecnologia">
+  <div class="container center">
+    <h2 class="reveal">Construido con las herramientas más avanzadas del mundo</h2>
+    <p class="section-sub reveal reveal-d1">Las mismas tecnologías que usan las empresas más grandes — ahora al alcance de tu negocio.</p>
+    <div class="tech-known">
+      <div class="tech-card reveal"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp" title="WhatsApp" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>El canal que tus clientes ya usan todos los días</p></div>
+      <div class="tech-card reveal reveal-d1"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/googlecalendar/4285F4" alt="Google Calendar" title="Google Calendar" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>La agenda en la que millones de personas confían</p></div>
+      <div class="tech-card reveal reveal-d2"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/telegram/26A5E4" alt="Telegram" title="Telegram" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>Tu panel de control siempre en tu bolsillo</p></div>
+    </div>
+    <div class="tech-ai">
+      <div class="tech-card reveal"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/anthropic/FFFFFF" alt="Anthropic Claude" title="Anthropic Claude" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>La IA que entiende y responde como una persona real</p></div>
+      <div class="tech-card reveal reveal-d1"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/openai/FFFFFF" alt="OpenAI" title="OpenAI" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>El motor de inteligencia artificial más reconocido del mundo</p></div>
+      <div class="tech-card reveal reveal-d2"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/elevenlabs/FFFFFF" alt="ElevenLabs" title="ElevenLabs" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>Respuestas de voz naturales e indistinguibles de un humano</p></div>
+      <div class="tech-card reveal reveal-d3"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/twilio/F22F46" alt="Twilio" title="Twilio" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>Infraestructura de comunicaciones usada por millones de empresas</p></div>
+    </div>
+    <p class="tech-close reveal">"No construimos desde cero — integramos lo mejor que existe para darte un producto probado, estable y de clase mundial."</p>
+  </div>
+  <div class="logo-marquee-wrap reveal">
+    <div class="logo-marquee" id="logo-marquee">
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/whatsapp/A0A0B0" alt="WhatsApp Business" title="WhatsApp Business" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/twilio/A0A0B0" alt="Twilio" title="Twilio" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/anthropic/A0A0B0" alt="Anthropic" title="Anthropic" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/googlecloud/A0A0B0" alt="Google Cloud" title="Google Cloud" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/supabase/A0A0B0" alt="Supabase" title="Supabase" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/mercadopago/A0A0B0" alt="Mercado Pago" title="Mercado Pago" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/railway/A0A0B0" alt="Railway" title="Railway" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/vercel/A0A0B0" alt="Vercel" title="Vercel" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/resend/A0A0B0" alt="Resend" title="Resend" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+      <span class="logo-chip"><img src="https://cdn.simpleicons.org/telegram/A0A0B0" alt="Telegram" title="Telegram" loading="lazy" onerror="this.replaceWith(this.alt)"></span>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 13: SIEMPRE DISPONIBLE -->
+<section id="disponible">
+  <div class="container center">
+    <h2 class="reveal">Ningún mensaje sin respuesta. Nunca.</h2>
+    <p class="section-sub reveal reveal-d1">Tu negocio nunca duerme.</p>
+    <div class="avail-grid">
+      <div class="avail-card reveal"><span class="icon">🕐</span><h3>24/7 sin descanso</h3><p>Tu asistente trabaja a las 3am, los domingos y en feriados. Mientras tú descansas, él atiende.</p></div>
+      <div class="avail-card reveal reveal-d2"><span class="icon">⚡</span><h3>Respuesta en segundos</h3><p>Sin tiempos de espera. Cada cliente recibe respuesta inmediata, sin importar cuántos escriban al mismo tiempo.</p></div>
+      <div class="avail-card reveal reveal-d4"><span class="icon">✉️</span><h3>Cero mensajes perdidos</h3><p>El asistente ve cada mensaje que llega. No hay olvidos, no hay "se me pasó", no hay clientes ignorados.</p></div>
+    </div>
+    <p class="live-counter reveal">Mensajes respondidos hoy: <span class="lc-num" id="live-msg-counter">0</span></p>
+  </div>
+</section>
+
+<!-- SECCIÓN 8: CTA FINAL -->
+<section id="cta-final">
+  <div class="container">
+    <h2 class="reveal">Tu negocio merece trabajar inteligente</h2>
+    <p class="section-sub reveal reveal-d1" style="margin-bottom:0">El asistente que tu negocio merece — únete a los negocios que ya no pierden clientes.</p>
+    <a href="#planes" class="btn btn-primary reveal reveal-d2">Empieza ahora — primer mes desde $29 →</a>
+    <p class="cta-small reveal reveal-d3">Sin contratos. Cancela cuando quieras.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="logo" style="margin-bottom:16px"><span class="star">✦</span> Constellation Nexia</div>
+      <p>Tu asistente con IA para WhatsApp. Responde clientes, agenda citas y gestiona tu negocio — 24/7.</p>
+      <a href="#" class="btn btn-ghost btn-sm calendly-link" style="margin-top:10px">¿Preguntas? Agenda una llamada gratis</a>
+    </div>
+    <div>
+      <h4>Legal</h4>
+      <a href="#">Términos y condiciones</a>
+      <a href="#">Política de privacidad</a>
+    </div>
+    <div>
+      <h4>Contacto</h4>
+      <a href="#" class="js-login" onclick="event.preventDefault()">Iniciar sesión</a>
+      <a href="mailto:constellationnexia@gmail.com">constellationnexia@gmail.com</a>
+      <a href="#" id="wa-footer-link">WhatsApp directo</a>
+      <a href="#">Instagram</a>
+      <a href="#">TikTok</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Constellation Nexia. Todos los derechos reservados.</span>
+    <span>Hecho en Ecuador 🇪🇨</span>
+  </div>
+</footer>
+
+<!-- PANEL DE CUENTA (pantalla completa) -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="panel-top">
+    <button class="back-btn" onclick="closeAuth()">← Regresar</button>
+    <span class="logo"><span class="star">✦</span> Constellation Nexia</span>
+    <span class="spacer"></span>
+  </div>
+  <div class="modal">
+
+    <!-- Vista: iniciar sesión -->
+    <div id="view-login" style="display:none">
+      <h3>Bienvenido de vuelta</h3>
+      <p class="modal-sub">Ingresa al panel de tu asistente.</p>
+      <form id="login-form">
+        <div class="field"><label for="l-email">Correo electrónico</label><input type="email" id="l-email" placeholder="tu@correo.com" required></div>
+        <div class="field"><label for="l-pass">Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" required></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Iniciar sesión →</button>
+      </form>
+      <p class="modal-alt" id="login-note" style="display:none;color:var(--accent)">El acceso a tu panel llega a tu correo al activar tu plan.</p>
+      <p class="modal-alt">¿No tienes cuenta? <a href="#" id="go-signup">Elige tu plan y crea una →</a></p>
+    </div>
+
+    <!-- Vista: wizard de registro -->
+    <div id="view-wizard">
+      <div class="wiz-steps">
+        <span class="wiz-line"><span class="wiz-line-fill" id="wiz-line-fill"></span></span>
+        <span class="wstep" data-s="1"><b>1</b>Plan</span>
+        <span class="wstep" data-s="2"><b>2</b>Pago</span>
+        <span class="wstep" data-s="3"><b>3</b>Cuenta</span>
+        <span class="wstep" data-s="4"><b>4</b>Personaliza</span>
+      </div>
+
+      <!-- Paso 1: elegir plan -->
+      <div class="wiz-panel" id="wiz-1">
+        <h3>Elige tu plan</h3>
+        <p class="modal-sub">Activa tu suscripción para crear tu cuenta. Sin contratos, cancela cuando quieras.</p>
+        <div id="plan-options"></div>
+        <button class="btn btn-primary" id="to-pay" style="width:100%" disabled>Continuar al pago →</button>
+      </div>
+
+      <!-- Paso 2: pago -->
+      <div class="wiz-panel" id="wiz-2" style="display:none">
+        <h3>Confirma tu pago</h3>
+        <p class="modal-sub">Pago seguro procesado por Mercado Pago.</p>
+        <div class="pay-summary" id="pay-summary"></div>
+        <button class="btn btn-primary" id="pay-btn" style="width:100%">Pagar con Mercado Pago →</button>
+        <p class="mp-note">🔒 Nunca vemos los datos de tu tarjeta — Mercado Pago procesa todo.</p>
+        <button class="wiz-back" data-back="1">← Cambiar plan</button>
+      </div>
+
+      <!-- Paso 3: crear cuenta -->
+      <div class="wiz-panel" id="wiz-3" style="display:none">
+        <h3>Crea tu cuenta</h3>
+        <p class="modal-sub" style="color:var(--accent)">✓ Pago confirmado — tu plan está activo.</p>
+        <form id="account-form">
+          <div class="field"><label for="a-email">Correo electrónico</label><input type="email" id="a-email" placeholder="tu@correo.com" required></div>
+          <div class="field"><label for="a-pass">Contraseña</label><input type="password" id="a-pass" placeholder="Mínimo 6 caracteres" minlength="6" required></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Crear cuenta →</button>
+        </form>
+      </div>
+
+      <!-- Paso 4: personalización (sub-wizard) -->
+      <div class="wiz-panel" id="wiz-4" style="display:none">
+        <h3>Personaliza tu asistente</h3>
+        <p class="modal-sub">Esto es lo que tu asistente sabrá de memoria. Podrás cambiarlo cuando quieras desde Telegram.</p>
+
+        <div class="sub-progress">
+          <div class="sub-label"><strong id="sub-name">Tu negocio</strong><span id="sub-count">Paso 1 de 3</span></div>
+          <div class="sub-track"><span class="sub-fill" id="sub-fill"></span></div>
+        </div>
+
+        <!-- Pantalla 1: Tu negocio -->
+        <form class="sub-screen" id="sub-1">
+          <div class="field"><label for="b-name">Nombre del negocio</label><input type="text" id="b-name" placeholder="Nombre de tu negocio o empresa" required></div>
+          <div class="field"><label>¿Cómo describes tu organización?</label>
+            <div class="org-row">
+              <label class="org-opt"><input type="radio" name="org" value="negocio" required><span><b>🏪</b>Negocio</span></label>
+              <label class="org-opt"><input type="radio" name="org" value="empresa"><span><b>🏢</b>Empresa</span></label>
+              <label class="org-opt"><input type="radio" name="org" value="perfil"><span><b>👤</b>Independiente</span></label>
+              <label class="org-opt"><input type="radio" name="org" value="institucion"><span><b>🏫</b>Institución</span></label>
+              <label class="org-opt"><input type="radio" name="org" value="gobierno"><span><b>🏛️</b>Gobierno</span></label>
+            </div>
+          </div>
+          <div class="field"><label for="b-type">¿A qué se dedica tu negocio?</label><input type="text" id="b-type" placeholder="Cuéntanos en pocas palabras" required></div>
+          <div class="field"><label for="b-mode">¿Atención presencial, online o ambas?</label>
+            <select id="b-mode" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="presencial">Presencial</option>
+              <option value="online">Online</option>
+              <option value="ambas">Ambas</option>
+            </select>
+          </div>
+          <div class="field" id="field-address" style="display:none"><label for="b-address">Dirección y ciudad</label><input type="text" id="b-address" placeholder="Dónde te encuentran tus clientes"></div>
+          <div class="grid-2">
+            <div class="field"><label for="b-ig">Instagram <em class="opt">opcional</em></label><input type="text" id="b-ig" placeholder="@usuario"></div>
+            <div class="field"><label for="b-fb">Facebook <em class="opt">opcional</em></label><input type="text" id="b-fb" placeholder="Tu página"></div>
+            <div class="field"><label for="b-tt">TikTok <em class="opt">opcional</em></label><input type="text" id="b-tt" placeholder="@usuario"></div>
+            <div class="field"><label for="b-web">Página web <em class="opt">opcional</em></label><input type="url" id="b-web" placeholder="https://"></div>
+          </div>
+          <div class="field"><label for="b-email">Email de contacto <em class="opt">opcional</em></label><input type="email" id="b-email" placeholder="contacto@correo.com"></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Continuar →</button>
+        </form>
+
+        <!-- Pantalla 2: Servicios -->
+        <form class="sub-screen" id="sub-2" style="display:none">
+          <div class="field"><label>¿Qué ofreces?</label>
+            <div class="svc-tabs">
+              <button type="button" class="svc-tab active" data-tab="svc">Servicios</button>
+              <button type="button" class="svc-tab" data-tab="prod">Productos</button>
+            </div>
+            <div id="tab-svc">
+              <div class="svc-head svc-head-prod"><span>Servicio</span><span>Precio</span><span></span></div>
+              <div id="svc-list"></div>
+              <button type="button" class="add-svc" id="add-svc">+ Agregar servicio</button>
+            </div>
+            <div id="tab-prod" style="display:none">
+              <div class="svc-head svc-head-prod"><span>Producto</span><span>Precio</span><span></span></div>
+              <div id="prod-list"></div>
+              <button type="button" class="add-svc" id="add-prod">+ Agregar producto</button>
+            </div>
+            <p id="svc-error"></p>
+          </div>
+          <div class="field" id="field-duration"><label for="s-duration">Duración o tiempo de entrega — si todo dura lo mismo <em class="opt">opcional</em></label>
+            <select id="s-duration">
+              <option value="">Selecciona una opción</option>
+              <option>15 minutos</option><option>30 minutos</option><option>45 minutos</option><option>60 minutos</option>
+            </select>
+          </div>
+          <div class="field"><label>Formas de pago que aceptan <em class="opt">opcional</em></label>
+            <div class="chk-row">
+              <label><input type="checkbox"> Efectivo</label>
+              <label><input type="checkbox"> Tarjeta</label>
+              <label><input type="checkbox"> Transferencia</label>
+            </div>
+          </div>
+          <div class="field"><label for="s-walkin">¿Atienden sin cita también? <em class="opt">opcional</em></label>
+            <select id="s-walkin">
+              <option value="">Selecciona una opción</option>
+              <option>Sí, también sin cita</option>
+              <option>Solo con cita</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Continuar →</button>
+          <button type="button" class="wiz-back sub-back" data-sub="1">← Anterior</button>
+        </form>
+
+        <!-- Pantalla 3: Horarios -->
+        <form class="sub-screen" id="sub-3" style="display:none">
+          <div class="field"><label>Horarios de atención por día</label><div id="hours-list"></div></div>
+          <div class="field"><label for="h-tone">Tono del asistente</label>
+            <select id="h-tone" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option>Formal</option><option>Amigable</option>
+            </select>
+          </div>
+          <div class="field" id="tone-demo" style="display:none">
+            <label>Así sonaría tu asistente <em class="opt">vista previa</em></label>
+            <div class="tone-bubble" id="tone-demo-bubble"></div>
+            <div class="chk-row" style="margin-top:12px">
+              <label><input type="checkbox" id="ec-mode"> Activar modo ecuatoriano 🇪🇨</label>
+            </div>
+            <div id="ec-picker" style="display:none">
+              <label style="margin-top:12px;display:block">Elige las expresiones que puede usar <em class="opt">opcional</em></label>
+              <div class="expr-chips" id="expr-picker"></div>
+            </div>
+          </div>
+          <div class="field"><label for="h-phone">Teléfono del dueño para derivar consultas <em class="opt">opcional</em></label><input type="tel" id="h-phone" placeholder="+593"></div>
+          <div class="field"><label for="h-welcome">Mensaje de bienvenida personalizado <em class="opt">opcional</em></label><textarea id="h-welcome" rows="2" placeholder="Si lo dejas vacío, usamos uno genérico"></textarea></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Finalizar configuración →</button>
+          <button type="button" class="wiz-back sub-back" data-sub="2">← Anterior</button>
+        </form>
+      </div>
+
+      <!-- Pantalla 4: confirmación -->
+      <div class="wiz-panel" id="wiz-5" style="display:none">
+        <div class="modal-msg celebrate" style="display:block">
+          <div id="confetti"></div>
+          <span class="big">🎉</span>
+          <h3>¡Tu asistente está listo!</h3>
+          <p>Hemos enviado los pasos finales a tu correo: conectar tu Google Calendar, ver tu número de WhatsApp asignado y abrir tu panel de control en Telegram.</p>
+          <a href="dashboard.html" class="btn btn-primary" style="width:100%">Ir a mi panel →</a>
+          <button type="button" class="btn btn-ghost" id="resend-email" style="width:100%;margin-top:10px">Reenviar correo</button>
+          <p class="help-small">¿Necesitas ayuda? <a href="#" class="calendly-link">Agenda una llamada con nosotros</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE AGENDAR CITA -->
+<div class="cal-overlay" id="cal-modal">
+  <div class="cal-box" id="cal-box">
+    <button class="cal-close" onclick="closeCalModal()" aria-label="Cerrar">✕</button>
+    <div id="cal-step1">
+      <h3>Agenda tu llamada gratuita</h3>
+      <p class="cal-intro">En esta llamada:</p>
+      <ul class="cal-list">
+        <li>Te explicamos cómo funciona Nexia</li>
+        <li>Analizamos tu negocio</li>
+        <li>Te ayudamos a elegir el plan ideal</li>
+      </ul>
+      <button class="btn btn-primary" style="width:100%" onclick="calStep2()">Continuar →</button>
+    </div>
+    <div id="cal-step2" style="display:none">
+      <iframe id="cal-frame" src="" title="Calendario de citas"></iframe>
+    </div>
+  </div>
+</div>
+
+<a id="support-fab" href="#" target="_blank" rel="noopener">💬 Servicio al cliente</a>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — reemplaza estos valores con los reales
+   ============================================================ */
+const LOGIN_URL = "";   // ← cuando exista el portal, ej: "https://app.nexia.ec/login"
+const SIGNUP_URL = "";  // ← cuando exista el portal, ej: "https://app.nexia.ec/registro"
+const CALENDLY_URL = "https://calendly.com/TU-USUARIO/llamada-20-minutos"; // ← link real de Calendly
+const WHATSAPP_NUMBER = "593999999999"; // ← número de WhatsApp del negocio (sin +)
+const WHATSAPP_MESSAGE = "Hola, quiero más información sobre el asistente de WhatsApp";
+
+/* Wire de links */
+const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
+/* "Constellation Nexia": cada letra entra y titila como una estrella */
+const brandLine = document.querySelector('.brand-line');
+if (brandLine) {
+  const words = brandLine.textContent.trim().split(/\s+/);
+  brandLine.textContent = '';
+  let li = 0;
+  words.forEach((word, w) => {
+    if (w > 0) brandLine.appendChild(document.createTextNode(' '));
+    const wSpan = document.createElement('span');
+    wSpan.className = 'bl-word'; /* la palabra nunca se corta a la mitad */
+    [...word].forEach((ch) => {
+    const s = document.createElement('span');
+    s.className = 'bl-ch';
+    s.textContent = ch === ' ' ? ' ' : ch;
+    s.style.setProperty('--din', (li * 0.05) + 's');
+    s.style.setProperty('--d', (Math.random() * 3).toFixed(2) + 's');
+    wSpan.appendChild(s);
+    li++;
+    });
+    brandLine.appendChild(wSpan);
+  });
+  /* Fases de color: titila en verde un rato y transiciona suave al azul del 24/7.
+     (para volver a solo verde: deja únicamente '#00FF88' en la lista) */
+  const TW_COLORS = ['#00FF88', '#7C3AED'];
+  let twIdx = 0;
+  brandLine.style.setProperty('--tw', TW_COLORS[0]);
+  setInterval(() => {
+    twIdx = (twIdx + 1) % TW_COLORS.length;
+    brandLine.style.setProperty('--tw', TW_COLORS[twIdx]);
+  }, 7000);
+}
+
+/* ============================================================
+   Agendar cita: modal en dos pasos + límite de 2 citas por cuenta
+   ============================================================ */
+const MAX_CITAS = 2;
+const calModal = document.getElementById('cal-modal');
+const calBox = document.getElementById('cal-box');
+function citasCount(){ return parseInt(localStorage.getItem('nexiaCitas') || '0', 10); }
+function openCalModal(){
+  document.getElementById('cal-step1').style.display = 'block';
+  document.getElementById('cal-step2').style.display = 'none';
+  calBox.classList.remove('expanded');
+  calModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCalModal(){
+  calModal.classList.remove('open');
+  if (!authModal.classList.contains('open')) document.body.style.overflow = '';
+}
+function calStep2(){
+  document.getElementById('cal-step1').style.display = 'none';
+  document.getElementById('cal-step2').style.display = 'block';
+  calBox.classList.add('expanded');
+  const f = document.getElementById('cal-frame');
+  if (!f.src) f.src = CALENDLY_URL + (CALENDLY_URL.includes('?') ? '&' : '?') + 'hide_gdpr_banner=1';
+}
+calModal.addEventListener('click', e => { if (e.target === calModal) closeCalModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCalModal(); });
+document.querySelectorAll('.calendly-link').forEach(a => {
+  a.href = '#';
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    if (citasCount() < MAX_CITAS) openCalModal();
+  });
+});
+function updateCalButtons(){
+  if (citasCount() >= MAX_CITAS) {
+    document.querySelectorAll('.calendly-link').forEach(a => {
+      a.textContent = 'Has alcanzado el límite de citas disponibles';
+      a.classList.add('cal-disabled');
+    });
+  }
+}
+updateCalButtons();
+/* Calendly avisa por postMessage cuando alguien agenda en el embed */
+window.addEventListener('message', e => {
+  if (e.data && e.data.event === 'calendly.event_scheduled') {
+    localStorage.setItem('nexiaCitas', String(citasCount() + 1));
+    updateCalButtons();
+    setTimeout(closeCalModal, 2500);
+  }
+});
+const waLink = document.getElementById('wa-footer-link');
+if (waLink) { waLink.href = waUrl; waLink.target = "_blank"; waLink.rel = "noopener"; }
+document.getElementById('support-fab').href =
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola, necesito ayuda con Constellation Nexia')}`;
+
+/* ============================================================
+   Planes y links de pago de Mercado Pago
+   Cuando tengas los links de suscripción reales, pégalos en MP_LINKS.
+   ============================================================ */
+const PLANS = [
+  { id: 'starter',    name: 'Starter',    m1: 29,  price: 49,  msgs: '500',
+    feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram'] },
+  { id: 'basico',     name: 'Básico',     m1: 59,  price: 99,  msgs: '1,500',
+    feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram'] },
+  { id: 'pro',        name: 'Pro',        m1: 149, price: 149, msgs: '3,000', popular: true,
+    feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] },
+  { id: 'business',   name: 'Business',   m1: 199, price: 199, msgs: '5,000',
+    feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] },
+  { id: 'enterprise', name: 'Enterprise', m1: 299, price: 299, msgs: '7,000+',
+    feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] }
+];
+const MP_LINKS = {
+  // starter: "https://www.mercadopago.com.ec/subscriptions/...",
+  // basico: "...", pro: "...", business: "...", enterprise: "..."
+};
+
+/* ============================================================
+   Modal: login + wizard (plan → pago → cuenta → personalización)
+   ============================================================ */
+const authModal = document.getElementById('auth-modal');
+let selectedPlan = null;
+
+function closeAuth(){
+  authModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function showModal(){
+  authModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function openLogin(){
+  if (LOGIN_URL) { window.location.href = LOGIN_URL; return; }
+  document.getElementById('view-login').style.display = 'block';
+  document.getElementById('view-wizard').style.display = 'none';
+  document.querySelector('#auth-modal .modal').classList.remove('wide');
+  showModal();
+}
+function openWizard(planId){
+  if (SIGNUP_URL) { window.location.href = SIGNUP_URL; return; }
+  document.getElementById('view-login').style.display = 'none';
+  document.getElementById('view-wizard').style.display = 'block';
+  if (planId) selectPlan(planId);
+  goStep(1);
+  showModal();
+}
+function goStep(n){
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('wiz-' + i).style.display = (i === n) ? 'block' : 'none';
+  }
+  /* el paso de planes usa todo el ancho en PC */
+  document.querySelector('#auth-modal .modal').classList.toggle('wide', n === 1);
+  document.querySelectorAll('.wstep').forEach(s => {
+    const sn = parseInt(s.dataset.s, 10);
+    s.classList.toggle('active', sn === n);
+    s.classList.toggle('done', sn < n || n === 5);
+  });
+  /* línea de progreso que se ilumina entre pasos */
+  document.getElementById('wiz-line-fill').style.width = ((Math.min(n, 4) - 1) / 3 * 100) + '%';
+  authModal.scrollTop = 0;
+  if (n === 2) renderPaySummary();
+}
+
+/* Paso 1: opciones de plan */
+const planOptions = document.getElementById('plan-options');
+PLANS.forEach(p => {
+  const d = document.createElement('div');
+  d.className = 'plan-option' + (p.popular ? ' popular' : '');
+  d.dataset.plan = p.id;
+  const offer = p.m1 < p.price;
+  d.innerHTML = `
+    <div>
+      <div class="pname">${p.name}${p.popular ? ' <span class="ppop">⭐ Popular</span>' : ''}</div>
+      <div class="pmsgs">${p.msgs} mensajes/mes</div>
+    </div>
+    <div class="pprice">
+      $${p.m1}<span class="psub">${offer ? ' primer mes' : '/mes'}</span>
+      ${offer ? `<div class="psub">luego $${p.price}/mes</div>` : ''}
+    </div>
+    <ul class="po-feats">${p.feats.map(f => `<li>${f}</li>`).join('')}</ul>`;
+  d.addEventListener('click', () => selectPlan(p.id));
+  planOptions.appendChild(d);
+});
+function selectPlan(id){
+  selectedPlan = PLANS.find(p => p.id === id);
+  document.querySelectorAll('.plan-option').forEach(o => o.classList.toggle('selected', o.dataset.plan === id));
+  document.getElementById('to-pay').disabled = false;
+}
+document.getElementById('to-pay').addEventListener('click', () => { if (selectedPlan) goStep(2); });
+
+/* Paso 2: pago */
+function renderPaySummary(){
+  if (!selectedPlan) return;
+  const p = selectedPlan;
+  const offer = p.m1 < p.price;
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="row"><span>Plan ${p.name}</span><strong>$${p.m1} USD</strong></div>
+    <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes · renovación mensual</span><span>${offer ? 'luego $' + p.price + '/mes' : ''}</span></div>`;
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = false;
+  btn.textContent = `Pagar $${p.m1} con Mercado Pago →`;
+}
+document.getElementById('pay-btn').addEventListener('click', function(){
+  const link = MP_LINKS[selectedPlan.id];
+  if (link) { window.open(link, '_blank'); goStep(3); return; }
+  /* Demo: simula el procesamiento mientras no hay links reales de MP */
+  this.disabled = true;
+  this.textContent = 'Procesando pago…';
+  setTimeout(() => {
+    this.disabled = false;
+    goStep(3);
+  }, 1600);
+});
+
+/* Navegación principal */
+document.querySelectorAll('.wiz-back[data-back]').forEach(b => b.addEventListener('click', () => goStep(parseInt(b.dataset.back, 10))));
+document.getElementById('account-form').addEventListener('submit', e => { e.preventDefault(); goStep(4); goSub(1); });
+
+/* ============================================================
+   Paso 4: sub-wizard de personalización (3 pantallas + confirmación)
+   ============================================================ */
+const SUB_NAMES = ['Tu negocio', 'Servicios', 'Horarios'];
+function goSub(n){
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('sub-' + i).style.display = (i === n) ? 'block' : 'none';
+  }
+  document.getElementById('sub-name').textContent = SUB_NAMES[n - 1];
+  document.getElementById('sub-count').textContent = 'Paso ' + n + ' de 3';
+  document.getElementById('sub-fill').style.width = (n / 3 * 100) + '%';
+  authModal.scrollTop = 0;
+}
+document.querySelectorAll('.sub-back').forEach(b => b.addEventListener('click', () => goSub(parseInt(b.dataset.sub, 10))));
+document.getElementById('sub-1').addEventListener('submit', e => {
+  e.preventDefault();
+  localStorage.setItem('nexiaBizName', document.getElementById('b-name').value.trim());
+  localStorage.setItem('nexiaMode', document.getElementById('b-mode').value);
+  /* perfil completo para precargar en el panel */
+  const P = JSON.parse(localStorage.getItem('nexiaProfile') || '{}');
+  P.name = document.getElementById('b-name').value.trim();
+  P.type = document.getElementById('b-type').value.trim();
+  P.address = document.getElementById('b-address').value.trim();
+  P.ig = document.getElementById('b-ig').value.trim();
+  P.fb = document.getElementById('b-fb').value.trim();
+  P.tt = document.getElementById('b-tt').value.trim();
+  P.web = document.getElementById('b-web').value.trim();
+  P.email = document.getElementById('b-email').value.trim();
+  localStorage.setItem('nexiaProfile', JSON.stringify(P));
+  goSub(2);
+});
+document.getElementById('sub-2').addEventListener('submit', e => {
+  e.preventDefault();
+  if (validateItems()) {
+    /* guarda servicios/productos completos (el dashboard los precarga editables) */
+    const itemsOf = list => [...list.querySelectorAll('.svc-row')].map(r => {
+      const [nm, pr, tm] = [...r.querySelectorAll('input')].map(i => i.value.trim());
+      return nm && pr ? { name: nm, price: pr, time: tm } : null;
+    }).filter(Boolean);
+    const svcItems = itemsOf(svcList), prodItems = itemsOf(prodList);
+    localStorage.setItem('nexiaSvcCount', svcItems.length);
+    localStorage.setItem('nexiaProdCount', prodItems.length);
+    localStorage.setItem('nexiaServices', JSON.stringify(svcItems));
+    localStorage.setItem('nexiaProducts', JSON.stringify(prodItems));
+    goSub(3);
+  }
+});
+document.getElementById('sub-3').addEventListener('submit', e => {
+  e.preventDefault();
+  localStorage.setItem('nexiaSession', '1'); /* cuenta creada → sesión iniciada */
+  /* horarios, tono y contacto para precargar en el panel */
+  const P = JSON.parse(localStorage.getItem('nexiaProfile') || '{}');
+  P.hours = [...hoursList.querySelectorAll('.day-row')].map(r => ({
+    day: r.querySelector('.dname').textContent,
+    closed: r.querySelector('input[type=checkbox]').checked,
+    from: r.querySelectorAll('input[type=time]')[0].value,
+    to: r.querySelectorAll('input[type=time]')[1].value
+  }));
+  P.tone = document.getElementById('h-tone').value;
+  P.phone = document.getElementById('h-phone').value.trim();
+  P.welcome = document.getElementById('h-welcome').value.trim();
+  localStorage.setItem('nexiaProfile', JSON.stringify(P));
+  goStep(5);
+  launchConfetti();
+});
+
+/* Dirección: solo si es presencial o ambas */
+const bMode = document.getElementById('b-mode');
+const fieldAddress = document.getElementById('field-address');
+const bAddress = document.getElementById('b-address');
+function updateAddress(){
+  const show = bMode.value === 'presencial' || bMode.value === 'ambas';
+  fieldAddress.style.display = show ? 'block' : 'none';
+  bAddress.required = show;
+}
+bMode.addEventListener('change', updateAddress);
+
+/* Servicios y productos: pestañas + filas repetibles.
+   Precio con coma decimal y flechitas de 0,50 · duración/entrega de 5 en 5 */
+const svcList = document.getElementById('svc-list');
+const prodList = document.getElementById('prod-list');
+const svcError = document.getElementById('svc-error');
+function makeNumInput(placeholder, step, title){
+  const wrap = document.createElement('div');
+  wrap.className = 'num-wrap';
+  wrap.innerHTML = `
+    <input type="text" inputmode="decimal" placeholder="${placeholder}"${title ? ` title="${title}"` : ''}>
+    <div class="spin">
+      <button type="button" tabindex="-1" aria-label="Subir">▲</button>
+      <button type="button" tabindex="-1" aria-label="Bajar">▼</button>
+    </div>`;
+  const inp = wrap.querySelector('input');
+  inp.addEventListener('input', () => { inp.value = inp.value.replace(/\./g, ','); });
+  const [up, down] = wrap.querySelectorAll('.spin button');
+  function bump(dir){
+    let v = parseFloat(inp.value.replace(',', '.')) || 0;
+    v = Math.max(0, Math.round((v + dir * step) * 100) / 100);
+    inp.value = (v % 1 === 0) ? String(v) : v.toFixed(2).replace('.', ',');
+  }
+  up.addEventListener('click', () => bump(1));
+  down.addEventListener('click', () => bump(-1));
+  return wrap;
+}
+/* Fila de servicio o producto: nombre + precio (con flechitas) + tiempo en texto libre */
+function addRow(list, namePh, timeLabel){
+  const row = document.createElement('div');
+  row.className = 'svc-row prod-row';
+  const name = document.createElement('input');
+  name.type = 'text';
+  name.placeholder = namePh;
+  const price = makeNumInput('$', 0.5, 'Precio');
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'svc-del';
+  del.setAttribute('aria-label', 'Eliminar');
+  del.textContent = '✕';
+  del.addEventListener('click', () => {
+    if (list.children.length > 1) row.remove();
+    else row.querySelectorAll('input').forEach(i => { i.value = ''; });
+    clearSvcErrors();
+  });
+  const timeLine = document.createElement('div');
+  timeLine.className = 'prod-time';
+  const label = document.createElement('span');
+  label.className = 'pt-label';
+  label.textContent = timeLabel;
+  const time = document.createElement('input');
+  time.type = 'text';
+  time.placeholder = 'Ej: 45 min, 2 horas, 5 días 6 noches';
+  timeLine.append(label, time);
+  row.append(name, price, del, timeLine);
+  list.appendChild(row);
+}
+addRow(svcList, 'Nombre del servicio', 'Duración (opcional):');
+addRow(prodList, 'Nombre del producto', 'Entrega (opcional):');
+document.getElementById('add-svc').addEventListener('click', () => addRow(svcList, 'Nombre del servicio', 'Duración (opcional):'));
+document.getElementById('add-prod').addEventListener('click', () => addRow(prodList, 'Nombre del producto', 'Entrega (opcional):'));
+function showTab(tab){
+  document.querySelectorAll('.svc-tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
+  document.getElementById('tab-svc').style.display = tab === 'svc' ? 'block' : 'none';
+  document.getElementById('tab-prod').style.display = tab === 'prod' ? 'block' : 'none';
+}
+document.querySelectorAll('.svc-tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+function clearSvcErrors(){
+  svcError.style.display = 'none';
+  document.querySelectorAll('.svc-row.err').forEach(r => r.classList.remove('err'));
+}
+document.getElementById('sub-2').addEventListener('input', clearSvcErrors);
+function validateItems(){
+  clearSvcErrors();
+  let complete = 0, bad = null, badTab = null;
+  [[svcList, 'svc'], [prodList, 'prod']].forEach(([list, tab]) => {
+    [...list.querySelectorAll('.svc-row')].forEach(r => {
+      const [name, price] = [...r.querySelectorAll('input')].map(i => i.value.trim());
+      const priceOk = /^[0-9]+(,[0-9]+)?$/.test(price);
+      if (name && priceOk) complete++;
+      else if (name || price) { if (!bad) { bad = r; badTab = tab; } }
+    });
+  });
+  if (bad) {
+    showTab(badTab);
+    bad.classList.add('err');
+    svcError.textContent = 'Completa el nombre y el precio (solo números y coma) de la fila marcada.';
+    svcError.style.display = 'block';
+    return false;
+  }
+  if (complete === 0) {
+    showTab('svc');
+    svcError.textContent = 'Agrega al menos un servicio o producto con nombre y precio.';
+    svcError.style.display = 'block';
+    return false;
+  }
+  return true;
+}
+
+/* Horarios por día con opción de cerrado */
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const hoursList = document.getElementById('hours-list');
+DAYS.forEach(d => {
+  const row = document.createElement('div');
+  row.className = 'day-row';
+  row.innerHTML = `
+    <span class="dname">${d}</span>
+    <input type="time" value="09:00" required>
+    <span class="dsep">a</span>
+    <input type="time" value="18:00" required>
+    <label class="dclosed"><input type="checkbox"> Cerrado</label>`;
+  const chk = row.querySelector('input[type=checkbox]');
+  chk.addEventListener('change', () => {
+    row.querySelectorAll('input[type=time]').forEach(t => { t.disabled = chk.checked; });
+    row.classList.toggle('closed', chk.checked);
+  });
+  hoursList.appendChild(row);
+});
+
+/* Confeti de la confirmación */
+function launchConfetti(){
+  const c = document.getElementById('confetti');
+  c.innerHTML = '';
+  const colors = ['#00FF88', '#7C3AED', '#FFFFFF', '#00E5FF'];
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('span');
+    s.className = 'confetti-p';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.background = colors[i % 4];
+    s.style.animationDuration = (1.8 + Math.random() * 1.5) + 's';
+    s.style.animationDelay = (Math.random() * 0.7) + 's';
+    c.appendChild(s);
+  }
+}
+
+/* Demo de tono: "Muy informal" muestra vista previa; el modo ecuatoriano
+   se activa aparte y abre el selector de expresiones */
+const EXPRESSIONS = ['¡Qué bacán!', '¡Chévere!', '¡De una!', '¡De ley!', '¡Buenazo!', '¡Dale no más!'];
+const hTone = document.getElementById('h-tone');
+const toneDemo = document.getElementById('tone-demo');
+const exprPicker = document.getElementById('expr-picker');
+const toneDemoBubble = document.getElementById('tone-demo-bubble');
+const ecMode = document.getElementById('ec-mode');
+const ecPicker = document.getElementById('ec-picker');
+EXPRESSIONS.forEach(x => {
+  const c = document.createElement('span');
+  c.className = 'chip';
+  c.textContent = x;
+  c.addEventListener('click', () => { c.classList.toggle('on'); updateToneDemo(); });
+  exprPicker.appendChild(c);
+});
+function updateToneDemo(){
+  if (ecMode.checked) {
+    const sel = [...exprPicker.querySelectorAll('.chip.on')].map(c => c.textContent);
+    const first = sel[0] || '¡De una!';
+    toneDemoBubble.textContent = `${first} Tu cita quedó agendada para el lunes a las 10 🤙`;
+  } else {
+    toneDemoBubble.textContent = '¡Listo! Tu cita quedó agendada para el lunes a las 10 😎';
+  }
+}
+ecMode.addEventListener('change', () => {
+  ecPicker.style.display = ecMode.checked ? 'block' : 'none';
+  updateToneDemo();
+});
+hTone.addEventListener('change', () => {
+  const informal = hTone.value === 'Muy informal';
+  toneDemo.style.display = informal ? 'block' : 'none';
+  if (informal) updateToneDemo();
+});
+
+/* Reenviar correo */
+const resendBtn = document.getElementById('resend-email');
+resendBtn.addEventListener('click', () => {
+  resendBtn.textContent = '✓ Correo reenviado';
+  resendBtn.disabled = true;
+  setTimeout(() => { resendBtn.textContent = 'Reenviar correo'; resendBtn.disabled = false; }, 4000);
+});
+document.getElementById('login-form').addEventListener('submit', e => {
+  e.preventDefault();
+  localStorage.setItem('nexiaSession', '1');
+  window.location.href = 'dashboard.html'; /* demo: entra directo al panel */
+});
+/* Sesión iniciada: el navbar deja de mostrar crear cuenta / iniciar sesión */
+if (localStorage.getItem('nexiaSession') === '1') {
+  document.querySelectorAll('.nav-right .js-login, .nav-right .js-signup, footer .js-login').forEach(el => { el.style.display = 'none'; });
+  document.getElementById('nav-panel').style.display = 'inline-block';
+}
+/* Tipo de organización → cambia el lenguaje del dashboard */
+document.querySelectorAll('input[name=org]').forEach(r => r.addEventListener('change', () => {
+  localStorage.setItem('nexiaOrg', r.value);
+}));
+document.getElementById('go-signup').addEventListener('click', e => { e.preventDefault(); openWizard(); });
+
+document.querySelectorAll('.js-login').forEach(b => b.addEventListener('click', openLogin));
+document.querySelectorAll('.js-signup').forEach(b => b.addEventListener('click', () => openWizard(b.dataset.plan)));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
+
+/* Banner */
+function closeBanner(){
+  document.getElementById('promo-banner').style.display = 'none';
+  document.body.classList.add('banner-hidden');
+}
+
+/* ============================================================
+   Reveal on scroll (Intersection Observer)
+   ============================================================ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      if (e.target.querySelector('.counter')) startCounters(e.target);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.18 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ============================================================
+   Contadores animados
+   ============================================================ */
+function startCounters(scope){
+  scope.querySelectorAll('.counter').forEach(el => {
+    if (el.dataset.done) return;
+    el.dataset.done = "1";
+    const target = parseInt(el.dataset.target, 10);
+    const prefix = el.dataset.prefix || "";
+    const suffix = el.dataset.suffix || "";
+    if (target === 0) { el.textContent = prefix + "0" + suffix; return; }
+    const dur = 1600, t0 = performance.now();
+    (function tick(t){
+      const p = Math.min((t - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + Math.round(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}
+
+/* ============================================================
+   Chat simulado del hero (loop infinito)
+   ============================================================ */
+const heroMessages = [
+  { who: 'in',  text: 'Hola, buenas tardes 👋' },
+  { who: 'out', text: '¡Hola! 😊 Bienvenido a Peluquería Estilo. ¿En qué le puedo ayudar?' },
+  { who: 'in',  text: '¿Cuánto cuesta el corte de cabello?' },
+  { who: 'out', text: 'El corte de cabello tiene un valor de $8. ¿Desea agendar una cita?' },
+  { who: 'in',  text: 'Sí, el lunes a las 10 por favor' },
+  { who: 'out', text: '✅ ¡Perfecto! Su cita quedó confirmada:\n✂️ Corte de cabello\n📅 Lunes 7 de julio · 10:00am\n¡Le esperamos!' }
+];
+const chatArea = document.getElementById('hero-chat');
+
+function runHeroChat(){
+  chatArea.innerHTML = '';
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  let i = 0;
+  function next(){
+    if (i >= heroMessages.length) { setTimeout(runHeroChat, 5000); return; }
+    const m = heroMessages[i];
+    const showTyping = m.who === 'out';
+    if (showTyping) { chatArea.appendChild(typing); typing.classList.add('show'); }
+    setTimeout(() => {
+      typing.classList.remove('show');
+      if (typing.parentNode) typing.parentNode.removeChild(typing);
+      const b = document.createElement('div');
+      b.className = 'bubble ' + m.who;
+      b.textContent = m.text;
+      chatArea.appendChild(b);
+      requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add('show')));
+      i++;
+      setTimeout(next, 900);
+    }, showTyping ? 1100 : 250);
+  }
+  next();
+}
+runHeroChat();
+
+/* ============================================================
+   FAQ acordeón
+   ============================================================ */
+document.querySelectorAll('.faq-item').forEach(item => {
+  const q = item.querySelector('.faq-q');
+  const a = item.querySelector('.faq-a');
+  q.addEventListener('click', () => {
+    const open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(o => {
+      o.classList.remove('open');
+      o.querySelector('.faq-a').style.maxHeight = null;
+    });
+    if (!open) {
+      item.classList.add('open');
+      a.style.maxHeight = a.scrollHeight + 'px';
+    }
+  });
+});
+
+/* ============================================================
+   Marquees (duplicar contenido para loop perfecto)
+   ============================================================ */
+['testi-track', 'logo-marquee'].forEach(id => {
+  const t = document.getElementById(id);
+  if (t) t.innerHTML += t.innerHTML;
+});
+
+/* ============================================================
+   Contador de mensajes "en vivo"
+   ============================================================ */
+const liveEl = document.getElementById('live-msg-counter');
+let liveCount = 1240 + Math.floor(Math.random() * 300);
+function bumpLive(){
+  liveEl.textContent = liveCount.toLocaleString('es-EC');
+  liveCount += 1 + Math.floor(Math.random() * 3);
+  setTimeout(bumpLive, 1500 + Math.random() * 3000);
+}
+bumpLive();
+
+/* ============================================================
+   Partículas del hero (canvas, muy sutil)
+   ============================================================ */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let parts = [];
+function sizeCanvas(){
+  const hero = document.getElementById('hero');
+  canvas.width = hero.offsetWidth;
+  canvas.height = hero.offsetHeight;
+}
+function initParts(){
+  sizeCanvas();
+  const n = Math.min(60, Math.floor(canvas.width / 22));
+  parts = Array.from({ length: n }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.9 + 0.6,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25,
+    o: Math.random() * 0.5 + 0.15
+  }));
+}
+function drawParts(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  parts.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,255,136,${p.o * 0.6})`;
+    ctx.fill();
+  });
+  /* líneas de conexión sutiles */
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = i + 1; j < parts.length; j++) {
+      const dx = parts[i].x - parts[j].x, dy = parts[i].y - parts[j].y;
+      const d = Math.hypot(dx, dy);
+      if (d < 130) {
+        ctx.beginPath();
+        ctx.moveTo(parts[i].x, parts[i].y);
+        ctx.lineTo(parts[j].x, parts[j].y);
+        ctx.strokeStyle = `rgba(0,255,136,${(1 - d / 130) * 0.14})`;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParts);
+}
+initParts();
+drawParts();
+window.addEventListener('resize', initParts);
+</script>
+</body>
+</html>

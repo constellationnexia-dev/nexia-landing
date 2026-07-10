@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexia — Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050508;
+  --bg2:#0F0F1A;
+  --card:#12121E;
+  --accent:#00FF88;
+  --accent2:#7C3AED;
+  --text:#FFFFFF;
+  --muted:#A0A0B0;
+  --line:#1E1E2E;
+  --font-title:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.5;min-height:100vh;display:flex}
+h1,h2,h3{font-family:var(--font-title)}
+button{font-family:var(--font-body)}
+
+/* ===== Sidebar ===== */
+.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
+.side-head{padding:0 10px 20px}
+.welcome{font-family:var(--font-title);font-weight:700;font-size:1.02rem;display:flex;align-items:center;gap:7px}
+.biz-sub{color:var(--muted);font-size:.72rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.star{color:var(--accent);animation:pulse-star 3s ease-in-out infinite}
+@keyframes pulse-star{0%,100%{opacity:1;text-shadow:0 0 8px var(--accent)}50%{opacity:.6}}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;color:var(--muted);font-size:.9rem;font-weight:500;padding:12px 12px;border-radius:11px;cursor:pointer;transition:all .25s;text-align:left;margin-bottom:4px}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-item.active{background:rgba(0,255,136,.1);color:var(--accent);font-weight:600}
+.nav-item .ico{font-size:1.05rem;width:22px;text-align:center}
+.sidebar .bottom{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line)}
+.bot-status{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);margin-bottom:14px}
+.bot-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1.8s infinite}
+.bot-dot.paused{background:#FFB020;box-shadow:0 0 8px #FFB020;animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.logout{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.85rem;text-decoration:none;padding:8px 2px;transition:color .25s;cursor:pointer;background:none;border:none}
+.logout:hover{color:#FF5C5C}
+.home-link:hover{color:var(--accent)}
+
+/* Confirmación de cierre de sesión */
+.confirm-overlay{position:fixed;inset:0;background:rgba(3,3,6,.7);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:26px 24px;max-width:340px;width:100%;text-align:center;animation:fade-in .25s ease-out}
+.confirm-box h3{font-size:1.05rem;margin-bottom:18px;font-weight:600}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns button,.confirm-btns a{flex:1;padding:11px;border-radius:10px;font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:none;font-family:var(--font-body);text-align:center}
+#logout-cancel{background:none;border:1px solid var(--line);color:var(--text);transition:border-color .25s}
+#logout-cancel:hover{border-color:var(--accent)}
+.confirm-btns .danger{background:#FF5C5C;color:#1A0505;border:none;transition:box-shadow .25s}
+.confirm-btns .danger:hover{box-shadow:0 0 16px rgba(255,92,92,.4)}
+
+/* ===== Main ===== */
+.main{flex:1;padding:32px 34px;min-width:0}
+.page{display:none;animation:fade-in .3s ease-out}
+.page.active{display:block}
+@keyframes fade-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.5rem}
+.page-head p{color:var(--muted);font-size:.9rem}
+
+/* ===== Estadísticas ===== */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:14px}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .3s}
+.metric:hover{border-color:rgba(0,255,136,.35)}
+.metric .m-label{color:var(--muted);font-size:.76rem;margin-bottom:6px}
+.metric .m-value{font-family:var(--font-title);font-size:1.7rem;font-weight:700;color:var(--accent)}
+.metric .m-note{color:var(--muted);font-size:.7rem;margin-top:4px}
+.usage-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.usage-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.usage-top .u-label{color:var(--muted);font-size:.8rem}
+.usage-top .u-nums{font-family:var(--font-title);font-weight:700}
+.usage-top .u-nums b{color:var(--accent)}
+.usage-bar{height:10px;background:#1A1A2A;border-radius:100px;overflow:hidden}
+.usage-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;box-shadow:0 0 12px rgba(0,255,136,.4);transition:width 1.2s ease-out}
+.usage-note{color:var(--muted);font-size:.72rem;margin-top:8px}
+
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.chart-head h3{font-size:1rem}
+.range-toggle{display:flex;gap:4px;background:var(--bg2);border-radius:9px;padding:4px}
+.range-btn{border:none;background:none;color:var(--muted);font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:7px;cursor:pointer;transition:all .25s}
+.range-btn.active{background:var(--accent);color:#04140b}
+.chart-legend{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.75rem;margin-bottom:6px}
+.lg-dot{width:11px;height:11px;border-radius:3px;background:linear-gradient(180deg,var(--accent),rgba(0,255,136,.3))}
+.chart-area{position:relative;height:200px;margin-top:20px}
+.grid-lines{position:absolute;inset:0;z-index:0}
+.grid-line{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,255,255,.08)}
+.grid-line span{position:absolute;left:2px;top:-15px;font-size:.6rem;color:var(--muted)}
+.bars{position:relative;z-index:1;display:flex;align-items:flex-end;gap:4px;height:100%}
+.bar{flex:1;position:relative;background:linear-gradient(180deg,var(--accent),rgba(0,255,136,.25));border-radius:5px 5px 2px 2px;min-height:4px;transition:height .5s ease-out,opacity .2s;cursor:default;opacity:.85}
+.bar:hover{opacity:1;box-shadow:0 0 12px rgba(0,255,136,.5)}
+.bar-val{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:.62rem;color:var(--muted);white-space:nowrap}
+.bars.dense .bar-val{display:none}
+.chart-tip{position:absolute;z-index:5;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:6px 11px;font-size:.74rem;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;box-shadow:0 0 14px rgba(0,255,136,.25)}
+.pause-stat{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-top:14px}
+.pause-stat .ps-label{font-size:.9rem;font-weight:600}
+.pause-stat .ps-note{color:var(--muted);font-size:.74rem;margin-top:2px}
+.pause-stat .ps-value{font-family:var(--font-title);font-size:1.7rem;font-weight:700;color:#FFB020;text-shadow:0 0 16px rgba(255,176,32,.35)}
+.bar-labels{display:flex;gap:4px;margin-top:8px}
+.bar-labels span{flex:1;text-align:center;font-size:.62rem;color:var(--muted);overflow:hidden;white-space:nowrap}
+
+/* ===== Página vacía (Mi Negocio / Config) ===== */
+.empty-card{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:44px 24px;text-align:center;color:var(--muted)}
+.empty-card .e-ico{font-size:2.2rem;display:block;margin-bottom:12px}
+.empty-card p{font-size:.9rem;max-width:380px;margin:0 auto}
+.config-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.config-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.config-card h3{font-size:.95rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.config-card p{color:var(--muted);font-size:.8rem}
+.soon{display:inline-block;font-size:.62rem;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:1px 8px;margin-top:10px}
+.switch{position:relative;display:inline-block;width:46px;height:25px;margin-top:10px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#1A1A2A;border:1px solid var(--line);border-radius:100px;transition:.3s}
+.slider:before{content:'';position:absolute;height:17px;width:17px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.3s}
+.switch input:checked + .slider{background:rgba(0,255,136,.2);border-color:var(--accent)}
+.switch input:checked + .slider:before{transform:translateX(20px);background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.pause-msg-wrap{margin-top:14px}
+.pause-msg-wrap label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:6px}
+.pause-msg-wrap textarea{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-family:var(--font-body);font-size:.82rem;resize:vertical;outline:none;transition:border-color .3s}
+.pause-msg-wrap textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+
+/* ===== Ultra personalización ===== */
+.items-block{margin-bottom:20px}
+.items-title{font-size:.74rem;color:var(--muted);font-weight:600;margin-bottom:9px;text-transform:uppercase;letter-spacing:.1em}
+.item-card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.item-grid{display:grid;grid-template-columns:1fr 88px 112px 34px;gap:8px;margin-bottom:8px}
+@media(max-width:700px){.item-grid{grid-template-columns:1fr 68px 86px 30px;gap:6px}}
+.item-card input{width:100%;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--text);font-family:var(--font-body);font-size:.85rem;outline:none;transition:border-color .3s;margin-bottom:0}
+.item-card input:focus{border-color:var(--accent)}
+.item-del{background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);cursor:pointer;transition:all .3s}
+.item-del:hover{color:#FF5C5C;border-color:#FF5C5C}
+.add-item{background:none;border:1px dashed var(--line);border-radius:10px;color:var(--accent);width:100%;padding:9px;cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:.82rem;transition:all .3s}
+.add-item:hover{border-color:var(--accent);box-shadow:0 0 12px rgba(0,255,136,.15)}
+/* Chips de selección (sin cuadritos nativos) */
+.chk-row{display:flex;gap:9px;flex-wrap:wrap}
+.chk-row label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.82rem;cursor:pointer;border:1px solid var(--line);border-radius:100px;padding:8px 15px;transition:all .2s;user-select:none;background:var(--bg2)}
+.chk-row input[type=checkbox]{display:none}
+.chk-row label:hover{border-color:rgba(0,255,136,.5)}
+.chk-row label:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(0,255,136,.08);box-shadow:0 0 10px rgba(0,255,136,.18)}
+.chk-row label:has(input:checked)::before{content:'✓';font-weight:700}
+/* Flechitas nativas de los campos numéricos: fuera (no combinan con la interfaz) */
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.adv-toggle{background:none;border:1px solid var(--line);border-radius:11px;color:var(--text);width:100%;padding:12px;cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:.88rem;transition:all .3s;display:flex;justify-content:center;align-items:center;gap:8px}
+.adv-toggle:hover{border-color:var(--accent);box-shadow:0 0 14px rgba(0,255,136,.15)}
+.adv-toggle .arr{color:var(--accent);transition:transform .3s}
+.adv-toggle.open .arr{transform:rotate(180deg)}
+#pay-adv{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+.pay-adv-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.pay-adv-head strong{font-size:.9rem}
+.apply-all{display:flex;gap:8px;align-items:center}
+.apply-all select{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;color:var(--text);font-size:.78rem;font-family:var(--font-body);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none}
+.apply-all button{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.4);color:var(--accent);border-radius:9px;padding:8px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .25s}
+.apply-all button:hover{box-shadow:0 0 12px rgba(0,255,136,.3)}
+.pay-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:9px}
+.pay-name{font-size:.86rem;font-weight:600;flex:1;min-width:110px}
+.pay-opts{display:flex;flex-wrap:wrap;gap:7px}
+.pay-opts label{display:flex;align-items:center;gap:5px;font-size:.74rem;color:var(--muted);cursor:pointer;border:1px solid var(--line);padding:6px 11px;border-radius:100px;transition:all .2s;user-select:none}
+.pay-opts label:hover{border-color:rgba(0,255,136,.5)}
+.pay-opts label:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(0,255,136,.08)}
+.pay-opts label:has(input:checked)::before{content:'✓';font-weight:700}
+.pay-opts input[type=radio]{display:none}
+.pay-pct{width:56px;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:4px 6px;color:var(--text);font-size:.74rem;outline:none;font-family:var(--font-body);display:none}
+.pay-pct:focus{border-color:var(--accent)}
+.pay-group{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:12px 0 8px;font-weight:600}
+.pay-group:first-child{margin-top:0}
+.u-section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+.u-section h3{font-size:1.05rem;margin-bottom:18px}
+.u-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+@media(max-width:700px){.u-grid{grid-template-columns:1fr}}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--text);font-family:var(--font-body);font-size:.9rem;outline:none;transition:border-color .3s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+.field select{appearance:none;-webkit-appearance:none;cursor:pointer}
+.field textarea{resize:vertical}
+.f-hint{font-size:.7rem;color:var(--muted);margin-top:5px}
+.chk-line label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:.88rem;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent)}
+.inline-times{display:flex;align-items:center;gap:8px;margin-top:10px}
+.inline-times input{width:auto;color-scheme:dark}
+.inline-times span{color:var(--muted);font-size:.8rem}
+.prof-card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.prof-card input[type=text]{width:100%;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--text);font-family:var(--font-body);font-size:.86rem;outline:none;transition:border-color .3s;margin-bottom:12px}
+.prof-card input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,136,.12)}
+.prof-card .p-label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:6px}
+.prof-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prof-head span{font-size:.78rem;color:var(--muted)}
+.prof-quick{font-size:.7rem;color:var(--accent);cursor:pointer;background:none;border:none;font-family:var(--font-body)}
+.svc-chks{display:flex;flex-wrap:wrap;gap:8px}
+.svc-chks label{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);cursor:pointer;border:1px solid var(--line);padding:6px 12px;border-radius:100px;transition:all .2s;user-select:none}
+.svc-chks input[type=checkbox]{display:none}
+.svc-chks label:hover{border-color:rgba(0,255,136,.5)}
+.svc-chks label:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(0,255,136,.08)}
+.svc-chks label:has(input:checked)::before{content:'✓';font-weight:700}
+.save-bar{display:flex;align-items:center;gap:14px;position:sticky;bottom:14px;background:rgba(5,5,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:12px 16px;z-index:5}
+.btn-save{background:var(--accent);color:#04140b;border:none;border-radius:11px;padding:12px 28px;font-weight:700;font-family:var(--font-body);font-size:.9rem;cursor:pointer;box-shadow:0 0 18px rgba(0,255,136,.3);transition:all .3s}
+.btn-save:hover{box-shadow:0 0 30px rgba(0,255,136,.55);transform:translateY(-1px)}
+.save-note{color:var(--accent);font-size:.82rem;opacity:0;transition:opacity .3s}
+
+/* ===== Conversaciones ===== */
+.convos{display:grid;grid-template-columns:300px 1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;height:calc(100vh - 160px);min-height:420px}
+.convo-list{border-right:1px solid var(--line);overflow-y:auto;background:var(--bg2)}
+.convo-item{display:flex;gap:11px;padding:14px 14px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .2s;align-items:center}
+.convo-item:hover{background:rgba(255,255,255,.03)}
+.convo-item.active{background:rgba(0,255,136,.08)}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-title);flex-shrink:0;font-size:.9rem}
+.convo-info{min-width:0;flex:1}
+.convo-info .c-name{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.convo-info .c-last{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.convo-item .c-time{font-size:.66rem;color:var(--muted);flex-shrink:0}
+.chat-pane{display:flex;flex-direction:column;min-width:0}
+.chat-header{display:flex;align-items:center;gap:11px;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--bg2)}
+.chat-header .back-btn{display:none;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px}
+.chat-header .ch-name{font-weight:600;font-size:.9rem}
+.chat-header .ch-num{font-size:.72rem;color:var(--muted)}
+.chat-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:70%;padding:9px 13px;border-radius:13px;font-size:.85rem;line-height:1.45}
+.msg.in{background:#1A1A2A;align-self:flex-start;border-bottom-left-radius:4px}
+.msg.out{background:rgba(0,255,136,.13);border:1px solid rgba(0,255,136,.22);align-self:flex-end;border-bottom-right-radius:4px}
+.msg .m-time{display:block;font-size:.62rem;color:var(--muted);margin-top:3px;text-align:right}
+.chat-note{padding:12px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem;text-align:center;background:var(--bg2)}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px}
+.chat-empty span{font-size:2rem}
+
+/* ===== Responsive ===== */
+@media(max-width:860px){
+  body{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:sticky;flex-direction:row;align-items:center;padding:10px 12px;gap:2px;overflow-x:auto}
+  .side-head{padding:0 8px 0 4px}
+  .welcome{font-size:.85rem;white-space:nowrap}
+  .biz-sub{display:none}
+  .nav-item{width:auto;margin-bottom:0;padding:9px 11px;white-space:nowrap;font-size:.8rem}
+  .nav-item .label{display:none}
+  .nav-item .ico{width:auto}
+  .sidebar .bottom{margin-top:0;margin-left:auto;padding:0;border-top:none;display:flex;align-items:center;gap:10px}
+  .bot-status{margin-bottom:0}
+  .bot-status .bs-text{display:none}
+  .logout .lg-text{display:none}
+  .main{padding:20px 16px 40px}
+  .convos{grid-template-columns:1fr;height:calc(100vh - 190px)}
+  .convo-list{border-right:none}
+  .chat-pane{display:none}
+  .convos.show-chat .convo-list{display:none}
+  .convos.show-chat .chat-pane{display:flex}
+  .chat-header .back-btn{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="side-head">
+    <div class="welcome"><span class="star">✦</span> Bienvenido a Nexia</div>
+    <div class="biz-sub" id="biz-sub">Asistente de tu negocio</div>
+  </div>
+  <button class="nav-item active" data-page="stats"><span class="ico">📊</span><span class="label">Estadísticas</span></button>
+  <button class="nav-item" data-page="org" id="nav-org"><span class="ico" id="org-ico">🏪</span><span class="label" id="org-label">Mi Negocio</span></button>
+  <button class="nav-item" data-page="convos"><span class="ico">💬</span><span class="label">Conversaciones</span></button>
+  <button class="nav-item" data-page="config"><span class="ico">⚙️</span><span class="label">Configuración</span></button>
+  <div class="bottom">
+    <div class="bot-status"><span class="bot-dot" id="bot-dot"></span><span class="bs-text" id="bot-status-text">Bot activo</span></div>
+    <a href="index.html" class="logout home-link">🏠 <span class="lg-text">Página de inicio</span></a>
+    <button class="logout" id="logout-btn">↩ <span class="lg-text">Cerrar sesión</span></button>
+  </div>
+</aside>
+
+<!-- CONFIRMACIÓN DE CIERRE DE SESIÓN -->
+<div class="confirm-overlay" id="logout-confirm">
+  <div class="confirm-box">
+    <h3>¿Seguro que quieres cerrar sesión?</h3>
+    <div class="confirm-btns">
+      <button id="logout-cancel">Cancelar</button>
+      <a href="index.html" class="danger" id="logout-yes">Cerrar sesión</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- PÁGINA: ESTADÍSTICAS -->
+  <section class="page active" id="page-stats">
+    <div class="page-head">
+      <h1>Estadísticas</h1>
+      <p>Así está trabajando tu asistente este mes.</p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="m-label">Mensajes respondidos este mes</div><div class="m-value">1.284</div><div class="m-note">↑ 18% vs mes anterior</div></div>
+      <div class="metric"><div class="m-label">Clientes</div><div class="m-value">312</div><div class="m-note">↑ 9% vs mes anterior</div></div>
+      <div class="metric" id="metric-services"><div class="m-label">Servicios agendados</div><div class="m-value">86</div><div class="m-note">12 esta semana</div></div>
+      <div class="metric" id="metric-orders"><div class="m-label">Pedidos realizados</div><div class="m-value">34</div><div class="m-note">5 esta semana</div></div>
+    </div>
+    <div class="usage-card">
+      <div class="usage-top">
+        <span class="u-label">Mensajes usados vs límite del plan</span>
+        <span class="u-nums"><b>1.284</b> / 1.500</span>
+      </div>
+      <div class="usage-bar"><div class="usage-fill" id="usage-fill"></div></div>
+      <p class="usage-note">Plan Básico · Te avisaremos al llegar al 80% del límite. Mensajes extra: $0,05 c/u.</p>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>Actividad de mensajes</h3>
+        <div class="range-toggle">
+          <button class="range-btn active" data-range="7">7 días</button>
+          <button class="range-btn" data-range="30">30 días</button>
+        </div>
+      </div>
+      <div class="chart-legend"><span class="lg-dot"></span> Mensajes respondidos</div>
+      <div class="chart-area">
+        <div class="grid-lines" id="grid-lines"></div>
+        <div class="bars" id="bars"></div>
+        <div class="chart-tip" id="chart-tip"></div>
+      </div>
+      <div class="bar-labels" id="bar-labels"></div>
+    </div>
+    <div class="pause-stat">
+      <div>
+        <div class="ps-label">⏸️ Mensajes durante pausa del bot</div>
+        <div class="ps-note">Mensajes que llegaron mientras el bot estuvo pausado este mes</div>
+      </div>
+      <div class="ps-value">23</div>
+    </div>
+  </section>
+
+  <!-- PÁGINA: MI NEGOCIO / MI EMPRESA / MI PERFIL (ultra personalización) -->
+  <section class="page" id="page-org">
+    <div class="page-head">
+      <h1 id="org-title">Mi Negocio</h1>
+      <p>Ultra personalización: ajusta al detalle cómo trabaja tu asistente. Llena solo lo que necesites y guarda.</p>
+    </div>
+
+    <!-- SECCIÓN 1: Servicios y productos (precargado del registro) -->
+    <div class="u-section" id="u-items">
+      <h3>🛍️ Servicios y productos</h3>
+      <p class="f-hint" style="margin:-10px 0 16px">Precargado de tu registro — edita, agrega o elimina lo que necesites.</p>
+      <div class="items-block">
+        <div class="items-title">Servicios</div>
+        <div id="items-svc"></div>
+        <button type="button" class="add-item" id="add-item-svc">+ Agregar servicio</button>
+      </div>
+      <div class="items-block">
+        <div class="items-title">Productos</div>
+        <div id="items-prod"></div>
+        <button type="button" class="add-item" id="add-item-prod">+ Agregar producto</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: Calendario y citas (solo si tiene servicios) -->
+    <div class="u-section" id="u-citas">
+      <h3>📅 Calendario y citas</h3>
+      <div class="field">
+        <label for="u-profs">¿Cuántos profesionales atienden?</label>
+        <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
+      </div>
+      <div id="prof-list"></div>
+      <div class="field">
+        <label for="u-break">¿Tienen descanso o almuerzo?</label>
+        <select id="u-break"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
+        <div class="inline-times" id="u-break-times" style="display:none">
+          <span>De</span><input type="time" id="u-break-from" value="13:00"><span>a</span><input type="time" id="u-break-to" value="14:00">
+        </div>
+        <p class="f-hint">💡 El bot no agendará citas en ese horario</p>
+      </div>
+      <div class="u-grid">
+        <div class="field"><label for="u-max-days">Ventana de agenda: ¿con cuántos días máximo de anticipación se puede agendar?</label><input type="number" id="u-max-days" min="1" placeholder="7"><p class="f-hint">💡 Si pones 7, el bot solo mostrará disponibilidad de los próximos 7 días — una cita que exceda el rango no aparecerá disponible</p></div>
+        <div class="field"><label for="u-min-hours">¿Con cuántas horas mínimas de anticipación se puede agendar?</label><input type="number" id="u-min-hours" min="0" placeholder="2"><p class="f-hint">💡 Evita citas de último momento sin tiempo de preparación</p></div>
+      </div>
+      <div class="u-grid">
+        <div class="field"><label for="u-confirm">¿Las citas se confirman automáticamente o requieren aprobación manual?</label>
+          <select id="u-confirm"><option value="">Selecciona una opción</option><option value="auto">Se confirman automáticamente</option><option value="manual">Requieren aprobación manual</option></select>
+          <p class="f-hint">💡 Si es manual, el bot avisará que la cita está pendiente de confirmación</p>
+        </div>
+        <div class="field"><label for="u-reminder">¿Envían recordatorio de cita?</label>
+          <select id="u-reminder"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
+          <div id="u-reminder-hours-wrap" style="display:none;margin-top:10px"><label for="u-reminder-hours">¿Con cuántas horas de anticipación?</label><input type="number" id="u-reminder-hours" min="1" placeholder="24"></div>
+        </div>
+      </div>
+      <div class="u-grid">
+        <div class="field"><label for="u-cancel">¿Aceptan cancelación de citas?</label>
+          <select id="u-cancel"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+        <div class="field" id="u-reprog-wrap"><label for="u-reprog">¿Aceptan reprogramación de citas?</label>
+          <select id="u-reprog"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+      </div>
+      <div class="field" id="u-cr-time-wrap"><label for="u-cr-time">¿Con cuánto tiempo de anticipación se puede cancelar o reprogramar?</label><input type="text" id="u-cr-time" placeholder="Ej: 12 horas antes"></div>
+      <div class="u-grid">
+        <div class="field"><label for="u-waitlist">¿Activas la lista de espera?</label>
+          <select id="u-waitlist"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select>
+          <p class="f-hint">💡 Si no hay cupos, el bot anota nombre y número del cliente y le avisa automáticamente cuando se libere un espacio</p>
+        </div>
+        <div class="field"><label for="u-lastmin">¿Atienden de último minuto?</label>
+          <select id="u-lastmin"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select>
+        </div>
+      </div>
+      <div class="field"><label for="u-noshow">¿Qué pasa si el cliente no aparece?</label><textarea id="u-noshow" rows="2" placeholder="Describe tu política de inasistencia"></textarea><p class="f-hint">💡 El bot puede informar la política de no-show</p></div>
+    </div>
+
+    <!-- SECCIÓN 2: Pedidos y entrega (solo si tiene productos) -->
+    <div class="u-section" id="u-pedidos">
+      <h3>📦 Pedidos y entrega</h3>
+      <div class="field"><label for="u-delivery-mode">¿Cómo entregan los pedidos?</label>
+        <select id="u-delivery-mode"><option value="">Selecciona una opción</option><option value="delivery">Delivery</option><option value="retiro">Retiro en local</option><option value="ambos">Ambos</option></select>
+      </div>
+      <div id="u-delivery-fields" style="display:none">
+        <div class="u-grid">
+          <div class="field"><label for="u-zone">¿Zona de cobertura?</label><input type="text" id="u-zone" placeholder="Sectores donde entregan"></div>
+          <div class="field"><label for="u-dcost">¿Costo de delivery?</label><input type="text" id="u-dcost" placeholder="$"></div>
+          <div class="field"><label for="u-dmin">¿Pedido mínimo para delivery?</label><input type="text" id="u-dmin" placeholder="$"><p class="f-hint">💡 El bot rechazará pedidos que no cumplan el mínimo</p></div>
+          <div class="field"><label for="u-dtime">¿Cuánto tarda el delivery?</label><input type="text" id="u-dtime" placeholder="Ej: 45 min"></div>
+        </div>
+      </div>
+      <div id="u-retiro-fields" style="display:none">
+        <div class="field"><label for="u-rtime">¿En cuánto tiempo estará listo el pedido para retirar?</label><input type="text" id="u-rtime" placeholder="Ej: 30 min"></div>
+      </div>
+      <div class="u-grid">
+        <div class="field"><label for="u-custom">¿Hacen pedidos personalizados?</label><select id="u-custom"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select><p class="f-hint">💡 Por ejemplo tortas con dedicatoria, ramos a medida</p></div>
+        <div class="field"><label for="u-custom-ant">¿Con cuánta anticipación deben pedir?</label><input type="text" id="u-custom-ant" placeholder="Ej: 2 días"></div>
+        <div class="field"><label for="u-max-day">¿Máximo de pedidos por día?</label><input type="number" id="u-max-day" min="1" placeholder="20"><p class="f-hint">💡 El bot cerrará pedidos automáticamente al llegar al límite</p></div>
+        <div class="field"><label for="u-max-hour">¿Máximo de pedidos por hora?</label><input type="number" id="u-max-hour" min="1" placeholder="5"></div>
+        <div class="field"><label for="u-stock">¿Tienen stock limitado de algún producto?</label><input type="text" id="u-stock" placeholder="Cuáles y cuántas unidades"><p class="f-hint">💡 El bot avisará cuando un producto esté agotado</p></div>
+        <div class="field"><label for="u-afterhours">¿Aceptan pedidos fuera del horario para entregar después?</label><select id="u-afterhours"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select></div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: Pagos -->
+    <div class="u-section" id="u-pagos">
+      <h3>💳 Pagos</h3>
+      <div class="field"><label>¿Qué métodos de pago aceptas?</label>
+        <div class="chk-row">
+          <label><input type="checkbox" class="pm" value="Efectivo"> Efectivo</label>
+          <label><input type="checkbox" class="pm" value="Transferencia bancaria"> Transferencia bancaria</label>
+          <label><input type="checkbox" class="pm" value="Tarjeta de crédito/débito"> Tarjeta de crédito/débito</label>
+          <label><input type="checkbox" class="pm" value="Mercado Pago"> Mercado Pago</label>
+          <label><input type="checkbox" class="pm" id="pm-otro" value="Otro"> Otro</label>
+        </div>
+        <input type="text" id="u-pay-other" placeholder="¿Cuál otro método?" style="display:none;margin-top:10px">
+      </div>
+      <div class="field"><label for="u-receipts">¿Emiten comprobantes o facturas?</label>
+        <select id="u-receipts"><option value="">Selecciona una opción</option><option>Físico</option><option>Digital</option><option>Ambos</option><option>No emitimos</option></select>
+        <p class="f-hint">💡 El bot informará si emiten factura cuando alguien pregunte</p>
+      </div>
+      <div class="field"><label>¿Cuándo se realiza el pago?</label>
+        <div class="pay-opts" id="basic-pay">
+          <label><input type="radio" name="basic-pay" value="full"> Pago completo al inicio</label>
+          <label><input type="radio" name="basic-pay" value="pct"> Porcentaje de anticipo <input type="number" class="pay-pct" id="basic-pct" min="1" max="99" placeholder="%"></label>
+          <label><input type="radio" name="basic-pay" value="end"> Pago al finalizar</label>
+        </div>
+        <p class="f-hint">💡 Aplica a todo tu negocio — usa la personalización avanzada para diferenciarlo por servicio o producto</p>
+      </div>
+      <button type="button" class="adv-toggle" id="pay-adv-toggle">⚙️ Personalización avanzada de pagos <span class="arr">▾</span></button>
+      <div id="pay-adv" style="display:none">
+        <div class="pay-adv-head">
+          <strong>¿Cuándo se realiza el pago?</strong>
+          <div class="apply-all">
+            <select id="pay-apply-sel">
+              <option value="full">Pago completo al inicio</option>
+              <option value="pct">Porcentaje de anticipo</option>
+              <option value="end">Pago al finalizar</option>
+            </select>
+            <button type="button" id="pay-apply-btn">Aplicar a todos</button>
+          </div>
+        </div>
+        <div id="pay-list"></div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: General -->
+    <div class="u-section" id="u-general">
+      <h3>🧭 General</h3>
+      <div class="u-grid">
+        <div class="field"><label for="u-warranty">¿Tienen garantía en sus servicios o productos?</label><input type="text" id="u-warranty" placeholder="Describe tu garantía"><p class="f-hint">💡 El bot puede mencionarla para convencer clientes indecisos</p></div>
+        <div class="field"><label for="u-emergency">¿Tienen número de emergencias o contacto urgente?</label><input type="tel" id="u-emergency" placeholder="+593"></div>
+      </div>
+      <div class="field"><label for="u-human">¿A qué número derivar si el cliente quiere hablar con una persona real?</label><input type="tel" id="u-human" placeholder="+593"></div>
+    </div>
+
+    <!-- SECCIÓN: Asistente -->
+    <div class="u-section" id="u-asistente">
+      <h3>🤖 Asistente</h3>
+      <div class="field"><label for="u-rude">¿Qué debe responder el bot si alguien es irrespetuoso?</label><textarea id="u-rude" rows="2" placeholder="Escribe la respuesta que dará"></textarea><p class="f-hint">💡 Si no configuras esto, el bot ignorará los insultos y seguirá siendo amable</p></div>
+    </div>
+
+    <div class="empty-card" id="u-empty" style="display:none">
+      <span class="e-ico" id="org-empty-ico">🏪</span>
+      <p>Configura al menos un servicio o producto en tu formulario de personalización para desbloquear estos ajustes.</p>
+    </div>
+
+    <div class="save-bar" id="u-save-bar">
+      <button class="btn-save" id="u-save">Guardar cambios</button>
+      <span class="save-note" id="u-save-note">✓ Cambios guardados</span>
+    </div>
+  </section>
+
+  <!-- PÁGINA: CONVERSACIONES -->
+  <section class="page" id="page-convos">
+    <div class="page-head">
+      <h1>Conversaciones</h1>
+      <p>Historial de chats que tu asistente ha atendido.</p>
+    </div>
+    <div class="convos" id="convos-box">
+      <div class="convo-list" id="convo-list"></div>
+      <div class="chat-pane" id="chat-pane">
+        <div class="chat-empty" id="chat-empty"><span>💬</span>Selecciona una conversación para ver el historial</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PÁGINA: CONFIGURACIÓN -->
+  <section class="page" id="page-config">
+    <div class="page-head">
+      <h1>Configuración</h1>
+      <p>Tu plan, tu cuenta y el control de tu asistente.</p>
+    </div>
+    <div class="config-grid">
+      <div class="config-card">
+        <h3>💳 Plan actual</h3>
+        <p>Plan Básico — $99/mes · 1.500 mensajes</p>
+        <span class="soon">Próximamente: cambiar de plan</span>
+      </div>
+      <div class="config-card">
+        <h3>🧾 Facturación</h3>
+        <p>Historial de pagos, facturas y método de pago.</p>
+        <span class="soon">Próximamente</span>
+      </div>
+      <div class="config-card">
+        <h3>👤 Datos de cuenta</h3>
+        <p>Correo, contraseña y datos de contacto.</p>
+        <span class="soon">Próximamente</span>
+      </div>
+      <div class="config-card">
+        <h3>⏸️ Pausar bot</h3>
+        <p id="pause-desc">Tu asistente está respondiendo con normalidad.</p>
+        <label class="switch">
+          <input type="checkbox" id="pause-toggle">
+          <span class="slider"></span>
+        </label>
+        <div class="pause-msg-wrap">
+          <label for="pause-msg">Mensaje que verán tus clientes al pausar:</label>
+          <textarea id="pause-msg" rows="2">En este momento no estamos atendiendo por este medio, volvemos pronto.</textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ============================================================
+   Lenguaje dinámico según tipo de organización
+   (elegido en el formulario de personalización)
+   ============================================================ */
+const ORG_MAP = {
+  negocio:     { label: 'Mi Negocio',      ico: '🏪' },
+  empresa:     { label: 'Mi Empresa',      ico: '🏢' },
+  perfil:      { label: 'Mi Perfil',       ico: '👤' },
+  institucion: { label: 'Mi Institución',  ico: '🏫' },
+  gobierno:    { label: 'Mi Organización', ico: '🏛️' }
+};
+const orgKey = localStorage.getItem('nexiaOrg') || 'negocio';
+const org = ORG_MAP[orgKey] || ORG_MAP.negocio;
+document.getElementById('org-label').textContent = org.label;
+document.getElementById('org-ico').textContent = org.ico;
+document.getElementById('org-title').textContent = org.label;
+document.getElementById('org-empty-ico').textContent = org.ico;
+
+/* Nombre del negocio (guardado desde el formulario de personalización) */
+const bizName = localStorage.getItem('nexiaBizName');
+document.getElementById('biz-sub').textContent = 'Asistente de ' + (bizName || 'tu negocio');
+
+/* Métricas condicionales: solo si el negocio configuró servicios/productos */
+const svcCount = localStorage.getItem('nexiaSvcCount');
+const prodCount = localStorage.getItem('nexiaProdCount');
+const hasServices = svcCount === null ? true : parseInt(svcCount, 10) > 0;
+const hasProducts = prodCount === null ? true : parseInt(prodCount, 10) > 0;
+if (!hasServices) document.getElementById('metric-services').style.display = 'none';
+if (!hasProducts) document.getElementById('metric-orders').style.display = 'none';
+
+/* ============================================================
+   Ultra personalización (página Mi Negocio)
+   ============================================================ */
+document.getElementById('u-citas').style.display = hasServices ? 'block' : 'none';
+document.getElementById('u-pedidos').style.display = hasProducts ? 'block' : 'none';
+if (!hasServices && !hasProducts) {
+  document.getElementById('u-empty').style.display = 'block';
+  document.getElementById('u-save-bar').style.display = 'none';
+}
+
+/* Delivery según modalidad del negocio: online no tiene retiro en local */
+const bizMode = localStorage.getItem('nexiaMode');
+const dmSelect = document.getElementById('u-delivery-mode');
+if (bizMode === 'online') {
+  [...dmSelect.options].forEach(o => { if (o.value === 'retiro' || o.value === 'ambos') o.remove(); });
+}
+
+/* Sección Servicios y productos: precargada del registro y editable */
+const normItem = x => typeof x === 'string' ? { name: x, price: '', time: '', desc: '' } : x;
+const savedSvcs = (JSON.parse(localStorage.getItem('nexiaServices') || '[]') || []).map(normItem);
+const savedProds = (JSON.parse(localStorage.getItem('nexiaProducts') || '[]') || []).map(normItem);
+const itemsSvc = document.getElementById('items-svc');
+const itemsProd = document.getElementById('items-prod');
+function addItemRow(container, it, timePh){
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.innerHTML = `
+    <div class="item-grid">
+      <input type="text" class="it-name" placeholder="Nombre">
+      <input type="text" class="it-price" inputmode="decimal" placeholder="$">
+      <input type="text" class="it-time" placeholder="${timePh}">
+      <button type="button" class="item-del" aria-label="Eliminar">✕</button>
+    </div>
+    <input type="text" class="it-desc" placeholder="Descripción opcional — Ej: Incluye corte, lavado y secado">`;
+  card.querySelector('.it-name').value = it.name || '';
+  card.querySelector('.it-price').value = it.price || '';
+  card.querySelector('.it-time').value = it.time || '';
+  card.querySelector('.it-desc').value = it.desc || '';
+  card.querySelector('.item-del').addEventListener('click', () => card.remove());
+  container.appendChild(card);
+}
+savedSvcs.forEach(it => addItemRow(itemsSvc, it, 'Duración'));
+savedProds.forEach(it => addItemRow(itemsProd, it, 'Entrega'));
+document.getElementById('add-item-svc').addEventListener('click', () => addItemRow(itemsSvc, {}, 'Duración'));
+document.getElementById('add-item-prod').addEventListener('click', () => addItemRow(itemsProd, {}, 'Entrega'));
+function collectItems(container){
+  return [...container.querySelectorAll('.item-card')].map(c => ({
+    name: c.querySelector('.it-name').value.trim(),
+    price: c.querySelector('.it-price').value.trim(),
+    time: c.querySelector('.it-time').value.trim(),
+    desc: c.querySelector('.it-desc').value.trim()
+  })).filter(x => x.name);
+}
+
+/* Profesionales: si son varios, cada uno con sus servicios Y productos
+   (una sola lista — ej: solo un repostero hace el pastel) */
+let chipNames = [...savedSvcs, ...savedProds].map(x => x.name).filter(Boolean).slice(0, 30);
+const profList = document.getElementById('prof-list');
+const uProfs = document.getElementById('u-profs');
+function renderProfs(n, saved){
+  profList.innerHTML = '';
+  if (n < 2) return;
+  const names = chipNames.length ? chipNames : ['Servicio 1', 'Servicio 2'];
+  for (let i = 0; i < n; i++) {
+    const sv = (saved && saved[i]) || null;
+    const card = document.createElement('div');
+    card.className = 'prof-card';
+    card.innerHTML = `
+      <div class="prof-head"><span>Profesional ${i + 1}</span>
+        <span>
+          <button type="button" class="prof-quick" data-all="1">Todos</button> ·
+          <button type="button" class="prof-quick" data-all="0">Ninguno</button>
+        </span>
+      </div>
+      <span class="p-label">Nombre</span>
+      <input type="text" class="prof-name" placeholder="Nombre del profesional">
+      <span class="p-label">¿Qué servicios o productos ofrece?</span>
+      <div class="svc-chks">
+        ${names.map(s => `<label><input type="checkbox" ${!sv || sv.services.includes(s) ? 'checked' : ''} value="${s.replace(/"/g, '&quot;')}"> ${s}</label>`).join('')}
+      </div>`;
+    card.querySelector('.prof-name').value = sv && sv.name ? sv.name : '';
+    card.querySelectorAll('.prof-quick').forEach(b => b.addEventListener('click', () => {
+      card.querySelectorAll('.svc-chks input').forEach(c => { c.checked = b.dataset.all === '1'; });
+    }));
+    profList.appendChild(card);
+  }
+}
+function collectProfs(){
+  return [...profList.querySelectorAll('.prof-card')].map(c => ({
+    name: c.querySelector('.prof-name').value.trim(),
+    services: [...c.querySelectorAll('.svc-chks input:checked')].map(i => i.value)
+  }));
+}
+uProfs.addEventListener('change', () => renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), collectProfs()));
+
+/* Condicionales de la sección de citas */
+const uBreak = document.getElementById('u-break');
+uBreak.addEventListener('change', () => {
+  document.getElementById('u-break-times').style.display = uBreak.value === 'si' ? 'flex' : 'none';
+});
+const uReminder = document.getElementById('u-reminder');
+uReminder.addEventListener('change', () => {
+  document.getElementById('u-reminder-hours-wrap').style.display = uReminder.value === 'si' ? 'block' : 'none';
+});
+const uCancel = document.getElementById('u-cancel');
+uCancel.addEventListener('change', () => {
+  const no = uCancel.value === 'no';
+  /* sin cancelación tampoco hay reprogramación */
+  document.getElementById('u-reprog-wrap').style.display = no ? 'none' : 'block';
+  document.getElementById('u-cr-time-wrap').style.display = no ? 'none' : 'block';
+  if (no) document.getElementById('u-reprog').value = 'no';
+});
+
+/* Condicionales de pedidos y entrega */
+dmSelect.addEventListener('change', () => {
+  const v = dmSelect.value;
+  document.getElementById('u-delivery-fields').style.display = (v === 'delivery' || v === 'ambos') ? 'block' : 'none';
+  document.getElementById('u-retiro-fields').style.display = (v === 'retiro' || v === 'ambos') ? 'block' : 'none';
+});
+
+/* Sección Pagos */
+const pmOtro = document.getElementById('pm-otro');
+pmOtro.addEventListener('change', () => {
+  document.getElementById('u-pay-other').style.display = pmOtro.checked ? 'block' : 'none';
+});
+const advToggle = document.getElementById('pay-adv-toggle');
+advToggle.addEventListener('click', () => {
+  const adv = document.getElementById('pay-adv');
+  const open = adv.style.display === 'none';
+  adv.style.display = open ? 'block' : 'none';
+  advToggle.classList.toggle('open', open);
+});
+/* Opción básica: cuándo se paga (aplica a todo el negocio) */
+const basicPayBox = document.getElementById('basic-pay');
+const basicPct = document.getElementById('basic-pct');
+function updBasicPct(){
+  const sel = basicPayBox.querySelector('input[type=radio]:checked');
+  basicPct.style.display = (sel && sel.value === 'pct') ? 'inline-block' : 'none';
+}
+basicPayBox.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', updBasicPct));
+updBasicPct();
+
+/* Personalización avanzada: cuándo se paga cada servicio/producto (lista ordenada) */
+const PAY_MODES = [['full', 'Pago completo al inicio'], ['pct', 'Porcentaje de anticipo'], ['end', 'Pago al finalizar']];
+const payList = document.getElementById('pay-list');
+function buildPayList(savedPlan, names){
+  names = names || {
+    svcs: savedSvcs.map(x => x.name).filter(Boolean),
+    prods: savedProds.map(x => x.name).filter(Boolean)
+  };
+  payList.innerHTML = '';
+  if (!names.svcs.length && !names.prods.length) {
+    payList.innerHTML = '<p class="f-hint">Configura servicios o productos primero (y guarda) para personalizar sus pagos.</p>';
+    return;
+  }
+  let idx = 0;
+  const addGroup = (title, list) => {
+    if (!list.length) return;
+    const h = document.createElement('div');
+    h.className = 'pay-group';
+    h.textContent = title;
+    payList.appendChild(h);
+    list.forEach(nm => {
+      const sv = savedPlan ? savedPlan.find(p => p.name === nm) : null;
+      const row = document.createElement('div');
+      row.className = 'pay-row';
+      row.innerHTML = `<div class="pay-name"></div><div class="pay-opts">` + PAY_MODES.map(([v, l]) =>
+        `<label><input type="radio" name="pay-${idx}" value="${v}" ${sv && sv.mode === v ? 'checked' : ''}> ${l}${v === 'pct' ? ` <input type="number" class="pay-pct" min="1" max="99" placeholder="%">` : ''}</label>`
+      ).join('') + `</div>`;
+      row.querySelector('.pay-name').textContent = nm;
+      const pct = row.querySelector('.pay-pct');
+      if (sv && sv.pct) pct.value = sv.pct;
+      const updatePct = () => {
+        const sel = row.querySelector('input[type=radio]:checked');
+        pct.style.display = (sel && sel.value === 'pct') ? 'inline-block' : 'none';
+      };
+      row.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', updatePct));
+      updatePct();
+      payList.appendChild(row);
+      idx++;
+    });
+  };
+  addGroup('Servicios', names.svcs);
+  addGroup('Productos', names.prods);
+}
+buildPayList(null);
+document.getElementById('pay-apply-btn').addEventListener('click', () => {
+  const mode = document.getElementById('pay-apply-sel').value;
+  payList.querySelectorAll('.pay-row').forEach(row => {
+    const r = row.querySelector(`input[value="${mode}"]`);
+    if (r) { r.checked = true; r.dispatchEvent(new Event('change')); }
+  });
+});
+
+/* Guardar y cargar */
+const U_IDS = ['u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude'];
+document.getElementById('u-save').addEventListener('click', () => {
+  const data = {};
+  U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+  data.profs = collectProfs();
+  data.payMethods = [...document.querySelectorAll('.pm:checked')].map(c => c.value);
+  const basicSel = basicPayBox.querySelector('input[type=radio]:checked');
+  data.basicPay = { mode: basicSel ? basicSel.value : '', pct: basicPct.value };
+  data.payPlan = [...payList.querySelectorAll('.pay-row')].map(row => {
+    const sel = row.querySelector('input[type=radio]:checked');
+    const pctEl = row.querySelector('.pay-pct');
+    return { name: row.querySelector('.pay-name').textContent, mode: sel ? sel.value : '', pct: pctEl ? pctEl.value : '' };
+  });
+  localStorage.setItem('nexiaUltra', JSON.stringify(data));
+  /* guarda también los servicios/productos editados */
+  const svcs = collectItems(itemsSvc), prods = collectItems(itemsProd);
+  localStorage.setItem('nexiaServices', JSON.stringify(svcs));
+  localStorage.setItem('nexiaProducts', JSON.stringify(prods));
+  localStorage.setItem('nexiaSvcCount', svcs.length);
+  localStorage.setItem('nexiaProdCount', prods.length);
+  /* refresca la lista de pagos y los profesionales con los items actualizados */
+  const freshNames = { svcs: svcs.map(x => x.name), prods: prods.map(x => x.name) };
+  chipNames = [...freshNames.svcs, ...freshNames.prods].filter(Boolean).slice(0, 30);
+  buildPayList(data.payPlan, freshNames);
+  renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), data.profs);
+  const note = document.getElementById('u-save-note');
+  note.style.opacity = '1';
+  setTimeout(() => { note.style.opacity = '0'; }, 2500);
+});
+(function loadUltra(){
+  const data = JSON.parse(localStorage.getItem('nexiaUltra') || 'null');
+  if (!data) return;
+  U_IDS.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; });
+  /* compatibilidad con datos guardados con el checkbox anterior */
+  if (data.break === true && data['u-break'] === undefined) uBreak.value = 'si';
+  renderProfs(Math.max(1, parseInt(data['u-profs'], 10) || 1), data.profs);
+  (data.payMethods || []).forEach(v => {
+    const c = [...document.querySelectorAll('.pm')].find(x => x.value === v);
+    if (c) c.checked = true;
+  });
+  if (data.basicPay && data.basicPay.mode) {
+    const r = basicPayBox.querySelector(`input[value="${data.basicPay.mode}"]`);
+    if (r) r.checked = true;
+    basicPct.value = data.basicPay.pct || '';
+    updBasicPct();
+  }
+  buildPayList(data.payPlan || null);
+  [uBreak, uReminder, uCancel, dmSelect, pmOtro].forEach(el => el.dispatchEvent(new Event('change')));
+})();
+
+/* Confirmación de cierre de sesión */
+const logoutConfirm = document.getElementById('logout-confirm');
+document.getElementById('logout-btn').addEventListener('click', () => logoutConfirm.classList.add('open'));
+document.getElementById('logout-cancel').addEventListener('click', () => logoutConfirm.classList.remove('open'));
+logoutConfirm.addEventListener('click', e => { if (e.target === logoutConfirm) logoutConfirm.classList.remove('open'); });
+document.getElementById('logout-yes').addEventListener('click', () => { localStorage.removeItem('nexiaSession'); });
+
+/* ============================================================
+   Navegación del menú lateral
+   ============================================================ */
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    window.scrollTo({ top: 0 });
+  });
+});
+
+/* ============================================================
+   Barra de uso del plan
+   ============================================================ */
+requestAnimationFrame(() => {
+  setTimeout(() => { document.getElementById('usage-fill').style.width = (1284 / 1500 * 100) + '%'; }, 200);
+});
+
+/* ============================================================
+   Gráfica de actividad (7 / 30 días)
+   ============================================================ */
+const DATA7 = [42, 58, 37, 64, 71, 53, 68];
+const DATA30 = [31, 44, 52, 38, 61, 47, 55, 42, 66, 58, 49, 71, 63, 54, 68, 45, 59, 72, 51, 64, 57, 69, 48, 62, 74, 53, 67, 60, 70, 65];
+const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+function dateInfo(n, i){
+  const d = new Date();
+  d.setDate(d.getDate() - (n - 1 - i));
+  return {
+    short: n === 7 ? WEEKDAYS[d.getDay()] : String(d.getDate()),
+    full: `${WEEKDAYS[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`
+  };
+}
+function renderChart(n){
+  const data = n === 7 ? DATA7 : DATA30;
+  /* escala redondeada para que las líneas guía caigan en 50, 100... */
+  const scaleMax = Math.max(50, Math.ceil(Math.max(...data) / 50) * 50);
+  const bars = document.getElementById('bars');
+  const labs = document.getElementById('bar-labels');
+  const grid = document.getElementById('grid-lines');
+  const tip = document.getElementById('chart-tip');
+  bars.innerHTML = ''; labs.innerHTML = ''; grid.innerHTML = '';
+  bars.classList.toggle('dense', n === 30);
+  /* líneas guía horizontales cada 50 unidades */
+  for (let g = 0; g <= scaleMax; g += 50) {
+    const gl = document.createElement('div');
+    gl.className = 'grid-line';
+    gl.style.bottom = (g / scaleMax * 100) + '%';
+    gl.innerHTML = `<span>${g}</span>`;
+    grid.appendChild(gl);
+  }
+  data.forEach((v, i) => {
+    const info = dateInfo(n, i);
+    const b = document.createElement('div');
+    b.className = 'bar';
+    b.style.height = '4px';
+    /* número encima de cada barra (oculto en vista de 30 días) */
+    const val = document.createElement('span');
+    val.className = 'bar-val';
+    val.textContent = v;
+    b.appendChild(val);
+    /* tooltip con fecha exacta al pasar el mouse */
+    b.addEventListener('mouseenter', () => {
+      tip.textContent = `${info.full}: ${v} mensajes`;
+      tip.style.left = Math.max(0, Math.min(b.offsetLeft - 40, bars.offsetWidth - 190)) + 'px';
+      tip.style.bottom = (v / scaleMax * bars.offsetHeight + 12) + 'px';
+      tip.style.opacity = '1';
+    });
+    b.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+    bars.appendChild(b);
+    requestAnimationFrame(() => requestAnimationFrame(() => { b.style.height = (v / scaleMax * 100) + '%'; }));
+    const s = document.createElement('span');
+    /* en 30 días solo se etiqueta 1 de cada 5 para no saturar */
+    s.textContent = (n === 7 || i % 5 === 0) ? info.short : '';
+    labs.appendChild(s);
+  });
+}
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderChart(parseInt(btn.dataset.range, 10));
+  });
+});
+renderChart(7);
+
+/* ============================================================
+   Conversaciones (datos de ejemplo)
+   ============================================================ */
+const CONVOS = [
+  { name: 'María Fernanda', num: '+593 99 123 4567', time: '10:42', msgs: [
+    { who: 'in',  t: '09:58', text: 'Hola, buenos días' },
+    { who: 'out', t: '09:58', text: '¡Hola! 😊 Bienvenida. ¿En qué le puedo ayudar?' },
+    { who: 'in',  t: '10:01', text: '¿Tienen disponibilidad para mañana?' },
+    { who: 'out', t: '10:01', text: 'Sí, mañana tenemos 10am, 2pm y 4pm disponibles. ¿Cuál le conviene?' },
+    { who: 'in',  t: '10:40', text: 'A las 2pm por favor' },
+    { who: 'out', t: '10:42', text: '✅ ¡Perfecto! Su cita quedó confirmada para mañana a las 2:00pm. ¡La esperamos!' }
+  ]},
+  { name: '+593 98 765 4321', num: '+593 98 765 4321', time: '09:15', msgs: [
+    { who: 'in',  t: '09:10', text: '¿Cuánto cuesta el servicio?' },
+    { who: 'out', t: '09:10', text: '¡Hola! Con gusto: el servicio tiene un valor de $25. ¿Desea agendar una cita?' },
+    { who: 'in',  t: '09:14', text: 'Lo voy a pensar, gracias' },
+    { who: 'out', t: '09:15', text: '¡Claro, sin problema! Aquí estaré cuando lo necesite 😊' }
+  ]},
+  { name: 'Carlos Andrade', num: '+593 96 222 8890', time: 'Ayer', msgs: [
+    { who: 'in',  t: '18:22', text: 'Necesito cancelar mi cita del viernes' },
+    { who: 'out', t: '18:22', text: 'Entendido. Encontré su cita del viernes a las 11:00am. ¿Confirma que desea cancelarla?' },
+    { who: 'in',  t: '18:25', text: 'Sí, confirmo' },
+    { who: 'out', t: '18:25', text: '✅ Su cita fue cancelada. Cuando desee reagendar, escríbame por aquí.' }
+  ]},
+  { name: 'Vanessa R.', num: '+593 99 888 4433', time: 'Ayer', msgs: [
+    { who: 'in',  t: '14:05', text: 'Hola! ¿Hacen entregas a domicilio?' },
+    { who: 'out', t: '14:05', text: '¡Hola! Sí, hacemos entregas. El tiempo estimado es de 2 días hábiles. ¿Qué producto le interesa?' },
+    { who: 'in',  t: '14:09', text: 'La torta de chocolate' },
+    { who: 'out', t: '14:09', text: '¡Excelente elección! 🎂 La torta de chocolate cuesta $18. ¿Confirmo su pedido?' },
+    { who: 'in',  t: '14:12', text: 'Sí porfa' },
+    { who: 'out', t: '14:12', text: '✅ Pedido confirmado. Le llegará en 2 días hábiles. ¡Gracias por su compra!' }
+  ]},
+  { name: '+593 96 555 1212', num: '+593 96 555 1212', time: 'Lun', msgs: [
+    { who: 'in',  t: '11:30', text: '¿A qué hora abren los sábados?' },
+    { who: 'out', t: '11:30', text: '¡Hola! Los sábados atendemos de 9:00am a 6:00pm. ¿Le agendo una cita?' }
+  ]}
+];
+const convoList = document.getElementById('convo-list');
+const chatPane = document.getElementById('chat-pane');
+const convosBox = document.getElementById('convos-box');
+
+CONVOS.forEach((c, i) => {
+  const item = document.createElement('div');
+  item.className = 'convo-item';
+  const initial = c.name.replace('+', '').charAt(0).toUpperCase();
+  item.innerHTML = `
+    <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(c.name) ? initial : '#'}</div>
+    <div class="convo-info">
+      <div class="c-name">${c.name}</div>
+      <div class="c-last">${c.msgs[c.msgs.length - 1].text}</div>
+    </div>
+    <span class="c-time">${c.time}</span>`;
+  item.addEventListener('click', () => openConvo(i, item));
+  convoList.appendChild(item);
+});
+
+function openConvo(i, item){
+  document.querySelectorAll('.convo-item').forEach(x => x.classList.toggle('active', x === item));
+  const c = CONVOS[i];
+  chatPane.innerHTML = `
+    <div class="chat-header">
+      <button class="back-btn" aria-label="Volver">←</button>
+      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(c.name) ? c.name.charAt(0).toUpperCase() : '#'}</div>
+      <div>
+        <div class="ch-name">${c.name}</div>
+        <div class="ch-num">${c.num}</div>
+      </div>
+    </div>
+    <div class="chat-msgs">
+      ${c.msgs.map(m => `<div class="msg ${m.who}">${m.text}<span class="m-time">${m.t}</span></div>`).join('')}
+    </div>
+    <div class="chat-note">🤖 Tu asistente responde automáticamente. Para intervenir, usa tu panel de Telegram.</div>`;
+  chatPane.querySelector('.back-btn').addEventListener('click', () => {
+    convosBox.classList.remove('show-chat');
+  });
+  convosBox.classList.add('show-chat');
+  const msgs = chatPane.querySelector('.chat-msgs');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+/* ============================================================
+   Pausar / activar bot
+   ============================================================ */
+const pauseToggle = document.getElementById('pause-toggle');
+const pauseMsg = document.getElementById('pause-msg');
+const DEFAULT_PAUSE_MSG = 'En este momento no estamos atendiendo por este medio, volvemos pronto.';
+/* recuerda el mensaje personalizado */
+pauseMsg.value = localStorage.getItem('nexiaPauseMsg') || DEFAULT_PAUSE_MSG;
+function updatePauseUI(){
+  const paused = pauseToggle.checked;
+  const msg = pauseMsg.value.trim() || DEFAULT_PAUSE_MSG;
+  document.getElementById('bot-dot').classList.toggle('paused', paused);
+  document.getElementById('bot-status-text').textContent = paused ? 'Bot pausado' : 'Bot activo';
+  document.getElementById('pause-desc').textContent = paused
+    ? `Pausado. Tus clientes verán: "${msg}"`
+    : 'Tu asistente está respondiendo con normalidad.';
+}
+pauseToggle.addEventListener('change', updatePauseUI);
+pauseMsg.addEventListener('input', () => {
+  localStorage.setItem('nexiaPauseMsg', pauseMsg.value);
+  updatePauseUI();
+});
+</script>
+</body>
+</html>
