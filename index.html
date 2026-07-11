@@ -873,15 +873,27 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
     <div class="testi-track" id="testi-track">
       <div class="testi-card">
         <p class="quote">"Antes perdía citas porque no podía contestar mientras atendía. Ahora el bot agenda solo y yo me entero por Telegram. En el primer mes recuperé lo que pagué."</p>
-        <div class="testi-who"><div class="testi-avatar">M</div><div><div class="name">María V.</div><div class="biz">Peluquería Estilo · Quito</div></div></div>
+        <div class="testi-who"><div class="testi-avatar">A</div><div><div class="name">Andrea M.</div><div class="biz">Nails & Brow Bar · Quito</div></div></div>
       </div>
       <div class="testi-card">
         <p class="quote">"Mis pacientes escriben a cualquier hora y siempre reciben respuesta. Los recordatorios bajaron las citas perdidas casi a cero."</p>
-        <div class="testi-who"><div class="testi-avatar">C</div><div><div class="name">Dr. Carlos A.</div><div class="biz">Consultorio Odontológico · Guayaquil</div></div></div>
+        <div class="testi-who"><div class="testi-avatar">S</div><div><div class="name">Dr. Sebastián V.</div><div class="biz">Clínica Dental Sonríe · Guayaquil</div></div></div>
       </div>
       <div class="testi-card">
         <p class="quote">"Yo no sé nada de tecnología y lo configuré sola en una tarde. Cambio los precios desde Telegram como si le escribiera a un amigo."</p>
         <div class="testi-who"><div class="testi-avatar">P</div><div><div class="name">Paola R.</div><div class="biz">Spa Serenity · Cuenca</div></div></div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Los fines de semana el bot atiende solo mientras yo descanso. Ya no pierdo pedidos por no contestar a tiempo. Valió cada centavo."</p>
+        <div class="testi-who"><div class="testi-avatar">R</div><div><div class="name">Roberto P.</div><div class="biz">Asadero El Rincón · Ambato</div></div></div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Mis pacientes reciben confirmación de cita al instante. Ya no hay confusiones de horario ni llamadas perdidas. El bot maneja todo mejor que yo."</p>
+        <div class="testi-who"><div class="testi-avatar">G</div><div><div class="name">Gabriela L.</div><div class="biz">Centro Psicológico Equilibrio · Quito</div></div></div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Pensé que era complicado pero lo activé en una tarde. Ahora los clientes preguntan precios y disponibilidad solos, sin llamarme a cada rato."</p>
+        <div class="testi-who"><div class="testi-avatar">M</div><div><div class="name">Ing. Marco T.</div><div class="biz">Ferretería Don Marco · Loja</div></div></div>
       </div>
     </div>
   </div>
@@ -1962,34 +1974,33 @@ function initMarquee(id, speed) {
   const track = document.getElementById(id);
   if (!track) return;
 
-  // Desactivar CSS animation
   track.style.animation = 'none';
   track.style.transform = 'translateX(0)';
 
-  // Medir el ancho original ANTES de duplicar
-  // Forzar layout
-  const originalW = track.scrollWidth;
-
-  // Duplicar
+  // Duplicar contenido
   track.innerHTML += track.innerHTML;
 
   let pos = 0;
-  let loopW = originalW;
+  let loopW = 0;
+
+  function measure() {
+    loopW = track.scrollWidth / 2;
+  }
 
   function tick() {
     pos -= speed;
-    if (Math.abs(pos) >= loopW) pos = 0;
+    if (loopW > 0 && Math.abs(pos) >= loopW) pos = 0;
     track.style.transform = `translateX(${pos}px)`;
     requestAnimationFrame(tick);
   }
 
-  // Recalcular en resize
-  window.addEventListener('resize', () => {
-    // Remeasure — después de resize el scrollWidth cambia
-    loopW = track.scrollWidth / 2;
-  });
+  // Doble RAF garantiza que el browser ya hizo layout
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    measure();
+    tick();
+  }));
 
-  tick();
+  window.addEventListener('resize', measure);
 }
 
 initMarquee('testi-track', 0.4);
