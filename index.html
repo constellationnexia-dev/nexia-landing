@@ -396,6 +396,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .plan:hover{transform:translateY(-5px);border-color:rgba(0,255,136,.5)}
 .plan.popular{border:1px solid var(--accent);box-shadow:0 0 24px rgba(0,255,136,.2);animation:popular-pulse 2.5s ease-in-out infinite}
 @keyframes popular-pulse{0%,100%{box-shadow:0 0 24px rgba(0,255,136,.2),0 0 0 0 rgba(0,255,136,0)}50%{box-shadow:0 0 40px rgba(0,255,136,.45),0 0 0 4px rgba(0,255,136,.08)}}
+.plan.selected{border-color:var(--accent);box-shadow:0 0 32px rgba(0,255,136,.35);animation:none}
+.plan.selected:not(.popular){background:linear-gradient(180deg,rgba(0,255,136,.06),var(--card) 50%)}
 .plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04140b;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
 .plan h3{font-size:1.15rem;margin-bottom:4px}
 .plan .who{color:var(--muted);font-size:.78rem;margin-bottom:18px;min-height:2.2em}
@@ -1829,6 +1831,14 @@ document.getElementById('go-signup').addEventListener('click', e => { e.preventD
 
 document.querySelectorAll('.js-login').forEach(b => b.addEventListener('click', openLogin));
 document.querySelectorAll('.js-signup').forEach(b => b.addEventListener('click', () => openWizard(b.dataset.plan)));
+
+// Selección visual de plan
+document.querySelectorAll('.plans-grid .plan').forEach(plan => {
+  plan.addEventListener('click', () => {
+    document.querySelectorAll('.plans-grid .plan').forEach(p => p.classList.remove('selected'));
+    plan.classList.add('selected');
+  });
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
 
 /* Banner */
