@@ -342,6 +342,28 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Ultra personalización: ajusta al detalle cómo trabaja tu asistente. Llena solo lo que necesites y guarda.</p>
     </div>
 
+    <!-- SECCIÓN 0: Información del negocio -->
+    <div class="u-section" id="u-info">
+      <h3>📍 Información del negocio</h3>
+      <div class="u-grid">
+        <div class="field"><label for="u-address">Dirección física</label><input type="text" id="u-address" placeholder="Ej: Av. Principal 123, Quito"></div>
+        <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Hola, bienvenido a..."><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba</p></div>
+      </div>
+      <div class="u-grid">
+        <div class="field"><label for="u-online">¿También atienden online?</label><select id="u-online"><option value="">Selecciona</option><option value="si">Sí</option><option value="no">No</option></select></div>
+        <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
+      </div>
+      <div class="field"><label>Redes sociales y contacto</label>
+        <div class="u-grid" style="margin-top:8px">
+          <input type="text" id="u-ig" placeholder="Instagram (usuario o link)">
+          <input type="text" id="u-fb" placeholder="Facebook (usuario o link)">
+          <input type="text" id="u-tt" placeholder="TikTok (usuario o link)">
+          <input type="url" id="u-web" placeholder="Página web">
+          <input type="email" id="u-email-contact" placeholder="Email de contacto">
+        </div>
+      </div>
+    </div>
+
     <!-- SECCIÓN 1: Servicios y productos (precargado del registro) -->
     <div class="u-section" id="u-items">
       <h3>🛍️ Servicios y productos</h3>
@@ -361,6 +383,12 @@ input[type=checkbox]{accent-color:var(--accent)}
     <!-- SECCIÓN 2: Calendario y citas (solo si tiene servicios) -->
     <div class="u-section" id="u-citas">
       <h3>📅 Calendario y citas</h3>
+      <div class="u-grid">
+        <div class="field"><label for="u-accepts-appt">¿Agendan citas?</label><select id="u-accepts-appt"><option value="si">Sí</option><option value="no">No</option></select></div>
+        <div class="field"><label for="u-accepts-walkin">¿También atienden sin cita?</label><select id="u-accepts-walkin"><option value="">Selecciona</option><option value="si">Sí, sujeto a disponibilidad</option><option value="no">No, solo con cita</option></select></div>
+        <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="">Selecciona</option><option value="si">Sí</option><option value="no">No</option></select></div>
+        <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
+      </div>
       <div class="field">
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
         <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
@@ -825,7 +853,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
+const U_IDS = ['u-address', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
 document.getElementById('u-save').addEventListener('click', async () => {
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -890,6 +918,19 @@ document.getElementById('u-save').addEventListener('click', async () => {
         config,
         payment_methods: data.payMethods,
         appointment_window_days: parseInt(data['u-max-days']) || null,
+        address: data['u-address'] || null,
+        welcome_message: data['u-welcome'] || null,
+        is_online: data['u-online'] === 'si',
+        bot_tone: data['u-tone'] || 'Amigable',
+        social_links: {
+          ig: data['u-ig'] || null, fb: data['u-fb'] || null,
+          tt: data['u-tt'] || null, web: data['u-web'] || null,
+          email: data['u-email-contact'] || null
+        },
+        accepts_appointments: data['u-accepts-appt'] !== 'no',
+        accepts_walkins: data['u-accepts-walkin'] === 'si',
+        accepts_orders: data['u-accepts-orders'] === 'si',
+        appointment_duration: parseInt(data['u-appt-duration']) || null,
       }).eq('id', BIZ_ID);
     } catch(e) { console.error('Supabase sync error:', e); }
   }
@@ -1083,6 +1124,24 @@ function populateFormFromConfig(biz) {
   const pay = cfg.payments   || {};
   const pol = cfg.policies   || {};
   const cst = cfg.custom     || {};
+
+  /* Campos directos del negocio */
+  if (biz.address)         { const el = document.getElementById('u-address');       if(el) el.value = biz.address; }
+  if (biz.welcome_message) { const el = document.getElementById('u-welcome');        if(el) el.value = biz.welcome_message; }
+  if (biz.bot_tone)        { const el = document.getElementById('u-tone');           if(el) el.value = biz.bot_tone; }
+  { const el = document.getElementById('u-online');        if(el) el.value = biz.is_online ? 'si' : 'no'; }
+  { const el = document.getElementById('u-accepts-appt');  if(el) el.value = biz.accepts_appointments === false ? 'no' : 'si'; }
+  { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
+  { const el = document.getElementById('u-accepts-orders');if(el) el.value = biz.accepts_orders ? 'si' : 'no'; }
+  if (biz.appointment_duration) { const el = document.getElementById('u-appt-duration'); if(el) el.value = biz.appointment_duration; }
+  if (biz.social_links) {
+    const sl = biz.social_links;
+    if(sl.ig)    { const el = document.getElementById('u-ig');           if(el) el.value = sl.ig; }
+    if(sl.fb)    { const el = document.getElementById('u-fb');           if(el) el.value = sl.fb; }
+    if(sl.tt)    { const el = document.getElementById('u-tt');           if(el) el.value = sl.tt; }
+    if(sl.web)   { const el = document.getElementById('u-web');          if(el) el.value = sl.web; }
+    if(sl.email) { const el = document.getElementById('u-email-contact');if(el) el.value = sl.email; }
+  }
 
   /* Mapeo directo de claves a IDs del formulario */
   const map = {
