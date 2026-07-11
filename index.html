@@ -399,6 +399,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 @keyframes popular-pulse{0%,100%{box-shadow:0 0 24px rgba(0,255,136,.2),0 0 0 0 rgba(0,255,136,0)}50%{box-shadow:0 0 40px rgba(0,255,136,.45),0 0 0 4px rgba(0,255,136,.08)}}
 .plan.selected{border-color:var(--accent);box-shadow:0 0 32px rgba(0,255,136,.35);animation:none}
 .plan.selected:not(.popular){background:linear-gradient(180deg,rgba(0,255,136,.06),var(--card) 50%)}
+.plan.popular.deselected{animation:none;box-shadow:none;border-color:rgba(0,255,136,.25)}
 .plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04140b;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
 .plan h3{font-size:1.15rem;margin-bottom:4px}
 .plan .who{color:var(--muted);font-size:.78rem;margin-bottom:18px;min-height:2.2em}
@@ -1843,7 +1844,12 @@ document.querySelectorAll('.js-signup').forEach(b => b.addEventListener('click',
 // Selección visual de plan
 document.querySelectorAll('.plans-grid .plan').forEach(plan => {
   plan.addEventListener('click', () => {
-    document.querySelectorAll('.plans-grid .plan').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('.plans-grid .plan').forEach(p => {
+      p.classList.remove('selected');
+      if (p.classList.contains('popular')) {
+        p.classList.toggle('deselected', !p.isSameNode(plan));
+      }
+    });
     plan.classList.add('selected');
   });
 });
