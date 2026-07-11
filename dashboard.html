@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#050508;
@@ -557,8 +558,15 @@ input[type=checkbox]{accent-color:var(--accent)}
 
 <script>
 /* ============================================================
+   SUPABASE
+   ============================================================ */
+const SUPA_URL = 'https://pltngimvnejhkpsdauue.supabase.co';
+const SUPA_KEY = 'sb_publishable_Zr_9mDOwKDeeZSdYOM6LAg_jhfovS4f';
+const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const BIZ_ID = localStorage.getItem('nexiaBusinessId');
+
+/* ============================================================
    Lenguaje dinámico según tipo de organización
-   (elegido en el formulario de personalización)
    ============================================================ */
 const ORG_MAP = {
   negocio:     { label: 'Mi Negocio',      ico: '🏪' },
@@ -574,17 +582,32 @@ document.getElementById('org-ico').textContent = org.ico;
 document.getElementById('org-title').textContent = org.label;
 document.getElementById('org-empty-ico').textContent = org.ico;
 
-/* Nombre del negocio (guardado desde el formulario de personalización) */
+/* Nombre del negocio */
 const bizName = localStorage.getItem('nexiaBizName');
 document.getElementById('biz-sub').textContent = 'Asistente de ' + (bizName || 'tu negocio');
 
-/* Métricas condicionales: solo si el negocio configuró servicios/productos */
+/* Métricas condicionales */
 const svcCount = localStorage.getItem('nexiaSvcCount');
 const prodCount = localStorage.getItem('nexiaProdCount');
 const hasServices = svcCount === null ? true : parseInt(svcCount, 10) > 0;
 const hasProducts = prodCount === null ? true : parseInt(prodCount, 10) > 0;
 if (!hasServices) document.getElementById('metric-services').style.display = 'none';
-if (!hasProducts) document.getElementById('metric-orders').style.display = 'none';
+if (!hasProducts)  document.getElementById('metric-orders').style.display  = 'none';
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const PLAN_PRICES = { starter:29, consultorio:49, negocio:79, empresa:149, premium:249 };
+const PLAN_NAMES  = { starter:'Starter', consultorio:'Consultorio', negocio:'Negocio', empresa:'Empresa', premium:'Premium' };
+
+function formatTime(iso, showHour) {
+  if (!iso) return '';
+  const d = new Date(iso), now = new Date();
+  if (showHour) return d.toLocaleTimeString('es-EC', { hour:'2-digit', minute:'2-digit' });
+  if ((now - d) < 86400000 && now.getDate() === d.getDate()) return d.toLocaleTimeString('es-EC', { hour:'2-digit', minute:'2-digit' });
+  if ((now - d) < 172800000) return 'Ayer';
+  return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+}
 
 /* ============================================================
    Ultra personalización (página Mi Negocio)
@@ -851,56 +874,29 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 });
 
 /* ============================================================
-   Barra de uso del plan
+   GRÁFICA DE ACTIVIDAD
    ============================================================ */
-requestAnimationFrame(() => {
-  setTimeout(() => { document.getElementById('usage-fill').style.width = (1284 / 1500 * 100) + '%'; }, 200);
-});
-
-/* ============================================================
-   Gráfica de actividad (7 / 30 días)
-   ============================================================ */
-const DATA7 = [42, 58, 37, 64, 71, 53, 68];
-const DATA30 = [31, 44, 52, 38, 61, 47, 55, 42, 66, 58, 49, 71, 63, 54, 68, 45, 59, 72, 51, 64, 57, 69, 48, 62, 74, 53, 67, 60, 70, 65];
-const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-function dateInfo(n, i){
-  const d = new Date();
-  d.setDate(d.getDate() - (n - 1 - i));
-  return {
-    short: n === 7 ? WEEKDAYS[d.getDay()] : String(d.getDate()),
-    full: `${WEEKDAYS[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`
-  };
+const WEEKDAYS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function dateInfo(n, i) {
+  const d = new Date(); d.setDate(d.getDate() - (n - 1 - i));
+  return { short: n === 7 ? WEEKDAYS[d.getDay()] : String(d.getDate()), full: `${WEEKDAYS[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}` };
 }
-function renderChart(n){
-  const data = n === 7 ? DATA7 : DATA30;
-  /* escala redondeada para que las líneas guía caigan en 50, 100... */
-  const scaleMax = Math.max(50, Math.ceil(Math.max(...data) / 50) * 50);
-  const bars = document.getElementById('bars');
-  const labs = document.getElementById('bar-labels');
-  const grid = document.getElementById('grid-lines');
-  const tip = document.getElementById('chart-tip');
+function renderChart(n, data) {
+  const scaleMax = Math.max(10, Math.ceil(Math.max(...data, 1) / 10) * 10);
+  const bars = document.getElementById('bars'), labs = document.getElementById('bar-labels'),
+        grid = document.getElementById('grid-lines'), tip = document.getElementById('chart-tip');
   bars.innerHTML = ''; labs.innerHTML = ''; grid.innerHTML = '';
   bars.classList.toggle('dense', n === 30);
-  /* líneas guía horizontales cada 50 unidades */
-  for (let g = 0; g <= scaleMax; g += 50) {
-    const gl = document.createElement('div');
-    gl.className = 'grid-line';
-    gl.style.bottom = (g / scaleMax * 100) + '%';
-    gl.innerHTML = `<span>${g}</span>`;
-    grid.appendChild(gl);
+  const step = Math.max(10, Math.ceil(scaleMax / 4 / 10) * 10);
+  for (let g = 0; g <= scaleMax; g += step) {
+    const gl = document.createElement('div'); gl.className = 'grid-line';
+    gl.style.bottom = (g / scaleMax * 100) + '%'; gl.innerHTML = `<span>${g}</span>`; grid.appendChild(gl);
   }
   data.forEach((v, i) => {
     const info = dateInfo(n, i);
-    const b = document.createElement('div');
-    b.className = 'bar';
-    b.style.height = '4px';
-    /* número encima de cada barra (oculto en vista de 30 días) */
-    const val = document.createElement('span');
-    val.className = 'bar-val';
-    val.textContent = v;
-    b.appendChild(val);
-    /* tooltip con fecha exacta al pasar el mouse */
+    const b = document.createElement('div'); b.className = 'bar'; b.style.height = '4px';
+    const val = document.createElement('span'); val.className = 'bar-val'; val.textContent = v; b.appendChild(val);
     b.addEventListener('mouseenter', () => {
       tip.textContent = `${info.full}: ${v} mensajes`;
       tip.style.left = Math.max(0, Math.min(b.offsetLeft - 40, bars.offsetWidth - 190)) + 'px';
@@ -911,98 +907,145 @@ function renderChart(n){
     bars.appendChild(b);
     requestAnimationFrame(() => requestAnimationFrame(() => { b.style.height = (v / scaleMax * 100) + '%'; }));
     const s = document.createElement('span');
-    /* en 30 días solo se etiqueta 1 de cada 5 para no saturar */
     s.textContent = (n === 7 || i % 5 === 0) ? info.short : '';
     labs.appendChild(s);
   });
 }
+async function loadChart(days) {
+  const DEMO7  = [42,58,37,64,71,53,68];
+  const DEMO30 = [31,44,52,38,61,47,55,42,66,58,49,71,63,54,68,45,59,72,51,64,57,69,48,62,74,53,67,60,70,65];
+  if (!BIZ_ID) { renderChart(days, days === 7 ? DEMO7 : DEMO30); return; }
+  const since = new Date(); since.setDate(since.getDate() - (days - 1)); since.setHours(0,0,0,0);
+  const { data: msgs } = await db.from('messages').select('created_at').eq('business_id', BIZ_ID).gte('created_at', since.toISOString());
+  const buckets = {};
+  for (let i = 0; i < days; i++) { const d = new Date(); d.setDate(d.getDate() - (days-1-i)); buckets[d.toISOString().slice(0,10)] = 0; }
+  (msgs || []).forEach(m => { const day = m.created_at.slice(0,10); if (buckets[day] !== undefined) buckets[day]++; });
+  renderChart(days, Object.values(buckets));
+}
 document.querySelectorAll('.range-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', b === btn));
-    renderChart(parseInt(btn.dataset.range, 10));
+    await loadChart(parseInt(btn.dataset.range, 10));
   });
 });
-renderChart(7);
 
 /* ============================================================
-   Conversaciones (datos de ejemplo)
+   CONVERSACIONES REALES
    ============================================================ */
-const CONVOS = [
-  { name: 'María Fernanda', num: '+593 99 123 4567', time: '10:42', msgs: [
-    { who: 'in',  t: '09:58', text: 'Hola, buenos días' },
-    { who: 'out', t: '09:58', text: '¡Hola! 😊 Bienvenida. ¿En qué le puedo ayudar?' },
-    { who: 'in',  t: '10:01', text: '¿Tienen disponibilidad para mañana?' },
-    { who: 'out', t: '10:01', text: 'Sí, mañana tenemos 10am, 2pm y 4pm disponibles. ¿Cuál le conviene?' },
-    { who: 'in',  t: '10:40', text: 'A las 2pm por favor' },
-    { who: 'out', t: '10:42', text: '✅ ¡Perfecto! Su cita quedó confirmada para mañana a las 2:00pm. ¡La esperamos!' }
-  ]},
-  { name: '+593 98 765 4321', num: '+593 98 765 4321', time: '09:15', msgs: [
-    { who: 'in',  t: '09:10', text: '¿Cuánto cuesta el servicio?' },
-    { who: 'out', t: '09:10', text: '¡Hola! Con gusto: el servicio tiene un valor de $25. ¿Desea agendar una cita?' },
-    { who: 'in',  t: '09:14', text: 'Lo voy a pensar, gracias' },
-    { who: 'out', t: '09:15', text: '¡Claro, sin problema! Aquí estaré cuando lo necesite 😊' }
-  ]},
-  { name: 'Carlos Andrade', num: '+593 96 222 8890', time: 'Ayer', msgs: [
-    { who: 'in',  t: '18:22', text: 'Necesito cancelar mi cita del viernes' },
-    { who: 'out', t: '18:22', text: 'Entendido. Encontré su cita del viernes a las 11:00am. ¿Confirma que desea cancelarla?' },
-    { who: 'in',  t: '18:25', text: 'Sí, confirmo' },
-    { who: 'out', t: '18:25', text: '✅ Su cita fue cancelada. Cuando desee reagendar, escríbame por aquí.' }
-  ]},
-  { name: 'Vanessa R.', num: '+593 99 888 4433', time: 'Ayer', msgs: [
-    { who: 'in',  t: '14:05', text: 'Hola! ¿Hacen entregas a domicilio?' },
-    { who: 'out', t: '14:05', text: '¡Hola! Sí, hacemos entregas. El tiempo estimado es de 2 días hábiles. ¿Qué producto le interesa?' },
-    { who: 'in',  t: '14:09', text: 'La torta de chocolate' },
-    { who: 'out', t: '14:09', text: '¡Excelente elección! 🎂 La torta de chocolate cuesta $18. ¿Confirmo su pedido?' },
-    { who: 'in',  t: '14:12', text: 'Sí porfa' },
-    { who: 'out', t: '14:12', text: '✅ Pedido confirmado. Le llegará en 2 días hábiles. ¡Gracias por su compra!' }
-  ]},
-  { name: '+593 96 555 1212', num: '+593 96 555 1212', time: 'Lun', msgs: [
-    { who: 'in',  t: '11:30', text: '¿A qué hora abren los sábados?' },
-    { who: 'out', t: '11:30', text: '¡Hola! Los sábados atendemos de 9:00am a 6:00pm. ¿Le agendo una cita?' }
-  ]}
-];
 const convoList = document.getElementById('convo-list');
-const chatPane = document.getElementById('chat-pane');
+const chatPane  = document.getElementById('chat-pane');
 const convosBox = document.getElementById('convos-box');
 
-CONVOS.forEach((c, i) => {
-  const item = document.createElement('div');
-  item.className = 'convo-item';
-  const initial = c.name.replace('+', '').charAt(0).toUpperCase();
-  item.innerHTML = `
-    <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(c.name) ? initial : '#'}</div>
-    <div class="convo-info">
-      <div class="c-name">${c.name}</div>
-      <div class="c-last">${c.msgs[c.msgs.length - 1].text}</div>
-    </div>
-    <span class="c-time">${c.time}</span>`;
-  item.addEventListener('click', () => openConvo(i, item));
-  convoList.appendChild(item);
-});
+async function loadConversations() {
+  const { data: convos } = await db
+    .from('conversations').select('id,client_phone,client_name,updated_at')
+    .eq('business_id', BIZ_ID).order('updated_at', { ascending: false }).limit(30);
+  convoList.innerHTML = '';
+  if (!convos || !convos.length) {
+    convoList.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:.82rem;text-align:center">No hay conversaciones aún 💬</div>'; return;
+  }
+  convos.forEach(c => {
+    const name = c.client_name || c.client_phone;
+    const item = document.createElement('div'); item.className = 'convo-item';
+    item.innerHTML = `
+      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div class="convo-info"><div class="c-name">${name}</div><div class="c-last">Toca para ver la conversación</div></div>
+      <span class="c-time">${formatTime(c.updated_at)}</span>`;
+    item.addEventListener('click', () => openConvo(c, item));
+    convoList.appendChild(item);
+  });
+}
 
-function openConvo(i, item){
+async function openConvo(c, item) {
   document.querySelectorAll('.convo-item').forEach(x => x.classList.toggle('active', x === item));
-  const c = CONVOS[i];
+  const { data: msgs } = await db.from('messages').select('role,content,created_at')
+    .eq('conversation_id', c.id).order('created_at', { ascending: true });
+  const name = c.client_name || c.client_phone;
   chatPane.innerHTML = `
     <div class="chat-header">
       <button class="back-btn" aria-label="Volver">←</button>
-      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(c.name) ? c.name.charAt(0).toUpperCase() : '#'}</div>
-      <div>
-        <div class="ch-name">${c.name}</div>
-        <div class="ch-num">${c.num}</div>
-      </div>
+      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div>
     </div>
     <div class="chat-msgs">
-      ${c.msgs.map(m => `<div class="msg ${m.who}">${m.text}<span class="m-time">${m.t}</span></div>`).join('')}
+      ${(msgs||[]).map(m=>`<div class="msg ${m.role==='user'?'in':'out'}">${m.content.replace(/</g,'&lt;').replace(/\n/g,'<br>')}<span class="m-time">${formatTime(m.created_at,true)}</span></div>`).join('')||'<div style="color:var(--muted);text-align:center;padding:20px;font-size:.82rem">Sin mensajes</div>'}
     </div>
     <div class="chat-note">🤖 Tu asistente responde automáticamente. Para intervenir, usa tu panel de Telegram.</div>`;
-  chatPane.querySelector('.back-btn').addEventListener('click', () => {
-    convosBox.classList.remove('show-chat');
-  });
+  chatPane.querySelector('.back-btn').addEventListener('click', () => convosBox.classList.remove('show-chat'));
   convosBox.classList.add('show-chat');
-  const msgs = chatPane.querySelector('.chat-msgs');
-  msgs.scrollTop = msgs.scrollHeight;
+  chatPane.querySelector('.chat-msgs').scrollTop = 99999;
 }
+
+function renderDemoConvos() {
+  const demos = [
+    {id:'d1',client_name:'María Fernanda',client_phone:'+593 99 123 4567',updated_at:new Date().toISOString(),
+     msgs:[{role:'user',content:'¿Tienen disponibilidad mañana?',created_at:new Date().toISOString()},{role:'assistant',content:'¡Hola! Sí, tenemos 10am, 2pm y 4pm. ¿Cuál le conviene?',created_at:new Date().toISOString()}]},
+    {id:'d2',client_name:'Carlos Andrade',client_phone:'+593 96 222 8890',updated_at:new Date(Date.now()-86400000).toISOString(),
+     msgs:[{role:'user',content:'Necesito cancelar mi cita del viernes',created_at:new Date().toISOString()},{role:'assistant',content:'✅ Cita cancelada. Cuando desee reagendar escríbame aquí.',created_at:new Date().toISOString()}]}
+  ];
+  convoList.innerHTML = '';
+  demos.forEach(c => {
+    const name = c.client_name; const last = c.msgs[c.msgs.length-1];
+    const item = document.createElement('div'); item.className = 'convo-item';
+    item.innerHTML = `<div class="avatar">${name.charAt(0)}</div><div class="convo-info"><div class="c-name">${name}</div><div class="c-last">${last.content.slice(0,60)}</div></div><span class="c-time">${formatTime(c.updated_at)}</span>`;
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.convo-item').forEach(x => x.classList.toggle('active', x === item));
+      chatPane.innerHTML = `<div class="chat-header"><button class="back-btn">←</button><div class="avatar">${name.charAt(0)}</div><div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div></div><div class="chat-msgs">${c.msgs.map(m=>`<div class="msg ${m.role==='user'?'in':'out'}">${m.content}<span class="m-time">${formatTime(m.created_at,true)}</span></div>`).join('')}</div><div class="chat-note">🤖 Datos de ejemplo — conecta tu negocio para ver chats reales.</div>`;
+      chatPane.querySelector('.back-btn').addEventListener('click', () => convosBox.classList.remove('show-chat'));
+      convosBox.classList.add('show-chat'); chatPane.querySelector('.chat-msgs').scrollTop = 99999;
+    });
+    convoList.appendChild(item);
+  });
+}
+
+/* ============================================================
+   CARGA INICIAL DESDE SUPABASE
+   ============================================================ */
+async function loadDashboard() {
+  if (!BIZ_ID) {
+    await loadChart(7); renderDemoConvos();
+    requestAnimationFrame(() => setTimeout(() => { document.getElementById('usage-fill').style.width = '85.6%'; }, 200));
+    return;
+  }
+  try {
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }] = await Promise.all([
+      db.from('businesses').select('business_name,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders').eq('id', BIZ_ID).single(),
+      db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
+      db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
+      db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
+      db.from('message_counters').select('count').eq('business_id', BIZ_ID).eq('month', currentMonth).maybeSingle()
+    ]);
+    if (biz) {
+      document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
+      const used = biz.messages_used || 0, limit = biz.plan_messages_limit || 500;
+      document.querySelector('.u-nums').innerHTML = `<b>${used.toLocaleString('es-EC')}</b> / ${limit.toLocaleString('es-EC')}`;
+      document.querySelector('.usage-note').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} · Mensajes extra: $0,05 c/u.`;
+      requestAnimationFrame(() => setTimeout(() => { document.getElementById('usage-fill').style.width = Math.min(100, used/limit*100) + '%'; }, 200));
+      const paused = !biz.bot_active;
+      document.getElementById('bot-dot').classList.toggle('paused', paused);
+      document.getElementById('bot-status-text').textContent = paused ? 'Bot pausado' : 'Bot activo';
+      document.getElementById('pause-toggle').checked = paused;
+      if (!biz.accepts_appointments) document.getElementById('metric-services').style.display = 'none';
+      if (!biz.accepts_orders) document.getElementById('metric-orders').style.display = 'none';
+      document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
+      const msgCount = counter?.count || used;
+      const metrics = document.querySelectorAll('.metric .m-value');
+      if (metrics[0]) metrics[0].textContent = msgCount.toLocaleString('es-EC');
+      if (metrics[1]) metrics[1].textContent = (clientCount||0).toLocaleString('es-EC');
+      const mv2 = document.querySelector('#metric-services .m-value'), mv3 = document.querySelector('#metric-orders .m-value');
+      if (mv2) mv2.textContent = apptCount || 0;
+      if (mv3) mv3.textContent = orderCount || 0;
+      document.querySelector('.pause-stat .ps-value').textContent = '—';
+    }
+    await Promise.all([loadChart(7), loadConversations()]);
+  } catch(err) {
+    console.error('Dashboard error:', err);
+    await loadChart(7); renderDemoConvos();
+  }
+}
+loadDashboard();
 
 /* ============================================================
    Pausar / activar bot
@@ -1021,7 +1064,12 @@ function updatePauseUI(){
     ? `Pausado. Tus clientes verán: "${msg}"`
     : 'Tu asistente está respondiendo con normalidad.';
 }
-pauseToggle.addEventListener('change', updatePauseUI);
+pauseToggle.addEventListener('change', async () => {
+  updatePauseUI();
+  if (BIZ_ID) {
+    await db.from('businesses').update({ bot_active: !pauseToggle.checked }).eq('id', BIZ_ID);
+  }
+});
 pauseMsg.addEventListener('input', () => {
   localStorage.setItem('nexiaPauseMsg', pauseMsg.value);
   updatePauseUI();
