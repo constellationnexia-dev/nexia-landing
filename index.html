@@ -1958,57 +1958,42 @@ document.querySelectorAll('.faq-item').forEach(item => {
 /* ============================================================
    Marquees (loop infinito sin salto con JS)
    ============================================================ */
-// Testimonios: JS loop sin salto
-(function initTestiMarquee() {
-  const track = document.getElementById('testi-track');
+function initMarquee(id, speed) {
+  const track = document.getElementById(id);
   if (!track) return;
-  track.innerHTML += track.innerHTML;
+
+  // Desactivar CSS animation
   track.style.animation = 'none';
-  const speed = 0.4;
-  let pos = 0;
-  let halfW = 0;
-  function getHalf() { halfW = track.scrollWidth / 2; }
-  function tick() {
-    pos -= speed;
-    if (Math.abs(pos) >= halfW) pos = 0;
-    track.style.transform = `translateX(${pos}px)`;
-    requestAnimationFrame(tick);
-  }
-  setTimeout(() => { getHalf(); tick(); }, 100);
-  window.addEventListener('resize', getHalf);
-})();
+  track.style.transform = 'translateX(0)';
 
-// Logo marquee: JS loop para evitar el salto visual del reset CSS
-(function initLogoMarquee() {
-  const wrap = document.querySelector('.logo-marquee-wrap');
-  const track = document.getElementById('logo-marquee');
-  if (!track || !wrap) return;
+  // Medir el ancho original ANTES de duplicar
+  // Forzar layout
+  const originalW = track.scrollWidth;
 
-  // Duplicar contenido
+  // Duplicar
   track.innerHTML += track.innerHTML;
 
-  // Desactivar animación CSS
-  track.style.animation = 'none';
-
-  const speed = 0.5; // px por frame
   let pos = 0;
-  let halfW = 0;
-
-  function getHalf() {
-    halfW = track.scrollWidth / 2;
-  }
+  let loopW = originalW;
 
   function tick() {
     pos -= speed;
-    if (Math.abs(pos) >= halfW) pos = 0;
+    if (Math.abs(pos) >= loopW) pos = 0;
     track.style.transform = `translateX(${pos}px)`;
     requestAnimationFrame(tick);
   }
 
-  // Esperar a que cargue para medir bien el ancho
-  setTimeout(() => { getHalf(); tick(); }, 100);
-  window.addEventListener('resize', getHalf);
-})();
+  // Recalcular en resize
+  window.addEventListener('resize', () => {
+    // Remeasure — después de resize el scrollWidth cambia
+    loopW = track.scrollWidth / 2;
+  });
+
+  tick();
+}
+
+initMarquee('testi-track', 0.4);
+initMarquee('logo-marquee', 0.5);
 
 /* ============================================================
    Contador de mensajes "en vivo"
