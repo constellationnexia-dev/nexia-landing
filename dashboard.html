@@ -202,7 +202,8 @@ input[type=checkbox]{accent-color:var(--accent)}
 .svc-chks label:hover{border-color:rgba(0,255,136,.5)}
 .svc-chks label:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(0,255,136,.08)}
 .svc-chks label:has(input:checked)::before{content:'✓';font-weight:700}
-.save-bar{display:flex;align-items:center;gap:14px;position:sticky;bottom:14px;background:rgba(5,5,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:12px 16px;z-index:5}
+.save-bar{display:none;align-items:center;gap:14px;position:sticky;bottom:14px;background:rgba(5,5,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:12px 16px;z-index:5}
+.save-bar.dirty{display:flex}
 .btn-save{background:var(--accent);color:#04140b;border:none;border-radius:11px;padding:12px 28px;font-weight:700;font-family:var(--font-body);font-size:.9rem;cursor:pointer;box-shadow:0 0 18px rgba(0,255,136,.3);transition:all .3s}
 .btn-save:hover{box-shadow:0 0 30px rgba(0,255,136,.55);transform:translateY(-1px)}
 .save-note{color:var(--accent);font-size:.82rem;opacity:0;transition:opacity .3s}
@@ -616,8 +617,12 @@ document.getElementById('u-citas').style.display = hasServices ? 'block' : 'none
 document.getElementById('u-pedidos').style.display = hasProducts ? 'block' : 'none';
 if (!hasServices && !hasProducts) {
   document.getElementById('u-empty').style.display = 'block';
-  document.getElementById('u-save-bar').style.display = 'none';
 }
+
+/* ── Dirty tracking ── */
+const saveBar = document.getElementById('u-save-bar');
+function markDirty()   { saveBar.classList.add('dirty'); }
+function unmarkDirty() { saveBar.classList.remove('dirty'); }
 
 /* Delivery según modalidad del negocio: online no tiene retiro en local */
 const bizMode = localStorage.getItem('nexiaMode');
@@ -647,13 +652,14 @@ function addItemRow(container, it, timePh){
   card.querySelector('.it-price').value = it.price || '';
   card.querySelector('.it-time').value = it.time || '';
   card.querySelector('.it-desc').value = it.desc || '';
-  card.querySelector('.item-del').addEventListener('click', () => card.remove());
+  card.querySelector('.item-del').addEventListener('click', () => { card.remove(); markDirty(); });
+  card.querySelectorAll('input').forEach(inp => inp.addEventListener('input', markDirty));
   container.appendChild(card);
 }
 savedSvcs.forEach(it => addItemRow(itemsSvc, it, 'Duración'));
 savedProds.forEach(it => addItemRow(itemsProd, it, 'Entrega'));
-document.getElementById('add-item-svc').addEventListener('click', () => addItemRow(itemsSvc, {}, 'Duración'));
-document.getElementById('add-item-prod').addEventListener('click', () => addItemRow(itemsProd, {}, 'Entrega'));
+document.getElementById('add-item-svc').addEventListener('click', () => { addItemRow(itemsSvc, {}, 'Duración'); markDirty(); });
+document.getElementById('add-item-prod').addEventListener('click', () => { addItemRow(itemsProd, {}, 'Entrega'); markDirty(); });
 function collectItems(container){
   return [...container.querySelectorAll('.item-card')].map(c => ({
     name: c.querySelector('.it-name').value.trim(),
@@ -805,7 +811,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 
 /* Guardar y cargar */
 const U_IDS = ['u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude'];
-document.getElementById('u-save').addEventListener('click', () => {
+document.getElementById('u-save').addEventListener('click', async () => {
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
   data.profs = collectProfs();
@@ -818,17 +824,31 @@ document.getElementById('u-save').addEventListener('click', () => {
     return { name: row.querySelector('.pay-name').textContent, mode: sel ? sel.value : '', pct: pctEl ? pctEl.value : '' };
   });
   localStorage.setItem('nexiaUltra', JSON.stringify(data));
-  /* guarda también los servicios/productos editados */
   const svcs = collectItems(itemsSvc), prods = collectItems(itemsProd);
   localStorage.setItem('nexiaServices', JSON.stringify(svcs));
   localStorage.setItem('nexiaProducts', JSON.stringify(prods));
   localStorage.setItem('nexiaSvcCount', svcs.length);
   localStorage.setItem('nexiaProdCount', prods.length);
-  /* refresca la lista de pagos y los profesionales con los items actualizados */
+  /* Sync Supabase services & products */
+  if (BIZ_ID) {
+    try {
+      await db.from('services').delete().eq('business_id', BIZ_ID);
+      if (svcs.length) await db.from('services').insert(svcs.map(s => ({
+        business_id: BIZ_ID, name: s.name, description: s.desc || null,
+        price: parseFloat(s.price) || null, duration: parseInt(s.time) || null, is_active: true
+      })));
+      await db.from('products').delete().eq('business_id', BIZ_ID);
+      if (prods.length) await db.from('products').insert(prods.map(p => ({
+        business_id: BIZ_ID, name: p.name, description: p.desc || null,
+        price: parseFloat(p.price) || null, is_available: true
+      })));
+    } catch(e) { console.error('Supabase sync error:', e); }
+  }
   const freshNames = { svcs: svcs.map(x => x.name), prods: prods.map(x => x.name) };
   chipNames = [...freshNames.svcs, ...freshNames.prods].filter(Boolean).slice(0, 30);
   buildPayList(data.payPlan, freshNames);
   renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), data.profs);
+  unmarkDirty();
   const note = document.getElementById('u-save-note');
   note.style.opacity = '1';
   setTimeout(() => { note.style.opacity = '0'; }, 2500);
@@ -852,6 +872,12 @@ document.getElementById('u-save').addEventListener('click', () => {
   }
   buildPayList(data.payPlan || null);
   [uBreak, uReminder, uCancel, dmSelect, pmOtro].forEach(el => el.dispatchEvent(new Event('change')));
+  /* Después de cargar, enganchar dirty tracking a todos los campos del form */
+  const uPage = document.getElementById('page-org');
+  uPage.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', markDirty);
+    el.addEventListener('change', markDirty);
+  });
 })();
 
 /* Confirmación de cierre de sesión */
