@@ -1958,9 +1958,25 @@ document.querySelectorAll('.faq-item').forEach(item => {
 /* ============================================================
    Marquees (loop infinito sin salto con JS)
    ============================================================ */
-// Testimonios: CSS animation (ya funciona bien)
-const testi = document.getElementById('testi-track');
-if (testi) testi.innerHTML += testi.innerHTML;
+// Testimonios: JS loop sin salto
+(function initTestiMarquee() {
+  const track = document.getElementById('testi-track');
+  if (!track) return;
+  track.innerHTML += track.innerHTML;
+  track.style.animation = 'none';
+  const speed = 0.4;
+  let pos = 0;
+  let halfW = 0;
+  function getHalf() { halfW = track.scrollWidth / 2; }
+  function tick() {
+    pos -= speed;
+    if (Math.abs(pos) >= halfW) pos = 0;
+    track.style.transform = `translateX(${pos}px)`;
+    requestAnimationFrame(tick);
+  }
+  setTimeout(() => { getHalf(); tick(); }, 100);
+  window.addEventListener('resize', getHalf);
+})();
 
 // Logo marquee: JS loop para evitar el salto visual del reset CSS
 (function initLogoMarquee() {
