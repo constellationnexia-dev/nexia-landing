@@ -904,8 +904,8 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 <!-- SECCIÓN 12: TECNOLOGÍA -->
 <section id="tecnologia">
   <div class="container center">
-    <h2 class="reveal">Stack de clase empresarial. Precio de startup.</h2>
-    <p class="section-sub reveal reveal-d1">Las mismas tecnologías que usan las empresas más grandes — ahora al alcance de tu negocio.</p>
+    <h2 class="reveal">Las tecnologías de las empresas de clase mundial — ahora en tu negocio.</h2>
+    <p class="section-sub reveal reveal-d1">Stack de clase empresarial. Precios que se adaptan a ti.</p>
     <div class="tech-known">
       <div class="tech-card reveal"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp" title="WhatsApp" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>El canal que tus clientes ya usan todos los días</p></div>
       <div class="tech-card reveal reveal-d1"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/googlecalendar/4285F4" alt="Google Calendar" title="Google Calendar" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>La agenda en la que millones de personas confían</p></div>
@@ -917,7 +917,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       <div class="tech-card reveal reveal-d2"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/elevenlabs/FFFFFF" alt="ElevenLabs" title="ElevenLabs" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>Respuestas de voz naturales e indistinguibles de un humano</p></div>
       <div class="tech-card reveal reveal-d3"><div class="t-logo"><img class="brand-logo" src="https://cdn.simpleicons.org/twilio/F22F46" alt="Twilio" title="Twilio" loading="lazy" onerror="this.replaceWith(this.alt)"></div><p>Infraestructura de comunicaciones usada por millones de empresas</p></div>
     </div>
-    <p class="tech-close reveal">"No construimos desde cero — integramos lo mejor que existe para darte un producto probado, estable y de clase mundial."</p>
+    <p class="tech-close reveal">"Integramos lo mejor que existe para darte un producto probado, estable y de clase mundial."</p>
   </div>
   <div class="logo-marquee-wrap reveal">
     <div class="logo-marquee" id="logo-marquee">
@@ -1956,12 +1956,43 @@ document.querySelectorAll('.faq-item').forEach(item => {
 });
 
 /* ============================================================
-   Marquees (duplicar contenido para loop perfecto)
+   Marquees (loop infinito sin salto con JS)
    ============================================================ */
-['testi-track', 'logo-marquee'].forEach(id => {
-  const t = document.getElementById(id);
-  if (t) t.innerHTML += t.innerHTML;
-});
+// Testimonios: CSS animation (ya funciona bien)
+const testi = document.getElementById('testi-track');
+if (testi) testi.innerHTML += testi.innerHTML;
+
+// Logo marquee: JS loop para evitar el salto visual del reset CSS
+(function initLogoMarquee() {
+  const wrap = document.querySelector('.logo-marquee-wrap');
+  const track = document.getElementById('logo-marquee');
+  if (!track || !wrap) return;
+
+  // Duplicar contenido
+  track.innerHTML += track.innerHTML;
+
+  // Desactivar animación CSS
+  track.style.animation = 'none';
+
+  const speed = 0.5; // px por frame
+  let pos = 0;
+  let halfW = 0;
+
+  function getHalf() {
+    halfW = track.scrollWidth / 2;
+  }
+
+  function tick() {
+    pos -= speed;
+    if (Math.abs(pos) >= halfW) pos = 0;
+    track.style.transform = `translateX(${pos}px)`;
+    requestAnimationFrame(tick);
+  }
+
+  // Esperar a que cargue para medir bien el ancho
+  setTimeout(() => { getHalf(); tick(); }, 100);
+  window.addEventListener('resize', getHalf);
+})();
 
 /* ============================================================
    Contador de mensajes "en vivo"
