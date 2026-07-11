@@ -1876,10 +1876,16 @@ document.getElementById('login-form').addEventListener('submit', e => {
   localStorage.setItem('nexiaSession', '1');
   window.location.href = 'dashboard.html'; /* demo: entra directo al panel */
 });
-/* Sesión iniciada: el navbar deja de mostrar crear cuenta / iniciar sesión */
+/* Sesión iniciada: ocultar login/signup y convertir botones de planes en "Ir a mi panel" */
 if (localStorage.getItem('nexiaSession') === '1') {
   document.querySelectorAll('.nav-right .js-login, .nav-right .js-signup, footer .js-login').forEach(el => { el.style.display = 'none'; });
   document.getElementById('nav-panel').style.display = 'inline-block';
+  // Botones "Empezar" en la sección de planes → redirigen al panel
+  document.querySelectorAll('.js-signup').forEach(el => {
+    el.textContent = 'Ir a mi panel';
+    el.classList.remove('js-signup');
+    el.onclick = () => { window.location.href = 'dashboard.html'; };
+  });
 }
 /* Tipo de organización → cambia el lenguaje del dashboard */
 document.querySelectorAll('input[name=org]').forEach(r => r.addEventListener('change', () => {
