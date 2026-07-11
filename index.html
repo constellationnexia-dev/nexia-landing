@@ -394,9 +394,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .plans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px;align-items:stretch}
 .plan{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 20px;display:flex;flex-direction:column;transition:all .35s ease-out;position:relative}
 .plan:hover{transform:translateY(-5px);border-color:rgba(0,255,136,.5)}
-.plan.popular{border:1px solid var(--accent);box-shadow:0 0 30px rgba(0,255,136,.18)}
-.plan.popular::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);padding:1px;background:linear-gradient(120deg,var(--accent),var(--accent2),var(--accent));background-size:300% 100%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:border-glow 4s linear infinite;pointer-events:none}
-@keyframes border-glow{to{background-position:300% 0}}
+.plan.popular{border:1px solid var(--accent);box-shadow:0 0 24px rgba(0,255,136,.2);animation:popular-pulse 2.5s ease-in-out infinite}
+@keyframes popular-pulse{0%,100%{box-shadow:0 0 24px rgba(0,255,136,.2),0 0 0 0 rgba(0,255,136,0)}50%{box-shadow:0 0 40px rgba(0,255,136,.45),0 0 0 4px rgba(0,255,136,.08)}}
 .plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04140b;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
 .plan h3{font-size:1.15rem;margin-bottom:4px}
 .plan .who{color:var(--muted);font-size:.78rem;margin-bottom:18px;min-height:2.2em}
