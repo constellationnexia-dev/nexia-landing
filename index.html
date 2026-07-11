@@ -106,11 +106,12 @@ body.banner-hidden nav{top:0}
 .modal.wide .plan-option .po-feats li{font-size:clamp(.78rem,.85vw,.88rem);padding-left:16px}
 .plan-option.popular{border-color:rgba(0,255,136,.5)}
 .plan-option.popular .ppop{background:var(--accent);color:#04140b;padding:2px 9px;border-radius:100px;font-size:.62rem}
-.modal.wide .plan-option.popular{border-color:var(--accent);background:linear-gradient(180deg,rgba(0,255,136,.07),var(--card) 45%);transform:translateY(-5px);animation:pro-glow 3s ease-in-out infinite}
+.modal.wide .plan-option.popular{border-color:rgba(0,255,136,.6);background:linear-gradient(180deg,rgba(0,255,136,.04),var(--card) 50%);transform:translateY(-3px);animation:pro-glow 3s ease-in-out infinite}
 @keyframes pro-glow{
-  0%,100%{box-shadow:0 0 16px rgba(0,255,136,.18)}
-  50%{box-shadow:0 0 32px rgba(0,255,136,.35)}
+  0%,100%{box-shadow:0 0 10px rgba(0,255,136,.1)}
+  50%{box-shadow:0 0 20px rgba(0,255,136,.22)}
 }
+.modal.wide .plan-option.popular.deselected{animation:none;transform:none;border-color:rgba(0,255,136,.3);background:var(--card)}
 .modal.wide #to-pay{max-width:430px;margin:26px auto 0;display:block;padding:16px 28px;font-size:1.02rem}
 @keyframes modal-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .modal-tabs{display:flex;gap:6px;background:var(--card);border-radius:11px;padding:5px;margin-bottom:24px}
@@ -1392,7 +1393,14 @@ PLANS.forEach(p => {
 });
 function selectPlan(id){
   selectedPlan = PLANS.find(p => p.id === id);
-  document.querySelectorAll('.plan-option').forEach(o => o.classList.toggle('selected', o.dataset.plan === id));
+  document.querySelectorAll('.plan-option').forEach(o => {
+    const isSelected = o.dataset.plan === id;
+    o.classList.toggle('selected', isSelected);
+    // Si el popular no está seleccionado, quitar animación
+    if (o.classList.contains('popular')) {
+      o.classList.toggle('deselected', !isSelected);
+    }
+  });
   document.getElementById('to-pay').disabled = false;
 }
 document.getElementById('to-pay').addEventListener('click', () => { if (selectedPlan) goStep(2); });
