@@ -505,8 +505,10 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
   .plans-grid{grid-template-columns:1fr}
   .compare-table th,.compare-table td{padding:13px 10px;font-size:.83rem}
   .footer-grid{grid-template-columns:1fr}
-  #promo-banner{font-size:.76rem;padding:8px 36px}
-  nav{padding:12px 16px}
+  #promo-banner{font-size:.75rem;padding:7px 36px}
+  #promo-banner .banner-full{display:none}
+  #promo-banner .banner-short{display:inline}
+  nav{padding:12px 16px;top:34px}
   .logo{font-size:1rem}
   .nav-call{display:none}
   .nav-right{gap:12px}
@@ -517,7 +519,8 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 
 <!-- BANNER OFERTA -->
 <div id="promo-banner">
-  ⚡ Oferta de lanzamiento — Primer mes desde $29. Solo por tiempo limitado.
+  <span class="banner-full">⚡ Oferta de lanzamiento — Primer mes desde $29. Solo por tiempo limitado.</span>
+  <span class="banner-short">⚡ Primer mes desde $29</span>
   <button class="close-banner" onclick="closeBanner()" aria-label="Cerrar">✕</button>
 </div>
 
