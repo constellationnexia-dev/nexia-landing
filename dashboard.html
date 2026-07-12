@@ -952,12 +952,16 @@ const TEMPLATES = {
 };
 
 const TPL_LABELS = {
-  'u-bizname': 'Nombre del negocio', 'u-city': 'Ciudad', 'u-online': 'Modalidad',
-  'u-tone': 'Tono', 'u-address': 'Dirección', 'u-desc': 'Descripción',
+  'u-bizname': 'Nombre del negocio', 'u-city': 'Ciudad', 'u-online': 'Modalidad de atención',
+  'u-tone': 'Tono del asistente', 'u-address': 'Dirección', 'u-desc': 'Descripción',
   'u-welcome': 'Mensaje de bienvenida', 'u-extra-info': 'Información adicional',
   'u-warranty': 'Garantía', 'u-noshow': 'Política de no-show',
   'u-rude': 'Respuesta a irrespetuosos', 'u-appt-duration': 'Duración cita (min)',
   'u-max-days': 'Días máx. de anticipación', 'u-min-hours': 'Horas mínimas anticipación',
+};
+const TPL_VALUE_MAP = {
+  'only': 'Solo online', 'si': 'Presencial y online', 'no': 'Solo presencial',
+  'Formal': 'Formal (usted, profesional)', 'Amigable': 'Amigable (tú, cercano)',
 };
 const TPL_TITLES = { viajes: '✈️ Ejemplo: Agencia de Viajes', peluqueria: '✂️ Ejemplo: Peluquería / Estética' };
 
@@ -968,9 +972,10 @@ function openTemplatePreview(type) {
   const body = document.getElementById('tpl-modal-body');
   body.innerHTML = Object.entries(tpl).map(([id, val]) => {
     const label = TPL_LABELS[id] || id;
+    const display = TPL_VALUE_MAP[val] || val;
     return `<div style="background:var(--bg2);border-radius:10px;padding:12px 14px">
       <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${label}</div>
-      <div style="color:var(--text);line-height:1.5">${val}</div>
+      <div style="color:var(--text);line-height:1.5">${display}</div>
     </div>`;
   }).join('');
   document.getElementById('tpl-modal').style.display = 'block';
