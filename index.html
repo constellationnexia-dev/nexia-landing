@@ -535,6 +535,8 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
 </head>
 <body>
 
@@ -1310,9 +1312,6 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       </ul>
       <button class="btn btn-primary" style="width:100%" onclick="calStep2()">Continuar →</button>
     </div>
-    <div id="cal-step2" style="display:none">
-      <iframe id="cal-frame" src="" title="Calendario de citas"></iframe>
-    </div>
   </div>
 </div>
 
@@ -1542,11 +1541,12 @@ function closeCalModal(){
   if (!authModal.classList.contains('open')) document.body.style.overflow = '';
 }
 function calStep2(){
-  document.getElementById('cal-step1').style.display = 'none';
-  document.getElementById('cal-step2').style.display = 'block';
-  calBox.classList.add('expanded');
-  const f = document.getElementById('cal-frame');
-  if (!f.src) f.src = CALENDLY_URL + (CALENDLY_URL.includes('?') ? '&' : '?') + 'hide_gdpr_banner=1';
+  closeCalModal();
+  if (typeof Calendly !== 'undefined') {
+    Calendly.initPopupWidget({ url: CALENDLY_URL });
+  } else {
+    window.open(CALENDLY_URL, '_blank');
+  }
 }
 calModal.addEventListener('click', e => { if (e.target === calModal) closeCalModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCalModal(); });
