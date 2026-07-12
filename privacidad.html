@@ -82,6 +82,16 @@ footer{
 footer a{color:var(--muted)}
 footer a:hover{color:var(--accent)}
 </style>
+<script>
+(function(){
+  const THEMES={purple:{a:'#A855F7',b:'rgba(168,85,247,.06)'},galaxy:{a:'#C77DFF',b:'rgba(199,125,255,.06)'},green:{a:'#00FF88',b:'rgba(0,255,136,.06)'},acid:{a:'#4BFF3C',b:'rgba(75,255,60,.06)'},cyan:{a:'#00E5FF',b:'rgba(0,229,255,.06)'},night:{a:'#6366F1',b:'rgba(99,102,241,.06)'},dusk:{a:'#7A68B5',b:'rgba(122,104,181,.06)'},red:{a:'#FF2E63',b:'rgba(255,46,99,.06)'},rose:{a:'#FF3399',b:'rgba(255,51,153,.06)'},mono:{a:'#FFFFFF',b:'rgba(255,255,255,.06)'},noir:{a:'#F2F2F2',b:'rgba(242,242,242,.04)'}};
+  const t=THEMES[localStorage.getItem('nexiaTheme')]||THEMES.purple;
+  document.documentElement.style.setProperty('--accent',t.a);
+  const s=document.createElement('style');
+  s.textContent=`.highlight{background:${t.b}!important}`;
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 
