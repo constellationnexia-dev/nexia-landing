@@ -249,7 +249,10 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .cal-list li:last-child{border-bottom:none}
 .cal-list li::before{content:'✓';position:absolute;left:4px;color:var(--accent);font-weight:700}
 #cal-frame{width:100%;height:min(72vh,620px);border:none;border-radius:10px;background:#fff}
-.cal-disabled{opacity:.45;pointer-events:none;cursor:not-allowed;box-shadow:none!important}
+.cal-at-limit{opacity:.75;font-style:italic}
+.cal-citas-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem;color:#D6D6E0}
+.cal-citas-item:last-child{border-bottom:none}
+.cal-citas-item .cal-num{width:26px;height:26px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
 .chk-row{display:flex;gap:16px;flex-wrap:wrap}
 .chk-row label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.86rem;cursor:pointer}
 .chk-row input,.day-row input[type=checkbox]{accent-color:var(--accent)}
@@ -1316,6 +1319,12 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
     <div id="cal-step2" style="display:none">
       <div id="cal-widget" style="min-width:320px;height:min(70vh,620px)"></div>
     </div>
+    <div id="cal-step-list" style="display:none">
+      <h3>Tus citas agendadas</h3>
+      <p class="cal-intro">Has usado todas tus citas disponibles.</p>
+      <div id="cal-citas-list" style="margin:16px 0"></div>
+      <p class="cal-intro" style="margin-top:4px;font-size:.82rem">¿Necesitas reagendar? Escríbenos a <strong>constellationnexia@gmail.com</strong></p>
+    </div>
   </div>
 </div>
 
@@ -1527,15 +1536,32 @@ if (brandLine) {
 }
 
 /* ============================================================
-   Agendar cita: modal en dos pasos + límite de 2 reservas reales
+   Agendar cita: modal en dos pasos + límite de 3 reservas reales
    ============================================================ */
-const MAX_CITAS = 2;
+const MAX_CITAS = 3;
 const calModal = document.getElementById('cal-modal');
 const calBox = document.getElementById('cal-box');
-function citasCount(){ return parseInt(localStorage.getItem('nexiaCitas') || '0', 10); }
+function getCitasData(){ return JSON.parse(localStorage.getItem('nexiaCitasData') || '[]'); }
+function citasCount(){ return getCitasData().length; }
+function showStep(id){
+  ['cal-step1','cal-step2','cal-step-list'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
 function openCalModal(){
-  document.getElementById('cal-step1').style.display = 'block';
+  showStep('cal-step1');
   calBox.classList.remove('expanded');
+  calModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function openCitasList(){
+  showStep('cal-step-list');
+  calBox.classList.remove('expanded');
+  const citas = getCitasData();
+  const fmt = d => new Date(d).toLocaleString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('cal-citas-list').innerHTML = citas.map((c,i) =>
+    `<div class="cal-citas-item"><span class="cal-num">${i+1}</span><span>Agendada el ${fmt(c.date)}</span></div>`
+  ).join('');
   calModal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1544,15 +1570,13 @@ function closeCalModal(){
   if (!authModal.classList.contains('open')) document.body.style.overflow = '';
 }
 function calStep2(){
-  document.getElementById('cal-step1').style.display = 'none';
-  document.getElementById('cal-step2').style.display = 'block';
+  showStep('cal-step2');
   calBox.classList.add('expanded');
   const container = document.getElementById('cal-widget');
   if (!container.hasChildNodes()) {
     if (typeof Calendly !== 'undefined') {
       Calendly.initInlineWidget({ url: CALENDLY_URL, parentElement: container });
     } else {
-      // fallback: nueva pestaña si el script no cargó aún
       window.open(CALENDLY_URL, '_blank');
     }
   }
@@ -1560,8 +1584,8 @@ function calStep2(){
 function updateCalButtons(){
   if (citasCount() >= MAX_CITAS) {
     document.querySelectorAll('.calendly-link').forEach(a => {
-      a.textContent = 'Has alcanzado el límite de citas disponibles';
-      a.classList.add('cal-disabled');
+      a.textContent = `Ver mis citas agendadas (${citasCount()}/${MAX_CITAS})`;
+      a.classList.add('cal-at-limit');
     });
   }
 }
@@ -1571,14 +1595,17 @@ document.querySelectorAll('.calendly-link').forEach(a => {
   a.href = '#';
   a.addEventListener('click', e => {
     e.preventDefault();
-    openCalModal();
+    if (citasCount() >= MAX_CITAS) openCitasList();
+    else openCalModal();
   });
 });
 updateCalButtons();
 /* Solo cuenta cuando Calendly confirma una reserva real */
 window.addEventListener('message', e => {
   if (e.data && e.data.event === 'calendly.event_scheduled') {
-    localStorage.setItem('nexiaCitas', String(citasCount() + 1));
+    const citas = getCitasData();
+    citas.push({ date: new Date().toISOString() });
+    localStorage.setItem('nexiaCitasData', JSON.stringify(citas));
     updateCalButtons();
   }
 });
