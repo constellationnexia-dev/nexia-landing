@@ -1308,6 +1308,9 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 <a id="support-fab" href="#" target="_blank" rel="noopener">💬 Servicio al cliente</a>
 
 <script>
+/* Variable global para el canvas de partículas — se actualiza con cada tema */
+let particleRgb = '139,92,246';
+
 /* ============================================================
    CONFIGURACIÓN — reemplaza estos valores con los reales
    ============================================================ */
@@ -2311,7 +2314,6 @@ bumpLive();
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let parts = [];
-let particleRgb = '139,92,246'; // se actualiza con el tema activo
 function sizeCanvas(){
   const hero = document.getElementById('hero');
   canvas.width = hero.offsetWidth;
