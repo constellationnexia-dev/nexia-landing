@@ -282,7 +282,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     <h3>¿Seguro que quieres cerrar sesión?</h3>
     <div class="confirm-btns">
       <button id="logout-cancel">Cancelar</button>
-      <a href="index.html" class="danger" id="logout-yes">Cerrar sesión</a>
+      <button class="danger" id="logout-yes">Cerrar sesión</button>
     </div>
   </div>
 </div>
@@ -612,7 +612,26 @@ input[type=checkbox]{accent-color:var(--accent)}
 const SUPA_URL = 'https://pltngimvnejhkpsdauue.supabase.co';
 const SUPA_KEY = 'sb_publishable_Zr_9mDOwKDeeZSdYOM6LAg_jhfovS4f';
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-const BIZ_ID = localStorage.getItem('nexiaBusinessId');
+
+/* Auth: verificar sesión activa */
+let BIZ_ID = localStorage.getItem('nexiaBusinessId');
+(async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) {
+    window.location.href = 'index.html?login=1';
+    return;
+  }
+  if (!BIZ_ID) {
+    const { data: biz } = await db.from('businesses').select('id').eq('user_id', session.user.id).maybeSingle();
+    if (biz) {
+      BIZ_ID = biz.id;
+      localStorage.setItem('nexiaBusinessId', BIZ_ID);
+    } else {
+      window.location.href = 'index.html';
+      return;
+    }
+  }
+})();
 
 /* ============================================================
    Lenguaje dinámico según tipo de organización
@@ -992,6 +1011,12 @@ const logoutConfirm = document.getElementById('logout-confirm');
 document.getElementById('logout-btn').addEventListener('click', () => logoutConfirm.classList.add('open'));
 document.getElementById('logout-cancel').addEventListener('click', () => logoutConfirm.classList.remove('open'));
 logoutConfirm.addEventListener('click', e => { if (e.target === logoutConfirm) logoutConfirm.classList.remove('open'); });
+document.getElementById('logout-yes').addEventListener('click', async () => {
+  await db.auth.signOut();
+  localStorage.removeItem('nexiaSession');
+  localStorage.removeItem('nexiaBusinessId');
+  window.location.href = 'index.html';
+});
 document.getElementById('logout-yes').addEventListener('click', () => { localStorage.removeItem('nexiaSession'); });
 
 /* ============================================================

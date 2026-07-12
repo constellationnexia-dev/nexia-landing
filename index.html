@@ -514,6 +514,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
   .nav-right{gap:12px}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1053,6 +1054,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="field"><label for="l-email">Correo electrónico</label><input type="email" id="l-email" placeholder="tu@correo.com" required></div>
         <div class="field"><label for="l-pass">Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" required></div>
         <button type="submit" class="btn btn-primary" style="width:100%">Iniciar sesión →</button>
+        <p id="login-error" style="display:none;color:#FF5C5C;font-size:.84rem;margin-top:8px"></p>
       </form>
       <p class="modal-alt" id="login-note" style="display:none;color:var(--accent)">El acceso a tu panel llega a tu correo al activar tu plan.</p>
       <p class="modal-alt">¿No tienes cuenta? <a href="#" id="go-signup">Elige tu plan y crea una →</a></p>
@@ -1626,8 +1628,24 @@ document.getElementById('sub-3').addEventListener('submit', async e => {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Guardando tu asistente…';
 
+  /* Crear cuenta en Supabase Auth */
+  const password = document.getElementById('a-pass').value;
+  let userId = null;
+  if (password) {
+    const { data: authData, error: authError } = await auth.signUp({ email, password });
+    if (authError && !authError.message.includes('already registered')) {
+      submitBtn.disabled = false; submitBtn.textContent = originalText;
+      let errEl = document.getElementById('sub3-error');
+      if (!errEl) { errEl = document.createElement('p'); errEl.id = 'sub3-error'; errEl.style.cssText = 'color:#FF5C5C;font-size:.84rem;margin-top:10px;text-align:center'; submitBtn.parentNode.insertBefore(errEl, submitBtn.nextSibling); }
+      errEl.textContent = '⚠️ ' + authError.message;
+      return;
+    }
+    if (authData && authData.user) userId = authData.user.id;
+  }
+
   const payload = {
     owner_email: email,
+    user_id: userId,
     business_name: bizName,
     business_type: org,
     business_description: bizType,
@@ -1872,10 +1890,33 @@ resendBtn.addEventListener('click', () => {
   resendBtn.disabled = true;
   setTimeout(() => { resendBtn.textContent = 'Reenviar correo'; resendBtn.disabled = false; }, 4000);
 });
-document.getElementById('login-form').addEventListener('submit', e => {
+/* ============================================================
+   SUPABASE AUTH
+   ============================================================ */
+const SUPA_URL = 'https://pltngimvnejhkpsdauue.supabase.co';
+const SUPA_KEY = 'sb_publishable_Zr_9mDOwKDeeZSdYOM6LAg_jhfovS4f';
+const auth = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+/* LOGIN */
+document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
+  const email = document.getElementById('l-email').value.trim();
+  const password = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+
+  const { data, error } = await auth.signInWithPassword({ email, password });
+  if (error) {
+    errEl.textContent = 'Email o contraseña incorrectos.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Ingresar';
+    return;
+  }
+  const { data: biz } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
+  if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
   localStorage.setItem('nexiaSession', '1');
-  window.location.href = 'dashboard.html'; /* demo: entra directo al panel */
+  window.location.href = 'dashboard.html';
 });
 /* Sesión iniciada: ocultar login/signup y convertir botones de planes en "Ir a mi panel" */
 if (localStorage.getItem('nexiaSession') === '1') {
