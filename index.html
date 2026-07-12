@@ -1582,6 +1582,8 @@ function openCitasList(){
 function closeCalModal(){
   calModal.classList.remove('open');
   if (!authModal.classList.contains('open')) document.body.style.overflow = '';
+  // Limpiar widget para que la próxima vez cargue fresco
+  document.getElementById('cal-widget').innerHTML = '';
 }
 function calStep2(){
   showStep('cal-step2');
