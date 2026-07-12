@@ -1191,11 +1191,16 @@ async function loadChart(days) {
   const DEMO7  = [42,58,37,64,71,53,68];
   const DEMO30 = [31,44,52,38,61,47,55,42,66,58,49,71,63,54,68,45,59,72,51,64,57,69,48,62,74,53,67,60,70,65];
   if (!BIZ_ID) { renderChart(days, days === 7 ? DEMO7 : DEMO30); return; }
+  // Fechas en hora Ecuador (UTC-5)
+  const toEcuadorDateStr = (d) => {
+    const ec = new Date(d.toLocaleString('en-US', { timeZone: 'America/Guayaquil' }));
+    return ec.getFullYear() + '-' + String(ec.getMonth()+1).padStart(2,'0') + '-' + String(ec.getDate()).padStart(2,'0');
+  };
   const since = new Date(); since.setDate(since.getDate() - (days - 1)); since.setHours(0,0,0,0);
   const { data: msgs } = await db.from('messages').select('created_at').eq('business_id', BIZ_ID).eq('role', 'assistant').gte('created_at', since.toISOString());
   const buckets = {};
-  for (let i = 0; i < days; i++) { const d = new Date(); d.setDate(d.getDate() - (days-1-i)); buckets[d.toISOString().slice(0,10)] = 0; }
-  (msgs || []).forEach(m => { const day = m.created_at.slice(0,10); if (buckets[day] !== undefined) buckets[day]++; });
+  for (let i = 0; i < days; i++) { const d = new Date(); d.setDate(d.getDate() - (days-1-i)); buckets[toEcuadorDateStr(d)] = 0; }
+  (msgs || []).forEach(m => { const day = toEcuadorDateStr(new Date(m.created_at)); if (buckets[day] !== undefined) buckets[day]++; });
   renderChart(days, Object.values(buckets));
 }
 document.querySelectorAll('.range-btn').forEach(btn => {
