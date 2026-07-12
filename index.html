@@ -1580,7 +1580,6 @@ window.addEventListener('message', e => {
   if (e.data && e.data.event === 'calendly.event_scheduled') {
     localStorage.setItem('nexiaCitas', String(citasCount() + 1));
     updateCalButtons();
-    setTimeout(closeCalModal, 2500);
   }
 });
 const waLink = document.getElementById('wa-footer-link');
