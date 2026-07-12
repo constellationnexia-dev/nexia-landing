@@ -1524,15 +1524,12 @@ if (brandLine) {
 }
 
 /* ============================================================
-   Agendar cita: modal en dos pasos + límite de 2 citas por cuenta
+   Agendar cita: modal en dos pasos
    ============================================================ */
-const MAX_CITAS = 2;
 const calModal = document.getElementById('cal-modal');
 const calBox = document.getElementById('cal-box');
-function citasCount(){ return parseInt(localStorage.getItem('nexiaCitas') || '0', 10); }
 function openCalModal(){
   document.getElementById('cal-step1').style.display = 'block';
-  document.getElementById('cal-step2').style.display = 'none';
   calBox.classList.remove('expanded');
   calModal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1551,23 +1548,12 @@ document.querySelectorAll('.calendly-link').forEach(a => {
   a.href = '#';
   a.addEventListener('click', e => {
     e.preventDefault();
-    if (citasCount() < MAX_CITAS) openCalModal();
+    openCalModal();
   });
 });
-function updateCalButtons(){
-  if (citasCount() >= MAX_CITAS) {
-    document.querySelectorAll('.calendly-link').forEach(a => {
-      a.textContent = 'Has alcanzado el límite de citas disponibles';
-      a.classList.add('cal-disabled');
-    });
-  }
-}
-updateCalButtons();
-/* Calendly avisa por postMessage cuando alguien agenda en el embed */
+/* Calendly avisa por postMessage cuando alguien agenda */
 window.addEventListener('message', e => {
   if (e.data && e.data.event === 'calendly.event_scheduled') {
-    localStorage.setItem('nexiaCitas', String(citasCount() + 1));
-    updateCalButtons();
     setTimeout(closeCalModal, 2500);
   }
 });
