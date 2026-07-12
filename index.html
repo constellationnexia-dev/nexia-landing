@@ -1945,8 +1945,11 @@ document.getElementById('login-form').addEventListener('submit', async e => {
     btn.disabled = false; btn.textContent = 'Ingresar';
     return;
   }
-  const { data: biz } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
-  if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
+  try {
+    const { data: biz, error: bizErr } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
+    if (bizErr) console.error('Error buscando negocio:', bizErr);
+    if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
+  } catch(e) { console.error('Error query negocio:', e); }
   localStorage.setItem('nexiaSession', '1');
   window.location.href = 'dashboard.html';
 });
