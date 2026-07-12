@@ -342,6 +342,28 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Ultra personalización: ajusta al detalle cómo trabaja tu asistente. Llena solo lo que necesites y guarda.</p>
     </div>
 
+    <!-- Guía rápida -->
+    <div style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);border-radius:14px;padding:18px 22px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--accent)">💡 Guía rápida — cuanto más completes, mejor atiende tu bot</div>
+      <div style="font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:6px">
+        <span>📍 <strong style="color:var(--text)">Información del negocio</strong> — nombre, dirección, descripción y mensaje de bienvenida. El bot lo usa para presentarse y responder preguntas básicas.</span>
+        <span>🛍️ <strong style="color:var(--text)">Servicios y productos</strong> — lista todo lo que ofreces con precios y duración. El bot los citará exactos cuando un cliente pregunte.</span>
+        <span>📆 <strong style="color:var(--text)">Citas</strong> — horarios, duración, políticas de cancelación y no-show. El bot agenda, recuerda y gestiona la agenda por ti.</span>
+        <span>💳 <strong style="color:var(--text)">Pagos</strong> — métodos aceptados, anticipo y facturación. El bot lo informa antes de confirmar cada cita o pedido.</span>
+        <span>🧭 <strong style="color:var(--text)">General y asistente</strong> — garantías, tono, emojis y cómo manejar situaciones especiales.</span>
+      </div>
+    </div>
+
+    <!-- Plantillas de ejemplo -->
+    <div style="background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:16px 20px;margin-bottom:24px">
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:10px;color:#a78bfa">📋 ¿Primera vez? Carga una plantilla de ejemplo y modifica lo que necesites</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" onclick="loadTemplate('viajes')" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;padding:8px 16px;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)">✈️ Agencia de Viajes</button>
+        <button type="button" onclick="loadTemplate('peluqueria')" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;padding:8px 16px;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)">✂️ Peluquería / Estética</button>
+      </div>
+      <p id="tpl-notice" style="display:none;margin-top:10px;font-size:.8rem;color:#a78bfa">✅ Plantilla cargada — revisa los campos, ajusta lo que no aplique y haz clic en <strong>Guardar cambios</strong>.</p>
+    </div>
+
     <!-- SECCIÓN 0: Información del negocio -->
     <div class="u-section" id="u-info">
       <h3>📍 Información del negocio</h3>
@@ -359,8 +381,8 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="u-grid">
         <div class="field"><label for="u-phone">Teléfono del dueño (para derivar consultas)</label><input type="tel" id="u-phone" placeholder="+593 99 999 9999"></div>
       </div>
-      <div class="field"><label for="u-desc">Descripción del negocio</label><textarea id="u-desc" rows="3" placeholder="Cuéntale al bot de qué trata tu negocio..."></textarea></div>
-      <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Hola, bienvenido a..."><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba</p></div>
+      <div class="field"><label for="u-desc">Descripción del negocio</label><textarea id="u-desc" rows="4" placeholder="Ej: Somos una peluquería unisex en Quito especializada en cortes modernos, tintes y tratamientos capilares. Atendemos desde 2018. Nuestro equipo tiene 3 estilistas profesionales. Somos conocidos por el ambiente relajado y los cortes de tendencia. / Ej: Agencia de viajes especializada en paquetes a destinos internacionales y nacionales. Ofrecemos viajes grupales, familiares e individuales con todo incluido. Trabajamos con los mejores hoteles y aerolíneas para garantizar la mejor experiencia."></textarea><p class="f-hint">💡 Cuéntale al bot quiénes son, qué hacen y qué los hace especiales — mientras más detalle, mejores respuestas</p></div>
+      <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Ej: ¡Hola! 👋 Bienvenido a Peluquería Estilo. Soy tu asistente virtual. ¿En qué te puedo ayudar hoy? Puedo darte info sobre nuestros servicios, precios o agendar una cita 😊"><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba — sé cálido y menciona qué puede hacer el bot</p></div>
       <div class="field"><label for="u-extra-info">Información adicional para el bot <span style="font-weight:400;opacity:.6">(opcional)</span></label><textarea id="u-extra-info" rows="4" placeholder="Ej: Tenemos estacionamiento gratuito en la calle. Contamos con WiFi para clientes (red: MiNegocio, clave: 1234). Acceso para sillas de ruedas. Usamos productos L'Oréal Professionnel. Descuento del 10% para estudiantes con carnet..."></textarea><p class="f-hint">💡 Todo lo que escribas aquí el bot lo sabrá y podrá responder</p></div>
       <div class="field"><label>Redes sociales y contacto</label>
         <div class="u-grid" style="margin-top:8px">
@@ -443,7 +465,7 @@ input[type=checkbox]{accent-color:var(--accent)}
           <select id="u-lastmin"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select>
         </div>
       </div>
-      <div class="field"><label for="u-noshow">¿Qué pasa si el cliente no aparece?</label><textarea id="u-noshow" rows="2" placeholder="Describe tu política de inasistencia"></textarea><p class="f-hint">💡 El bot puede informar la política de no-show</p></div>
+      <div class="field"><label for="u-noshow">¿Qué pasa si el cliente no aparece?</label><textarea id="u-noshow" rows="2" placeholder="Ej: Si el cliente no se presenta y no avisa con al menos 2 horas de anticipación, pierde el anticipo pagado y deberá reagendar. Para citas sin anticipo, después de 2 inasistencias seguidas se requiere pago por adelantado."></textarea><p class="f-hint">💡 El bot informará esta política antes de confirmar la cita y si alguien pregunta</p></div>
     </div>
 
     <!-- SECCIÓN 2: Pedidos y entrega (solo si tiene productos) -->
@@ -519,7 +541,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     <div class="u-section" id="u-general">
       <h3>🧭 General</h3>
       <div class="u-grid">
-        <div class="field"><label for="u-warranty">¿Tienen garantía en sus servicios o productos?</label><input type="text" id="u-warranty" placeholder="Describe tu garantía"><p class="f-hint">💡 El bot puede mencionarla para convencer clientes indecisos</p></div>
+        <div class="field"><label for="u-warranty">¿Tienen garantía en sus servicios o productos?</label><input type="text" id="u-warranty" placeholder="Ej: Si no quedas satisfecho con el corte, te lo ajustamos gratis dentro de los 7 días siguientes. / Ej: Todos nuestros paquetes de viaje incluyen seguro de cancelación sin costo adicional."><p class="f-hint">💡 El bot puede mencionarla para convencer clientes indecisos</p></div>
         <div class="field"><label for="u-emergency">¿Tienen número de emergencias o contacto urgente?</label><input type="tel" id="u-emergency" placeholder="+593"></div>
       </div>
       <div class="field"><label for="u-human">¿A qué número derivar si el cliente quiere hablar con una persona real?</label><input type="tel" id="u-human" placeholder="+593"></div>
@@ -528,7 +550,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     <!-- SECCIÓN: Asistente -->
     <div class="u-section" id="u-asistente">
       <h3>🤖 Asistente</h3>
-      <div class="field"><label for="u-rude">¿Qué debe responder el bot si alguien es irrespetuoso?</label><textarea id="u-rude" rows="2" placeholder="Escribe la respuesta que dará"></textarea><p class="f-hint">💡 Si no configuras esto, el bot ignorará los insultos y seguirá siendo amable</p></div>
+      <div class="field"><label for="u-rude">¿Qué debe responder el bot si alguien es irrespetuoso?</label><textarea id="u-rude" rows="2" placeholder="Ej: Entiendo que puedas estar frustrado, pero para poder ayudarte necesito que mantengamos una conversación respetuosa. Si tienes algún problema puntual, con gusto te ayudo a resolverlo 😊"></textarea><p class="f-hint">💡 Si no configuras esto, el bot ignorará los insultos y seguirá siendo amable</p></div>
       <div class="field">
         <label for="u-emojis">Emojis que puede usar el bot <span style="color:var(--muted);font-size:.78rem">(máx. 10, separados por espacio)</span></label>
         <input type="text" id="u-emojis" placeholder="😊 🙌 ✅ 📅 💬 🎉" maxlength="60">
@@ -882,6 +904,59 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 
 /* Guardar y cargar */
 const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
+/* ===== Plantillas de ejemplo ===== */
+const TEMPLATES = {
+  viajes: {
+    'u-bizname': 'Horizonte Viajes',
+    'u-city': 'Quito',
+    'u-online': 'only',
+    'u-tone': 'Formal',
+    'u-desc': 'Somos una agencia de viajes especializada en paquetes nacionales e internacionales con todo incluido. Operamos desde 2015 y hemos llevado a más de 5,000 viajeros a sus destinos soñados. Contamos con asesores expertos en cada destino, los mejores precios garantizados y acompañamiento personalizado desde la reserva hasta el regreso. Ofrecemos paquetes para familias, parejas, grupos corporativos y aventureros en solitario.',
+    'u-welcome': '¡Hola! 👋 Bienvenido a Horizonte Viajes. Soy su asistente virtual y estoy aquí para ayudarle a planificar el viaje de sus sueños. Puedo darle información sobre nuestros paquetes, precios y disponibilidad, o coordinar una asesoría personalizada. ¿A dónde le gustaría viajar? ✈️',
+    'u-extra-info': 'Todos nuestros paquetes incluyen: boleto aéreo (salvo indicación), hospedaje en hoteles 3-5 estrellas, traslados aeropuerto-hotel-aeropuerto, y guía en español disponible 24/7 durante el viaje. Aceptamos grupos desde 2 personas. Ofrecemos facilidades de pago: 30% de anticipo para reservar y el saldo hasta 30 días antes del viaje. Trabajamos con todas las aerolíneas principales. Tenemos seguro de viaje opcional. Para grupos corporativos ofrecemos facturación y condiciones especiales.',
+    'u-warranty': 'Si el paquete no cumple con lo prometido en el itinerario, gestionamos una compensación o alternativa sin costo adicional. Todos los paquetes incluyen seguro básico de cancelación por causas de fuerza mayor.',
+    'u-noshow': 'Las reservas canceladas con más de 30 días de anticipación reciben devolución del 80% del anticipo. Con 15-30 días, el 50%. Con menos de 15 días, el anticipo no es reembolsable. En caso de emergencia documentada, buscamos la mejor alternativa para reprogramar sin penalidad.',
+    'u-rude': 'Entendemos que planificar un viaje puede generar dudas y cierta ansiedad. Con mucho gusto le ayudamos, pero para brindarle la mejor atención necesitamos mantener una comunicación respetuosa. ¿En qué podemos ayudarle? 🌍',
+    'u-appt-duration': '60',
+    'u-max-days': '90',
+    'u-min-hours': '24',
+  },
+  peluqueria: {
+    'u-bizname': 'Peluquería Estilo',
+    'u-city': 'Quito',
+    'u-online': 'no',
+    'u-address': 'Av. Principal 123, sector La Mariscal, Quito',
+    'u-tone': 'Amigable',
+    'u-desc': 'Somos una peluquería unisex en Quito especializada en cortes modernos, tintes, tratamientos capilares y manicure. Llevamos más de 8 años en el mercado y contamos con un equipo de 4 estilistas profesionales certificados. Somos conocidos por el ambiente relajado, la música, el café de cortesía y los cortes de tendencia. Usamos productos profesionales L\'Oréal y Wella exclusivamente.',
+    'u-welcome': '¡Hola! 😊 Bienvenido a Peluquería Estilo. Soy tu asistente virtual. Puedo darte info sobre nuestros servicios y precios, ver disponibilidad y agendar tu cita. ¿En qué te ayudo hoy? ✂️',
+    'u-extra-info': 'Tenemos estacionamiento gratuito disponible en la calle lateral (Calle Secundaria 45). Contamos con WiFi para clientes (red: EstiloWifi, clave: estilo2025). Acceso para personas con movilidad reducida. Ofrecemos café, agua y snacks de cortesía mientras esperas. Descuento del 10% para estudiantes con carnet universitario. Los martes hay 2x1 en manicure. Aceptamos citas de último minuto sujeto a disponibilidad — escríbenos directamente.',
+    'u-warranty': 'Si no quedas 100% satisfecho con tu corte o tinte, te lo ajustamos gratis dentro de los 7 días siguientes. Para tintes, garantizamos el color exacto acordado o repetimos el proceso sin costo.',
+    'u-noshow': 'Si no puedes venir, avísanos con al menos 2 horas de anticipación para liberar el cupo. Si no se presenta y no avisa, se pierde el anticipo y para la siguiente cita se solicitará pago completo por adelantado. Entendemos que pasan imprevistos, si es una emergencia contáctenos directamente.',
+    'u-rude': 'Hey, entiendo que puedas estar molesto, pero para poder ayudarte necesito que hablemos con respeto. ¿Cuéntame qué pasó y lo resolvemos juntos? 😊',
+    'u-appt-duration': '45',
+    'u-max-days': '14',
+    'u-min-hours': '2',
+  }
+};
+
+function loadTemplate(type) {
+  const tpl = TEMPLATES[type];
+  if (!tpl) return;
+  Object.entries(tpl).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') {
+      el.value = val;
+      el.dispatchEvent(new Event('change'));
+    } else {
+      el.value = val;
+    }
+  });
+  document.getElementById('tpl-notice').style.display = 'block';
+  // Scroll suave al inicio del formulario
+  document.getElementById('u-info').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 /* Ocultar dirección si es solo online */
 function syncAddressVisibility() {
   const val = document.getElementById('u-online').value;
