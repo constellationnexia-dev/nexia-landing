@@ -1936,22 +1936,29 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   const password = document.getElementById('l-pass').value;
   const errEl = document.getElementById('login-error');
   const btn = e.target.querySelector('button[type=submit]');
+  errEl.style.display = 'none';
   btn.disabled = true; btn.textContent = 'Ingresando...';
 
-  const { data, error } = await auth.signInWithPassword({ email, password });
-  if (error) {
-    errEl.textContent = 'Email o contraseña incorrectos.';
-    errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Ingresar';
-    return;
-  }
   try {
-    const { data: biz, error: bizErr } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
-    if (bizErr) console.error('Error buscando negocio:', bizErr);
-    if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
-  } catch(e) { console.error('Error query negocio:', e); }
-  localStorage.setItem('nexiaSession', '1');
-  window.location.href = 'dashboard.html';
+    const { data, error } = await auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = 'Email o contraseña incorrectos.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Iniciar sesión →';
+      return;
+    }
+    try {
+      const { data: biz } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
+      if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
+    } catch(queryErr) { console.error('Error buscando negocio:', queryErr); }
+    localStorage.setItem('nexiaSession', '1');
+    window.location.href = 'dashboard.html';
+  } catch(err) {
+    console.error('Error login:', err);
+    errEl.textContent = 'Error al conectar. Intenta de nuevo.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Iniciar sesión →';
+  }
 });
 /* Sesión iniciada: ocultar login/signup y convertir botones de planes en "Ir a mi panel" */
 if (localStorage.getItem('nexiaSession') === '1') {
