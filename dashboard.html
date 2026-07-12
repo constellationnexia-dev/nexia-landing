@@ -297,10 +297,10 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Así está trabajando tu asistente este mes.</p>
     </div>
     <div class="metrics">
-      <div class="metric"><div class="m-label">Mensajes respondidos este mes</div><div class="m-value">1.284</div><div class="m-note">↑ 18% vs mes anterior</div></div>
-      <div class="metric"><div class="m-label">Clientes</div><div class="m-value">312</div><div class="m-note">↑ 9% vs mes anterior</div></div>
-      <div class="metric" id="metric-services"><div class="m-label">Servicios agendados</div><div class="m-value">86</div><div class="m-note">12 esta semana</div></div>
-      <div class="metric" id="metric-orders"><div class="m-label">Pedidos realizados</div><div class="m-value">34</div><div class="m-note">5 esta semana</div></div>
+      <div class="metric"><div class="m-label">Mensajes respondidos este mes</div><div class="m-value">—</div><div class="m-note" id="note-msgs">cargando...</div></div>
+      <div class="metric"><div class="m-label">Clientes únicos</div><div class="m-value">—</div><div class="m-note" id="note-clients">conversaciones totales</div></div>
+      <div class="metric" id="metric-services"><div class="m-label">Citas agendadas este mes</div><div class="m-value">—</div><div class="m-note" id="note-appts">este mes</div></div>
+      <div class="metric" id="metric-orders"><div class="m-label">Pedidos realizados</div><div class="m-value">—</div><div class="m-note" id="note-orders">este mes</div></div>
     </div>
     <div class="usage-card">
       <div class="usage-top">
@@ -1192,7 +1192,7 @@ async function loadChart(days) {
   const DEMO30 = [31,44,52,38,61,47,55,42,66,58,49,71,63,54,68,45,59,72,51,64,57,69,48,62,74,53,67,60,70,65];
   if (!BIZ_ID) { renderChart(days, days === 7 ? DEMO7 : DEMO30); return; }
   const since = new Date(); since.setDate(since.getDate() - (days - 1)); since.setHours(0,0,0,0);
-  const { data: msgs } = await db.from('messages').select('created_at').eq('business_id', BIZ_ID).gte('created_at', since.toISOString());
+  const { data: msgs } = await db.from('messages').select('created_at').eq('business_id', BIZ_ID).eq('role', 'assistant').gte('created_at', since.toISOString());
   const buckets = {};
   for (let i = 0; i < days; i++) { const d = new Date(); d.setDate(d.getDate() - (days-1-i)); buckets[d.toISOString().slice(0,10)] = 0; }
   (msgs || []).forEach(m => { const day = m.created_at.slice(0,10); if (buckets[day] !== undefined) buckets[day]++; });
@@ -1390,14 +1390,19 @@ async function loadDashboard() {
     return;
   }
   try {
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }] = await Promise.all([
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+    const currentMonth = now.toISOString().slice(0, 7);
+    const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
       db.from('businesses').select('business_name,business_description,city,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
-      db.from('message_counters').select('count').eq('business_id', BIZ_ID).eq('month', currentMonth).maybeSingle()
+      db.from('message_counters').select('count').eq('business_id', BIZ_ID).eq('month', currentMonth).maybeSingle(),
+      db.from('messages').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).eq('role', 'assistant').gte('created_at', startOfMonth),
+      db.from('messages').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).eq('role', 'assistant').gte('created_at', startOfLastMonth).lte('created_at', endOfLastMonth),
     ]);
     if (biz) {
       document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
@@ -1412,13 +1417,32 @@ async function loadDashboard() {
       if (!biz.accepts_appointments) document.getElementById('metric-services').style.display = 'none';
       if (!biz.accepts_orders) document.getElementById('metric-orders').style.display = 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
-      const msgCount = counter?.count || used;
+
+      // Mensajes este mes (real)
+      const msgCount = msgsThisMonth || counter?.count || used;
       const metrics = document.querySelectorAll('.metric .m-value');
       if (metrics[0]) metrics[0].textContent = msgCount.toLocaleString('es-EC');
+
+      // Nota: comparativa con mes anterior
+      const noteEl = document.getElementById('note-msgs');
+      if (noteEl && msgsLastMonth > 0) {
+        const diff = msgCount - msgsLastMonth;
+        const pct = Math.round(Math.abs(diff) / msgsLastMonth * 100);
+        noteEl.textContent = diff >= 0 ? `↑ ${pct}% vs mes anterior` : `↓ ${pct}% vs mes anterior`;
+        noteEl.style.color = diff >= 0 ? 'var(--accent)' : '#ef4444';
+      } else if (noteEl) {
+        noteEl.textContent = 'primer mes activo';
+      }
+
       if (metrics[1]) metrics[1].textContent = (clientCount||0).toLocaleString('es-EC');
+      const noteClients = document.getElementById('note-clients');
+      if (noteClients) noteClients.textContent = `${clientCount||0} conversaciones en total`;
+
       const mv2 = document.querySelector('#metric-services .m-value'), mv3 = document.querySelector('#metric-orders .m-value');
-      if (mv2) mv2.textContent = apptCount || 0;
-      if (mv3) mv3.textContent = orderCount || 0;
+      if (mv2) mv2.textContent = (apptCount || 0).toLocaleString('es-EC');
+      if (mv3) mv3.textContent = (orderCount || 0).toLocaleString('es-EC');
+      const noteAppts = document.getElementById('note-appts');
+      if (noteAppts) noteAppts.textContent = apptCount > 0 ? `este mes` : 'sin citas aún este mes';
       document.querySelector('.pause-stat .ps-value').textContent = '—';
       /* Rellenar formulario Mi Negocio desde Supabase (override localStorage) */
       populateFormFromConfig(biz);
