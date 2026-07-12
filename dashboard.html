@@ -1104,24 +1104,25 @@ document.getElementById('u-save').addEventListener('click', async () => {
 });
 (function loadUltra(){
   const data = JSON.parse(localStorage.getItem('nexiaUltra') || 'null');
-  if (!data) return;
-  U_IDS.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; });
-  /* compatibilidad con datos guardados con el checkbox anterior */
-  if (data.break === true && data['u-break'] === undefined) uBreak.value = 'si';
-  renderProfs(Math.max(1, parseInt(data['u-profs'], 10) || 1), data.profs);
-  (data.payMethods || []).forEach(v => {
-    const c = [...document.querySelectorAll('.pm')].find(x => x.value === v);
-    if (c) c.checked = true;
-  });
-  if (data.basicPay && data.basicPay.mode) {
-    const r = basicPayBox.querySelector(`input[value="${data.basicPay.mode}"]`);
-    if (r) r.checked = true;
-    basicPct.value = data.basicPay.pct || '';
-    updBasicPct();
+  if (data) {
+    U_IDS.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; });
+    /* compatibilidad con datos guardados con el checkbox anterior */
+    if (data.break === true && data['u-break'] === undefined) uBreak.value = 'si';
+    renderProfs(Math.max(1, parseInt(data['u-profs'], 10) || 1), data.profs);
+    (data.payMethods || []).forEach(v => {
+      const c = [...document.querySelectorAll('.pm')].find(x => x.value === v);
+      if (c) c.checked = true;
+    });
+    if (data.basicPay && data.basicPay.mode) {
+      const r = basicPayBox.querySelector(`input[value="${data.basicPay.mode}"]`);
+      if (r) r.checked = true;
+      basicPct.value = data.basicPay.pct || '';
+      updBasicPct();
+    }
+    buildPayList(data.payPlan || null);
+    [uBreak, uReminder, uCancel, dmSelect, pmOtro].forEach(el => el.dispatchEvent(new Event('change')));
   }
-  buildPayList(data.payPlan || null);
-  [uBreak, uReminder, uCancel, dmSelect, pmOtro].forEach(el => el.dispatchEvent(new Event('change')));
-  /* Después de cargar, enganchar dirty tracking a todos los campos del form */
+  /* Siempre enganchar dirty tracking — incluye usuarios nuevos sin localStorage */
   const uPage = document.getElementById('page-org');
   uPage.querySelectorAll('input, select, textarea').forEach(el => {
     el.addEventListener('input', markDirty);
