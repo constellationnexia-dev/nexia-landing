@@ -1633,6 +1633,7 @@ document.getElementById('sub-3').addEventListener('submit', async e => {
     business_description: bizType,
     address: address || null,
     is_online: mode === 'online' || mode === 'ambas',
+    only_online: mode === 'online',
     plan: selectedPlan ? selectedPlan.id : 'starter',
     working_hours,
     services,

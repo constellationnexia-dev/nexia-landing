@@ -347,10 +347,14 @@ input[type=checkbox]{accent-color:var(--accent)}
       <h3>📍 Información del negocio</h3>
       <div class="u-grid">
         <div class="field"><label for="u-address">Dirección física</label><input type="text" id="u-address" placeholder="Ej: Av. Principal 123, Quito"></div>
+        <div class="field"><label for="u-phone">Teléfono del dueño (para derivar consultas)</label><input type="tel" id="u-phone" placeholder="+593 99 999 9999"></div>
+      </div>
+      <div class="field"><label for="u-desc">Descripción del negocio</label><textarea id="u-desc" rows="3" placeholder="Cuéntale al bot de qué trata tu negocio..."></textarea></div>
+      <div class="u-grid">
         <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Hola, bienvenido a..."><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba</p></div>
+        <div class="field"><label for="u-online">Modalidad de atención</label><select id="u-online"><option value="no">Solo presencial</option><option value="si">Presencial y online</option><option value="only">Solo online</option></select></div>
       </div>
       <div class="u-grid">
-        <div class="field"><label for="u-online">Modalidad de atención</label><select id="u-online"><option value="no">Solo presencial</option><option value="si">Presencial y online</option><option value="only">Solo online</option></select></div>
         <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
       </div>
       <div class="field"><label>Redes sociales y contacto</label>
@@ -853,7 +857,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-address', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
+const U_IDS = ['u-address', 'u-phone', 'u-desc', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
 document.getElementById('u-save').addEventListener('click', async () => {
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
@@ -919,6 +923,8 @@ document.getElementById('u-save').addEventListener('click', async () => {
         payment_methods: data.payMethods,
         appointment_window_days: parseInt(data['u-max-days']) || null,
         address: data['u-address'] || null,
+        owner_phone: data['u-phone'] || null,
+        business_description: data['u-desc'] || null,
         welcome_message: data['u-welcome'] || null,
         is_online: data['u-online'] === 'si' || data['u-online'] === 'only',
         only_online: data['u-online'] === 'only',
@@ -1127,8 +1133,10 @@ function populateFormFromConfig(biz) {
   const cst = cfg.custom     || {};
 
   /* Campos directos del negocio */
-  if (biz.address)         { const el = document.getElementById('u-address');       if(el) el.value = biz.address; }
-  if (biz.welcome_message) { const el = document.getElementById('u-welcome');        if(el) el.value = biz.welcome_message; }
+  if (biz.address)              { const el = document.getElementById('u-address'); if(el) el.value = biz.address; }
+  if (biz.owner_phone)          { const el = document.getElementById('u-phone');   if(el) el.value = biz.owner_phone; }
+  if (biz.business_description) { const el = document.getElementById('u-desc');    if(el) el.value = biz.business_description; }
+  if (biz.welcome_message)      { const el = document.getElementById('u-welcome'); if(el) el.value = biz.welcome_message; }
   if (biz.bot_tone)        { const el = document.getElementById('u-tone');           if(el) el.value = biz.bot_tone; }
   { const el = document.getElementById('u-online');        if(el) el.value = biz.only_online ? 'only' : (biz.is_online ? 'si' : 'no'); }
   { const el = document.getElementById('u-accepts-appt');  if(el) el.value = biz.accepts_appointments === false ? 'no' : 'si'; }
@@ -1229,7 +1237,7 @@ async function loadDashboard() {
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
     const currentMonth = new Date().toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }] = await Promise.all([
-      db.from('businesses').select('business_name,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,config,payment_methods,appointment_window_days').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
