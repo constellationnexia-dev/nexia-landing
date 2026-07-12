@@ -16,7 +16,7 @@
   --card:#12121E;
   --accent:#8B5CF6;
   --accent-dim:rgba(139,92,246,.12);
-  --accent2:#4F46E5;
+  --accent2:#00E5FF;
   --text:#FFFFFF;
   --muted:#A0A0B0;
   --line:#1E1E2E;
@@ -44,8 +44,8 @@ h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;margin-bottom:16px}
 .reveal-d4{transition-delay:.4s}.reveal-d5{transition-delay:.5s}
 
 /* ===== Promo banner ===== */
-#promo-banner{position:fixed;top:0;left:0;right:0;z-index:60;background:linear-gradient(90deg,#6D28D9,var(--accent));color:#ffffff;font-weight:600;font-size:.9rem;text-align:center;padding:9px 40px;display:flex;align-items:center;justify-content:center;gap:8px}
-#promo-banner .close-banner{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#ffffff;font-size:1.1rem;cursor:pointer;line-height:1}
+#promo-banner{position:fixed;top:0;left:0;right:0;z-index:60;background:linear-gradient(90deg,#6D28D9,var(--accent));color:#100822;font-weight:600;font-size:.9rem;text-align:center;padding:9px 40px;display:flex;align-items:center;justify-content:center;gap:8px}
+#promo-banner .close-banner{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#100822;font-size:1.1rem;cursor:pointer;line-height:1}
 
 /* ===== Navbar ===== */
 nav{position:fixed;top:38px;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:rgba(5,5,8,.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transition:top .3s}
@@ -55,8 +55,8 @@ body.banner-hidden nav{top:0}
 .nexia-brand{font-size:1.45rem;font-weight:700;letter-spacing:.03em;color:var(--accent);animation:neon-breathe 5.4s ease-in-out infinite}
 @keyframes neon-breathe{
   0%,100%{color:var(--accent);text-shadow:0 0 6px rgba(139,92,246,.4),0 0 18px rgba(139,92,246,.2)}
-  25%{color:var(--accent);text-shadow:0 0 14px rgba(139,92,246,.95),0 0 36px rgba(139,92,246,.5),0 0 64px rgba(124,58,237,.45)}
-  50%{color:#9D6BFF;text-shadow:0 0 14px rgba(124,58,237,.95),0 0 36px rgba(124,58,237,.55),0 0 64px rgba(124,58,237,.45)}
+  25%{color:var(--accent);text-shadow:0 0 14px rgba(139,92,246,.95),0 0 36px rgba(139,92,246,.5),0 0 64px rgba(0,229,255,.45)}
+  50%{color:#22E0FF;text-shadow:0 0 14px rgba(0,229,255,.95),0 0 36px rgba(0,229,255,.55),0 0 64px rgba(0,229,255,.45)}
   75%{color:var(--accent);text-shadow:0 0 10px rgba(139,92,246,.6),0 0 24px rgba(139,92,246,.3)}
 }
 @property --tw{syntax:'<color>';inherits:true;initial-value:#8B5CF6}
@@ -71,7 +71,7 @@ body.banner-hidden nav{top:0}
 .brand-slogan{font-family:var(--font-title);color:var(--accent);font-size:1.05rem;font-weight:600;margin-bottom:20px;text-shadow:0 0 18px rgba(139,92,246,.3)}
 @keyframes pulse-star{0%,100%{opacity:1;text-shadow:0 0 8px var(--accent)}50%{opacity:.6;text-shadow:0 0 2px var(--accent)}}
 .btn{display:inline-block;padding:13px 26px;border-radius:12px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;font-family:var(--font-body);transition:all .3s ease-out;text-align:center}
-.btn-primary{background:var(--accent);color:#ffffff;box-shadow:0 0 20px rgba(139,92,246,.35)}
+.btn-primary{background:var(--accent);color:#100822;box-shadow:0 0 20px rgba(139,92,246,.35)}
 .btn-primary:hover{box-shadow:0 0 34px rgba(139,92,246,.6);transform:translateY(-2px)}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
 .btn-ghost:hover{border-color:var(--accent);box-shadow:0 0 16px rgba(139,92,246,.25)}
@@ -106,7 +106,7 @@ body.banner-hidden nav{top:0}
 .modal.wide .plan-option .po-feats{margin-top:14px;padding-top:14px;flex-direction:column;gap:8px}
 .modal.wide .plan-option .po-feats li{font-size:clamp(.78rem,.85vw,.88rem);padding-left:16px}
 .plan-option.popular{border-color:rgba(139,92,246,.5)}
-.plan-option.popular .ppop{background:var(--accent);color:#ffffff;padding:2px 9px;border-radius:100px;font-size:.62rem}
+.plan-option.popular .ppop{background:var(--accent);color:#100822;padding:2px 9px;border-radius:100px;font-size:.62rem}
 .modal.wide .plan-option.popular{border-color:rgba(139,92,246,.6);background:linear-gradient(180deg,rgba(139,92,246,.04),var(--card) 50%);transform:translateY(-3px);animation:pro-glow 3s ease-in-out infinite}
 @keyframes pro-glow{
   0%,100%{box-shadow:0 0 10px rgba(139,92,246,.1)}
@@ -117,7 +117,7 @@ body.banner-hidden nav{top:0}
 @keyframes modal-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .modal-tabs{display:flex;gap:6px;background:var(--card);border-radius:11px;padding:5px;margin-bottom:24px}
 .modal-tab{flex:1;padding:9px;border:none;border-radius:8px;background:none;color:var(--muted);font-family:var(--font-body);font-weight:600;font-size:.88rem;cursor:pointer;transition:all .25s}
-.modal-tab.active{background:var(--accent);color:#ffffff}
+.modal-tab.active{background:var(--accent);color:#100822}
 .modal h3{font-size:1.3rem;margin-bottom:6px}
 .modal .modal-sub{color:var(--muted);font-size:.87rem;margin-bottom:20px}
 .field{margin-bottom:14px}
@@ -138,7 +138,7 @@ body.banner-hidden nav{top:0}
 .wstep{flex:1;text-align:center;font-size:.68rem;color:var(--muted);font-weight:500;position:relative;z-index:1}
 .wstep b{display:flex;width:27px;height:27px;border-radius:50%;background:var(--card);border:1px solid var(--line);align-items:center;justify-content:center;margin:0 auto 5px;font-family:var(--font-title);font-size:.78rem;transition:all .3s}
 .wstep.active{color:var(--text)}
-.wstep.active b{background:var(--accent);color:#ffffff;border-color:var(--accent);box-shadow:0 0 12px rgba(139,92,246,.4)}
+.wstep.active b{background:var(--accent);color:#100822;border-color:var(--accent);box-shadow:0 0 12px rgba(139,92,246,.4)}
 .wstep.done b{border-color:var(--accent);color:var(--accent)}
 .plan-option{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:9px;cursor:pointer;transition:all .25s;background:var(--card)}
 .po-feats{width:100%;list-style:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 16px}
@@ -201,7 +201,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .add-svc:hover{border-color:var(--accent);box-shadow:0 0 12px rgba(139,92,246,.15)}
 .svc-tabs{display:flex;gap:6px;background:var(--card);border-radius:11px;padding:5px;margin-bottom:12px}
 .svc-tab{flex:1;padding:9px;border:none;border-radius:8px;background:none;color:var(--muted);font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .25s}
-.svc-tab.active{background:var(--accent);color:#ffffff}
+.svc-tab.active{background:var(--accent);color:#100822}
 .num-wrap{position:relative}
 .num-wrap input{padding-right:24px}
 .spin{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px}
@@ -216,7 +216,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .prod-time .num-wrap{width:88px;flex-shrink:0}
 .prod-time input[type=text]{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font-size:.84rem;outline:none;font-family:var(--font-body);transition:border-color .3s;min-width:0}
 .prod-time input[type=text]:focus{border-color:var(--accent)}
-#support-fab{position:fixed;right:18px;bottom:18px;z-index:120;background:var(--accent);color:#ffffff;font-weight:700;font-family:var(--font-body);padding:12px 18px;border-radius:100px;box-shadow:0 8px 30px rgba(0,0,0,.45),0 0 20px rgba(139,92,246,.35);display:flex;align-items:center;gap:7px;font-size:.86rem;transition:all .3s;text-decoration:none}
+#support-fab{position:fixed;right:18px;bottom:18px;z-index:120;background:var(--accent);color:#100822;font-weight:700;font-family:var(--font-body);padding:12px 18px;border-radius:100px;box-shadow:0 8px 30px rgba(0,0,0,.45),0 0 20px rgba(139,92,246,.35);display:flex;align-items:center;gap:7px;font-size:.86rem;transition:all .3s;text-decoration:none}
 #support-fab:hover{transform:translateY(-3px);box-shadow:0 0 34px rgba(139,92,246,.6)}
 .org-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .org-opt{position:relative}
@@ -318,7 +318,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .step{position:relative;z-index:1;text-align:center}
 .step-icon{width:88px;height:88px;margin:0 auto 22px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:2rem;transition:all .4s}
 .step:hover .step-icon{border-color:var(--accent);box-shadow:0 0 26px rgba(139,92,246,.35)}
-.step-num{position:absolute;top:-6px;right:calc(50% - 56px);background:var(--accent);color:#ffffff;font-weight:700;font-size:.8rem;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-title)}
+.step-num{position:absolute;top:-6px;right:calc(50% - 56px);background:var(--accent);color:#100822;font-weight:700;font-size:.8rem;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-title)}
 .step h3{font-size:1.2rem;margin-bottom:10px}
 .step p{color:var(--muted);font-size:.95rem}
 
@@ -399,7 +399,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .plan.selected{border-color:var(--accent);box-shadow:0 0 32px rgba(139,92,246,.35);animation:none}
 .plan.selected:not(.popular){background:linear-gradient(180deg,rgba(139,92,246,.06),var(--card) 50%)}
 .plan.popular.deselected{animation:none;box-shadow:none;border-color:rgba(139,92,246,.25)}
-.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#ffffff;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
+.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#100822;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
 .plan h3{font-size:1.15rem;margin-bottom:4px}
 .plan .who{color:var(--muted);font-size:.78rem;margin-bottom:18px;min-height:2.2em}
 .plan .price-old{color:var(--muted);text-decoration:line-through;font-size:.95rem}
@@ -738,7 +738,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
               <span style="font-size:1.1rem">🛡️</span>
               <div style="font-size:.8rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-weight:800">Nexia — API oficial Meta</div>
-              <span style="background:var(--accent);color:#ffffff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.04em;margin-left:auto">SEGURO</span>
+              <span style="background:var(--accent);color:#100822;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.04em;margin-left:auto">SEGURO</span>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="font-size:.95rem;color:#c8ffd8;font-weight:600">✓ Integración aprobada por Meta</div>
@@ -1303,6 +1303,40 @@ const LOGIN_URL = "";   // ← cuando exista el portal, ej: "https://app.nexia.e
 const SIGNUP_URL = "";  // ← cuando exista el portal, ej: "https://app.nexia.ec/registro"
 const CALENDLY_URL = "https://calendly.com/TU-USUARIO/llamada-20-minutos"; // ← link real de Calendly
 const WHATSAPP_NUMBER = "593999999999"; // ← número de WhatsApp del negocio (sin +)
+
+/* ============================================================
+   Theme switcher — click en el logo para ciclar entre paletas
+   ============================================================ */
+const THEMES = [
+  { name: 'purple', accent: '#8B5CF6', accentDim: 'rgba(139,92,246,.12)', accent2: '#00E5FF', btnText: '#100822', glow1: '139,92,246', glow2: '0,229,255', bannerFrom: '#6D28D9' },
+  { name: 'green',  accent: '#00FF88', accentDim: 'rgba(0,255,136,.12)',  accent2: '#7C3AED', btnText: '#04140b', glow1: '0,255,136',   glow2: '124,58,237', bannerFrom: '#00cc6e' },
+  { name: 'cyan',   accent: '#00E5FF', accentDim: 'rgba(0,229,255,.12)',  accent2: '#8B5CF6', btnText: '#041420', glow1: '0,229,255',   glow2: '139,92,246', bannerFrom: '#0099cc' },
+];
+let themeIdx = 0;
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--accent-dim', t.accentDim);
+  r.setProperty('--accent2', t.accent2);
+  document.querySelectorAll('.btn-primary, .modal-tab.active, .plan-option.popular .ppop, #support-fab, .wstep.active b, .svc-tab.active, .step-num, .plan-badge')
+    .forEach(el => el.style.color = t.btnText);
+  localStorage.setItem('nexiaTheme', t.name);
+}
+const savedTheme = localStorage.getItem('nexiaTheme');
+if (savedTheme) {
+  const found = THEMES.findIndex(t => t.name === savedTheme);
+  if (found > 0) { themeIdx = found; applyTheme(THEMES[themeIdx]); }
+}
+document.querySelector('.logo').addEventListener('click', (e) => {
+  e.preventDefault();
+  themeIdx = (themeIdx + 1) % THEMES.length;
+  applyTheme(THEMES[themeIdx]);
+  // Mini feedback visual
+  const star = document.querySelector('.star');
+  star.style.transform = 'scale(1.5) rotate(180deg)';
+  star.style.transition = 'transform .3s ease';
+  setTimeout(() => { star.style.transform = ''; }, 300);
+});
 const WHATSAPP_MESSAGE = "Hola, quiero más información sobre el asistente de WhatsApp";
 
 /* Wire de links */
