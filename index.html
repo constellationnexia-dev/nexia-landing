@@ -1308,6 +1308,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       <ul class="cal-list">
         <li>Te explicamos cómo funciona Nexia</li>
         <li>Analizamos tu negocio</li>
+        <li>Te ayudamos a configurar a fondo tu negocio</li>
         <li>Te ayudamos a elegir el plan ideal</li>
       </ul>
       <button class="btn btn-primary" style="width:100%" onclick="calStep2()">Continuar →</button>
@@ -1542,11 +1543,7 @@ function closeCalModal(){
 }
 function calStep2(){
   closeCalModal();
-  if (typeof Calendly !== 'undefined') {
-    Calendly.initPopupWidget({ url: CALENDLY_URL });
-  } else {
-    window.open(CALENDLY_URL, '_blank');
-  }
+  window.open(CALENDLY_URL, '_blank');
 }
 calModal.addEventListener('click', e => { if (e.target === calModal) closeCalModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCalModal(); });
