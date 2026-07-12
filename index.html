@@ -1927,7 +1927,8 @@ resendBtn.addEventListener('click', () => {
    ============================================================ */
 const SUPA_URL = 'https://pltngimvnejhkpsdauue.supabase.co';
 const SUPA_KEY = 'sb_publishable_Zr_9mDOwKDeeZSdYOM6LAg_jhfovS4f';
-const auth = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const auth = supaClient.auth;
 
 /* LOGIN */
 document.getElementById('login-form').addEventListener('submit', async e => {
@@ -1948,7 +1949,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
       return;
     }
     try {
-      const { data: biz } = await auth.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
+      const { data: biz } = await supaClient.from('businesses').select('id').eq('user_id', data.user.id).maybeSingle();
       if (biz) localStorage.setItem('nexiaBusinessId', biz.id);
     } catch(queryErr) { console.error('Error buscando negocio:', queryErr); }
     localStorage.setItem('nexiaSession', '1');
