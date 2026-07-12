@@ -357,6 +357,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       </div>
       <div class="field"><label for="u-desc">Descripción del negocio</label><textarea id="u-desc" rows="3" placeholder="Cuéntale al bot de qué trata tu negocio..."></textarea></div>
       <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Hola, bienvenido a..."><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba</p></div>
+      <div class="field"><label for="u-extra-info">Información adicional para el bot <span style="font-weight:400;opacity:.6">(opcional)</span></label><textarea id="u-extra-info" rows="4" placeholder="Ej: Tenemos estacionamiento gratuito en la calle. Contamos con WiFi para clientes (red: MiNegocio, clave: 1234). Acceso para sillas de ruedas. Usamos productos L'Oréal Professionnel. Descuento del 10% para estudiantes con carnet..."></textarea><p class="f-hint">💡 Todo lo que escribas aquí el bot lo sabrá y podrá responder</p></div>
       <div class="field"><label>Redes sociales y contacto</label>
         <div class="u-grid" style="margin-top:8px">
           <input type="text" id="u-ig" placeholder="Instagram (usuario o link)">
@@ -857,7 +858,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-address', 'u-phone', 'u-desc', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
+const U_IDS = ['u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
 /* Ocultar dirección si es solo online */
 function syncAddressVisibility() {
   const val = document.getElementById('u-online').value;
@@ -925,7 +926,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
           emojis: data['u-emojis'], clientId: data['u-client-id'],
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
-        custom: { notes: data['u-custom'], ant: data['u-custom-ant'] }
+        custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
       };
       await db.from('businesses').update({
         config,
@@ -1197,6 +1198,7 @@ function populateFormFromConfig(biz) {
     'u-stock':          pol.stock,
     'u-custom':         cst.notes,
     'u-custom-ant':     cst.ant,
+    'u-extra-info':     cst.extra,
   };
   Object.entries(map).forEach(([id, val]) => {
     if (val === undefined || val === null) return;
