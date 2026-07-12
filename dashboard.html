@@ -350,7 +350,7 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Hola, bienvenido a..."><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba</p></div>
       </div>
       <div class="u-grid">
-        <div class="field"><label for="u-online">¿También atienden online?</label><select id="u-online"><option value="">Selecciona</option><option value="si">Sí</option><option value="no">No</option></select></div>
+        <div class="field"><label for="u-online">Modalidad de atención</label><select id="u-online"><option value="no">Solo presencial</option><option value="si">Presencial y online</option><option value="only">Solo online</option></select></div>
         <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
       </div>
       <div class="field"><label>Redes sociales y contacto</label>
@@ -920,7 +920,8 @@ document.getElementById('u-save').addEventListener('click', async () => {
         appointment_window_days: parseInt(data['u-max-days']) || null,
         address: data['u-address'] || null,
         welcome_message: data['u-welcome'] || null,
-        is_online: data['u-online'] === 'si',
+        is_online: data['u-online'] === 'si' || data['u-online'] === 'only',
+        only_online: data['u-online'] === 'only',
         bot_tone: data['u-tone'] || 'Amigable',
         social_links: {
           ig: data['u-ig'] || null, fb: data['u-fb'] || null,
@@ -1129,7 +1130,7 @@ function populateFormFromConfig(biz) {
   if (biz.address)         { const el = document.getElementById('u-address');       if(el) el.value = biz.address; }
   if (biz.welcome_message) { const el = document.getElementById('u-welcome');        if(el) el.value = biz.welcome_message; }
   if (biz.bot_tone)        { const el = document.getElementById('u-tone');           if(el) el.value = biz.bot_tone; }
-  { const el = document.getElementById('u-online');        if(el) el.value = biz.is_online ? 'si' : 'no'; }
+  { const el = document.getElementById('u-online');        if(el) el.value = biz.only_online ? 'only' : (biz.is_online ? 'si' : 'no'); }
   { const el = document.getElementById('u-accepts-appt');  if(el) el.value = biz.accepts_appointments === false ? 'no' : 'si'; }
   { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
   { const el = document.getElementById('u-accepts-orders');if(el) el.value = biz.accepts_orders ? 'si' : 'no'; }
@@ -1256,7 +1257,7 @@ async function loadDashboard() {
       if (mv3) mv3.textContent = orderCount || 0;
       document.querySelector('.pause-stat .ps-value').textContent = '—';
       /* Rellenar formulario Mi Negocio desde Supabase (override localStorage) */
-      if (biz.config && Object.keys(biz.config).length) populateFormFromConfig(biz);
+      populateFormFromConfig(biz);
     }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
