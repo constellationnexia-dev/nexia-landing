@@ -280,6 +280,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   radial-gradient(ellipse  70% 45% at 80%   5%, rgba(var(--accent-rgb),.12), transparent 45%),
   radial-gradient(ellipse 100% 55% at -15% 115%,rgba(var(--accent2-rgb),.06),transparent 65%)}
 #particles{position:absolute;inset:0;pointer-events:none}
+.shooting-star{position:absolute;width:2.5px;height:2.5px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px rgba(var(--accent-rgb),.9);opacity:0;pointer-events:none;z-index:1;transform:rotate(-35deg);animation:shoot linear infinite}
+.shooting-star::after{content:'';position:absolute;top:50%;left:2px;width:110px;height:1.5px;background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(var(--accent2-rgb),.5),transparent);transform:translateY(-50%)}
+@keyframes shoot{
+  0%{opacity:0;translate:0 0}
+  2%{opacity:1}
+  11%{opacity:0;translate:-360px 252px}
+  100%{opacity:0;translate:-360px 252px}
+}
 .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;position:relative;z-index:2}
 .badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(var(--accent-rgb),.35);color:var(--accent);padding:7px 16px;border-radius:100px;font-size:.85rem;font-weight:600;margin-bottom:24px}
 .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1.6s infinite}
@@ -551,6 +559,10 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 <!-- SECCIÓN 1: HERO -->
 <section id="hero">
   <canvas id="particles"></canvas>
+  <span class="shooting-star" style="top:10%;left:80%;animation-duration:6s;animation-delay:1s"></span>
+  <span class="shooting-star" style="top:22%;left:55%;animation-duration:8s;animation-delay:3.5s"></span>
+  <span class="shooting-star" style="top:6%;left:35%;animation-duration:10s;animation-delay:6s"></span>
+  <span class="shooting-star" style="top:16%;left:92%;animation-duration:9s;animation-delay:8s"></span>
   <div class="container hero-grid">
     <div>
       <div class="badge"><span class="dot"></span> ✦ Disponible en tu región</div>
