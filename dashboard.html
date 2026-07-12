@@ -334,6 +334,15 @@ input[type=checkbox]{accent-color:var(--accent)}
       </div>
       <div class="ps-value">23</div>
     </div>
+
+    <!-- Citas agendadas con Nexia -->
+    <div class="chart-card" id="db-citas-card" style="margin-top:14px;display:none">
+      <div class="chart-head">
+        <h3>📅 Mis citas con Nexia</h3>
+        <span id="db-citas-reset" style="font-size:.75rem;color:var(--muted)"></span>
+      </div>
+      <div id="db-citas-list"></div>
+    </div>
   </section>
 
   <!-- PÁGINA: MI NEGOCIO / MI EMPRESA / MI PERFIL (ultra personalización) -->
@@ -1507,6 +1516,31 @@ pauseMsg.addEventListener('input', () => {
   localStorage.setItem('nexiaPauseMsg', pauseMsg.value);
   updatePauseUI();
 });
+
+/* ── Citas agendadas con Nexia (desde landing) ── */
+(function renderDbCitas(){
+  const RESET_DAYS = 30;
+  let data = JSON.parse(localStorage.getItem('nexiaCitasData') || '[]');
+  if (!data.length) return;
+  // mismo reset que la landing
+  const oldest = new Date(data[0].date);
+  if ((Date.now() - oldest.getTime()) / 86400000 >= RESET_DAYS) {
+    localStorage.removeItem('nexiaCitasData');
+    return;
+  }
+  const card = document.getElementById('db-citas-card');
+  const list = document.getElementById('db-citas-list');
+  const resetEl = document.getElementById('db-citas-reset');
+  const resetDate = new Date(oldest.getTime() + RESET_DAYS * 86400000);
+  const fmt = d => new Date(d).toLocaleString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  resetEl.textContent = `🔄 Cupo se renueva el ${resetDate.toLocaleDateString('es-EC',{day:'numeric',month:'long',year:'numeric'})}`;
+  list.innerHTML = data.map((c,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.88rem;color:#D6D6E0">
+      <span style="width:26px;height:26px;border-radius:50%;background:rgba(var(--accent-rgb),.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0">${i+1}</span>
+      <span>Agendada el ${fmt(c.date)}</span>
+    </div>`).join('');
+  card.style.display = 'block';
+})();
 </script>
 <script>
 /* ── Theme switcher del dashboard ──────────────────────────

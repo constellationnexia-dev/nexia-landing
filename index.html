@@ -1541,7 +1541,19 @@ if (brandLine) {
 const MAX_CITAS = 3;
 const calModal = document.getElementById('cal-modal');
 const calBox = document.getElementById('cal-box');
-function getCitasData(){ return JSON.parse(localStorage.getItem('nexiaCitasData') || '[]'); }
+const CITAS_RESET_DAYS = 30;
+function getCitasData(){
+  const data = JSON.parse(localStorage.getItem('nexiaCitasData') || '[]');
+  if (!data.length) return data;
+  // Reset automático cada 30 días desde la primera cita del ciclo
+  const oldest = new Date(data[0].date);
+  const daysSince = (Date.now() - oldest.getTime()) / 86400000;
+  if (daysSince >= CITAS_RESET_DAYS) {
+    localStorage.removeItem('nexiaCitasData');
+    return [];
+  }
+  return data;
+}
 function citasCount(){ return getCitasData().length; }
 function showStep(id){
   ['cal-step1','cal-step2','cal-step-list'].forEach(s => {
@@ -1559,9 +1571,11 @@ function openCitasList(){
   calBox.classList.remove('expanded');
   const citas = getCitasData();
   const fmt = d => new Date(d).toLocaleString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const resetDate = citas.length ? new Date(new Date(citas[0].date).getTime() + CITAS_RESET_DAYS*86400000) : null;
+  const resetStr = resetDate ? resetDate.toLocaleDateString('es-EC',{day:'numeric',month:'long',year:'numeric'}) : '';
   document.getElementById('cal-citas-list').innerHTML = citas.map((c,i) =>
     `<div class="cal-citas-item"><span class="cal-num">${i+1}</span><span>Agendada el ${fmt(c.date)}</span></div>`
-  ).join('');
+  ).join('') + (resetDate ? `<p style="margin-top:14px;font-size:.8rem;color:var(--muted)">🔄 Tu cupo se renueva el ${resetStr}</p>` : '');
   calModal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
