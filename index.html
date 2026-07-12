@@ -1308,11 +1308,15 @@ const WHATSAPP_NUMBER = "593999999999"; // ← número de WhatsApp del negocio (
    Theme switcher — click en el logo para ciclar entre paletas
    ============================================================ */
 const THEMES = [
-  { name: 'purple', accent: '#8B5CF6', accentDim: 'rgba(139,92,246,.12)', accent2: '#00E5FF', btnText: '#100822', glow1: '139,92,246', glow2: '0,229,255', bannerFrom: '#6D28D9' },
-  { name: 'green',  accent: '#00FF88', accentDim: 'rgba(0,255,136,.12)',  accent2: '#7C3AED', btnText: '#04140b', glow1: '0,255,136',   glow2: '124,58,237', bannerFrom: '#00cc6e' },
-  { name: 'cyan',   accent: '#00E5FF', accentDim: 'rgba(0,229,255,.12)',  accent2: '#8B5CF6', btnText: '#041420', glow1: '0,229,255',   glow2: '139,92,246', bannerFrom: '#0099cc' },
+  { name: 'purple', accent: '#8B5CF6', accentDim: 'rgba(139,92,246,.12)', accent2: '#00E5FF', btnText: '#100822' },
+  { name: 'green',  accent: '#00FF88', accentDim: 'rgba(0,255,136,.12)',  accent2: '#7C3AED', btnText: '#04140b' },
+  { name: 'cyan',   accent: '#00E5FF', accentDim: 'rgba(0,229,255,.12)',  accent2: '#8B5CF6', btnText: '#041420' },
+  // 🔴 Easter egg oculto — solo aparece si haces click 7 veces seguidas en el logo
+  { name: 'red',    accent: '#FF2D55', accentDim: 'rgba(255,45,85,.12)',   accent2: '#FF9500', btnText: '#1a0008', secret: true },
 ];
 let themeIdx = 0;
+let clickCount = 0;
+let clickTimer = null;
 function applyTheme(t) {
   const r = document.documentElement.style;
   r.setProperty('--accent', t.accent);
@@ -1329,10 +1333,30 @@ if (savedTheme) {
 }
 document.querySelector('.logo').addEventListener('click', (e) => {
   e.preventDefault();
-  themeIdx = (themeIdx + 1) % THEMES.length;
-  applyTheme(THEMES[themeIdx]);
-  // Mini feedback visual
   const star = document.querySelector('.star');
+
+  // Contar clicks rápidos para el easter egg rojo (7 clicks en 2s)
+  clickCount++;
+  clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+
+  if (clickCount === 7) {
+    clickCount = 0;
+    themeIdx = THEMES.findIndex(t => t.name === 'red');
+    applyTheme(THEMES[themeIdx]);
+    star.style.transform = 'scale(2) rotate(360deg)';
+    star.style.transition = 'transform .5s ease';
+    setTimeout(() => { star.style.transform = ''; }, 500);
+    return;
+  }
+
+  // Ciclar solo entre los 3 temas normales (no el rojo)
+  const normalThemes = THEMES.filter(t => !t.secret);
+  const currentNormal = normalThemes.findIndex(t => t.name === THEMES[themeIdx].name);
+  const nextIdx = (currentNormal + 1) % normalThemes.length;
+  themeIdx = THEMES.findIndex(t => t.name === normalThemes[nextIdx].name);
+  applyTheme(THEMES[themeIdx]);
+
   star.style.transform = 'scale(1.5) rotate(180deg)';
   star.style.transition = 'transform .3s ease';
   setTimeout(() => { star.style.transform = ''; }, 300);
