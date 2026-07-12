@@ -1313,6 +1313,9 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       </ul>
       <button class="btn btn-primary" style="width:100%" onclick="calStep2()">Continuar →</button>
     </div>
+    <div id="cal-step2" style="display:none">
+      <div id="cal-widget" style="min-width:320px;height:min(70vh,620px)"></div>
+    </div>
   </div>
 </div>
 
@@ -1524,10 +1527,12 @@ if (brandLine) {
 }
 
 /* ============================================================
-   Agendar cita: modal en dos pasos
+   Agendar cita: modal en dos pasos + límite de 2 reservas reales
    ============================================================ */
+const MAX_CITAS = 2;
 const calModal = document.getElementById('cal-modal');
 const calBox = document.getElementById('cal-box');
+function citasCount(){ return parseInt(localStorage.getItem('nexiaCitas') || '0', 10); }
 function openCalModal(){
   document.getElementById('cal-step1').style.display = 'block';
   calBox.classList.remove('expanded');
@@ -1539,8 +1544,26 @@ function closeCalModal(){
   if (!authModal.classList.contains('open')) document.body.style.overflow = '';
 }
 function calStep2(){
-  closeCalModal();
-  window.open(CALENDLY_URL, '_blank');
+  document.getElementById('cal-step1').style.display = 'none';
+  document.getElementById('cal-step2').style.display = 'block';
+  calBox.classList.add('expanded');
+  const container = document.getElementById('cal-widget');
+  if (!container.hasChildNodes()) {
+    if (typeof Calendly !== 'undefined') {
+      Calendly.initInlineWidget({ url: CALENDLY_URL, parentElement: container });
+    } else {
+      // fallback: nueva pestaña si el script no cargó aún
+      window.open(CALENDLY_URL, '_blank');
+    }
+  }
+}
+function updateCalButtons(){
+  if (citasCount() >= MAX_CITAS) {
+    document.querySelectorAll('.calendly-link').forEach(a => {
+      a.textContent = 'Has alcanzado el límite de citas disponibles';
+      a.classList.add('cal-disabled');
+    });
+  }
 }
 calModal.addEventListener('click', e => { if (e.target === calModal) closeCalModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCalModal(); });
@@ -1551,9 +1574,12 @@ document.querySelectorAll('.calendly-link').forEach(a => {
     openCalModal();
   });
 });
-/* Calendly avisa por postMessage cuando alguien agenda */
+updateCalButtons();
+/* Solo cuenta cuando Calendly confirma una reserva real */
 window.addEventListener('message', e => {
   if (e.data && e.data.event === 'calendly.event_scheduled') {
+    localStorage.setItem('nexiaCitas', String(citasCount() + 1));
+    updateCalButtons();
     setTimeout(closeCalModal, 2500);
   }
 });
