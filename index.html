@@ -1314,6 +1314,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <li>Te ayudamos a configurar a fondo tu negocio</li>
         <li>Te ayudamos a elegir el plan ideal</li>
       </ul>
+      <div id="cal-prev-citas" style="display:none;margin-bottom:16px;padding:12px;background:rgba(var(--accent-rgb),.06);border-radius:10px;border:1px solid rgba(var(--accent-rgb),.15)"></div>
       <button class="btn btn-primary" style="width:100%" onclick="calStep2()">Continuar →</button>
     </div>
     <div id="cal-step2" style="display:none">
@@ -1561,6 +1562,17 @@ function showStep(id){
 function openCalModal(){
   showStep('cal-step1');
   calBox.classList.remove('expanded');
+  // Mostrar citas previas en step1 si existen
+  const citas = getCitasData();
+  const prevBox = document.getElementById('cal-prev-citas');
+  if (citas.length) {
+    const fmt = d => new Date(d).toLocaleString('es-EC',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    prevBox.innerHTML = `<p style="font-size:.8rem;color:var(--muted);margin-bottom:6px">Tus citas agendadas (${citas.length}/${MAX_CITAS}):</p>`
+      + citas.map((c,i) => `<div class="cal-citas-item"><span class="cal-num">${i+1}</span><span>${fmt(c.date)}</span></div>`).join('');
+    prevBox.style.display = 'block';
+  } else {
+    prevBox.style.display = 'none';
+  }
   calModal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
