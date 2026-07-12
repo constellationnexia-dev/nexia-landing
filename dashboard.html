@@ -1423,10 +1423,17 @@ async function loadDashboard() {
       /* Rellenar formulario Mi Negocio desde Supabase (override localStorage) */
       populateFormFromConfig(biz);
       syncAddressVisibility();
-      // Si hay datos reales, ocultar plantillas de ejemplo
+      // Si hay datos reales, cambiar plantillas a modo compacto
       if (biz.business_name || biz.business_description) {
         const tplBlock = document.getElementById('tpl-block');
-        if (tplBlock) tplBlock.style.display = 'none';
+        if (tplBlock) tplBlock.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <span style="font-size:.82rem;color:var(--muted)">📋 ¿Necesitas inspiración? Mira ejemplos de perfiles completos</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" onclick="openTemplatePreview('viajes')" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#c4b5fd;padding:6px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">✈️ Agencia de Viajes</button>
+              <button type="button" onclick="openTemplatePreview('peluqueria')" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#c4b5fd;padding:6px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">✂️ Peluquería</button>
+            </div>
+          </div>`;
       }
     }
     await Promise.all([loadChart(7), loadConversations()]);
