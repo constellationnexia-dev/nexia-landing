@@ -678,6 +678,8 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="pause-msg-wrap">
           <label for="pause-msg">Mensaje que verán tus clientes al pausar:</label>
           <textarea id="pause-msg" rows="2">En este momento no estamos atendiendo por este medio, volvemos pronto.</textarea>
+          <button class="btn-save" id="save-pause-msg" style="margin-top:10px;font-size:.8rem;padding:8px 16px">Guardar mensaje</button>
+          <span id="pause-msg-saved" style="display:none;color:#22c55e;font-size:.8rem;margin-left:10px">✓ Guardado</span>
         </div>
       </div>
     </div>
@@ -1649,6 +1651,13 @@ pauseMsg.addEventListener('blur', async () => {
   if (BIZ_ID) {
     await db.from('businesses').update({ bot_pause_message: pauseMsg.value.trim() || DEFAULT_PAUSE_MSG }).eq('id', BIZ_ID);
   }
+});
+document.getElementById('save-pause-msg').addEventListener('click', async () => {
+  if (!BIZ_ID) return;
+  await db.from('businesses').update({ bot_pause_message: pauseMsg.value.trim() || DEFAULT_PAUSE_MSG }).eq('id', BIZ_ID);
+  const saved = document.getElementById('pause-msg-saved');
+  saved.style.display = 'inline';
+  setTimeout(() => saved.style.display = 'none', 2000);
 });
 
 /* ── Google Calendar — estado de conexión ── */
