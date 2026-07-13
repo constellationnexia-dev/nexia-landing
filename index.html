@@ -1695,7 +1695,11 @@ function goStep(n){
     const sn = parseInt(s.dataset.s, 10);
     s.classList.toggle('active', sn === n);
     s.classList.toggle('done', sn < n || n === 5);
+    s.querySelector('b').style.color = '';
   });
+  /* Aplicar el color de texto del tema al círculo activo */
+  const activeB = document.querySelector('.wstep.active b');
+  if (activeB) activeB.style.color = THEMES[themeIdx].btnText;
   /* línea de progreso que se ilumina entre pasos */
   document.getElementById('wiz-line-fill').style.width = ((Math.min(n, 4) - 1) / 3 * 100) + '%';
   authModal.scrollTop = 0;
