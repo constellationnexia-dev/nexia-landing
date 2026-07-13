@@ -637,6 +637,11 @@ input[type=checkbox]{accent-color:var(--accent)}
         <p>Correo, contraseña y datos de contacto.</p>
         <span class="soon">Próximamente</span>
       </div>
+      <div class="config-card" id="gcal-card">
+        <h3>📅 Google Calendar</h3>
+        <p id="gcal-status">Verificando conexión...</p>
+        <div id="gcal-actions" style="margin-top:12px"></div>
+      </div>
       <div class="config-card">
         <h3>⏸️ Pausar bot</h3>
         <p id="pause-desc">Tu asistente está respondiendo con normalidad.</p>
@@ -1516,6 +1521,29 @@ pauseMsg.addEventListener('input', () => {
   localStorage.setItem('nexiaPauseMsg', pauseMsg.value);
   updatePauseUI();
 });
+
+/* ── Google Calendar — estado de conexión ── */
+const BACKEND_URL = 'https://nexia-backend-production-c65e.up.railway.app';
+async function loadGCalStatus() {
+  if (!BIZ_ID) { setTimeout(loadGCalStatus, 800); return; }
+  const { data } = await db.from('businesses').select('google_refresh_token').eq('id', BIZ_ID).single();
+  const connected = !!(data && data.google_refresh_token);
+  const statusEl = document.getElementById('gcal-status');
+  const actionsEl = document.getElementById('gcal-actions');
+  if (connected) {
+    statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600">✓ Conectado</span> — el bot puede agendar citas automáticamente.';
+    actionsEl.innerHTML = `<a href="${BACKEND_URL}/auth/google/${BIZ_ID}" style="font-size:.8rem;color:var(--muted);text-decoration:underline;cursor:pointer">Cambiar cuenta de Google</a>`;
+  } else {
+    statusEl.textContent = 'No conectado — el bot no puede agendar citas automáticamente.';
+    actionsEl.innerHTML = `<a href="${BACKEND_URL}/auth/google/${BIZ_ID}" class="btn-save" style="display:inline-block;text-decoration:none;padding:10px 18px;font-size:.85rem">Conectar Google Calendar →</a>`;
+  }
+  // Si viene de redirigir tras conectar
+  if (new URLSearchParams(location.search).get('calendar') === 'connected') {
+    statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600">✓ ¡Conectado exitosamente!</span>';
+    history.replaceState({}, '', location.pathname);
+  }
+}
+loadGCalStatus();
 
 /* ── Citas agendadas con Nexia (desde landing) ── */
 (function renderDbCitas(){
