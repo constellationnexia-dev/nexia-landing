@@ -237,12 +237,12 @@ input[type=checkbox]{accent-color:var(--accent)}
 .convo-info .c-name{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .convo-info .c-last{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .convo-item .c-time{font-size:.66rem;color:var(--muted);flex-shrink:0}
-.chat-pane{display:flex;flex-direction:column;min-width:0}
+.chat-pane{display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .chat-header{display:flex;align-items:center;gap:11px;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--bg2)}
 .chat-header .back-btn{display:none;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px}
 .chat-header .ch-name{font-weight:600;font-size:.9rem}
 .chat-header .ch-num{font-size:.72rem;color:var(--muted)}
-.chat-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:8px}
+.chat-msgs{flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:8px}
 .msg{max-width:70%;padding:9px 13px;border-radius:13px;font-size:.85rem;line-height:1.45}
 .msg.in{background:#1A1A2A;align-self:flex-start;border-bottom-left-radius:4px}
 .msg.out{background:rgba(var(--accent-rgb),.13);border:1px solid rgba(var(--accent-rgb),.22);align-self:flex-end;border-bottom-right-radius:4px}
@@ -456,7 +456,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="u-grid">
         <div class="field"><label for="u-accepts-appt">¿Agendan citas?</label><select id="u-accepts-appt"><option value="si">Sí</option><option value="no">No</option></select></div>
         <div class="field"><label for="u-accepts-walkin">¿También atienden sin cita?</label><select id="u-accepts-walkin"><option value="">Selecciona</option><option value="si">Sí, sujeto a disponibilidad</option><option value="no">No, solo con cita</option></select></div>
-        <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="si">Sí</option><option value="no">No</option></select></div>
+        <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="no">No</option><option value="si">Sí</option></select></div>
         <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
       </div>
       <div class="field" style="margin-top:4px">
