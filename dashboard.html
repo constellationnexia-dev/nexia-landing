@@ -1362,7 +1362,7 @@ async function loadConversations() {
     const name = c.client_name || c.client_phone;
     const item = document.createElement('div'); item.className = 'convo-item';
     item.innerHTML = `
-      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div class="avatar" style="color:${window._avatarTextColor||''}">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
       <div class="convo-info"><div class="c-name">${name}</div><div class="c-last">Toca para ver la conversación</div></div>
       <span class="c-time">${formatTime(c.updated_at)}</span>`;
     item.addEventListener('click', () => openConvo(c, item));
@@ -1378,7 +1378,7 @@ async function openConvo(c, item) {
   chatPane.innerHTML = `
     <div class="chat-header">
       <button class="back-btn" aria-label="Volver">←</button>
-      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div class="avatar" style="color:${window._avatarTextColor||''}">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
       <div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div>
     </div>
     <div class="chat-msgs">
@@ -1401,10 +1401,10 @@ function renderDemoConvos() {
   demos.forEach(c => {
     const name = c.client_name; const last = c.msgs[c.msgs.length-1];
     const item = document.createElement('div'); item.className = 'convo-item';
-    item.innerHTML = `<div class="avatar">${name.charAt(0)}</div><div class="convo-info"><div class="c-name">${name}</div><div class="c-last">${last.content.slice(0,60)}</div></div><span class="c-time">${formatTime(c.updated_at)}</span>`;
+    item.innerHTML = `<div class="avatar" style="color:${window._avatarTextColor||''}">${name.charAt(0)}</div><div class="convo-info"><div class="c-name">${name}</div><div class="c-last">${last.content.slice(0,60)}</div></div><span class="c-time">${formatTime(c.updated_at)}</span>`;
     item.addEventListener('click', () => {
       document.querySelectorAll('.convo-item').forEach(x => x.classList.toggle('active', x === item));
-      chatPane.innerHTML = `<div class="chat-header"><button class="back-btn">←</button><div class="avatar">${name.charAt(0)}</div><div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div></div><div class="chat-msgs">${c.msgs.map(m=>`<div class="msg ${m.role==='user'?'in':'out'}">${m.content}<span class="m-time">${formatTime(m.created_at,true)}</span></div>`).join('')}</div><div class="chat-note">🤖 Datos de ejemplo — conecta tu negocio para ver chats reales.</div>`;
+      chatPane.innerHTML = `<div class="chat-header"><button class="back-btn">←</button><div class="avatar" style="color:${window._avatarTextColor||''}">${name.charAt(0)}</div><div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div></div><div class="chat-msgs">${c.msgs.map(m=>`<div class="msg ${m.role==='user'?'in':'out'}">${m.content}<span class="m-time">${formatTime(m.created_at,true)}</span></div>`).join('')}</div><div class="chat-note">🤖 Datos de ejemplo — conecta tu negocio para ver chats reales.</div>`;
       chatPane.querySelector('.back-btn').addEventListener('click', () => convosBox.classList.remove('show-chat'));
       convosBox.classList.add('show-chat'); chatPane.querySelector('.chat-msgs').scrollTop = 99999;
     });
@@ -1712,6 +1712,8 @@ function applyDbTheme(t) {
   r.setProperty('--bg2',  t.bg2);
   r.setProperty('--card', t.card);
   document.querySelectorAll('.btn-save').forEach(el => el.style.color = t.btnSave);
+  window._avatarTextColor = (t.name === 'mono' || t.name === 'noir') ? '#111' : '';
+  document.querySelectorAll('.avatar').forEach(el => el.style.color = window._avatarTextColor);
   const star = document.querySelector('.star');
   if (star) {
     star.style.transform = 'scale(1.6) rotate(180deg)';
