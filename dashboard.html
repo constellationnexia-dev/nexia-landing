@@ -837,6 +837,7 @@ function collectItems(container){
 /* Profesionales: si son varios, cada uno con sus servicios Y productos
    (una sola lista — ej: solo un repostero hace el pastel) */
 let chipNames = [...savedSvcs, ...savedProds].map(x => x.name).filter(Boolean).slice(0, 30);
+let bizWorkingHours = {};
 const profList = document.getElementById('prof-list');
 const uProfs = document.getElementById('u-profs');
 const DAYS_PROF = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
@@ -848,15 +849,19 @@ function renderProfSchedule(container, savedHours) {
   wrap.style.cssText = 'margin-top:12px;display:flex;flex-direction:column;gap:6px';
   DAYS_PROF.forEach((day, idx) => {
     const h = (savedHours && savedHours[day]) || {};
+    const bh = bizWorkingHours[day] || {};
+    const defOpen  = h.open  || bh.open  || '09:00';
+    const defClose = h.close || bh.close || '18:00';
+    const isActive = h.open ? !h.closed : (bh.open && !bh.closed);
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:.8rem';
     row.innerHTML = `
       <label style="display:flex;align-items:center;gap:5px;width:54px;cursor:pointer;color:var(--text)">
-        <input type="checkbox" class="pd-active" data-day="${day}" style="accent-color:var(--accent)" ${!h.closed && h.open ? 'checked' : ''}> ${DAYS_PROF_LABEL[idx]}
+        <input type="checkbox" class="pd-active" data-day="${day}" style="accent-color:var(--accent)" ${isActive ? 'checked' : ''}> ${DAYS_PROF_LABEL[idx]}
       </label>
-      <input type="time" class="pd-open" data-day="${day}" value="${h.open||'09:00'}" style="background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 7px;color:var(--text);font-size:.78rem;outline:none;width:90px">
+      <input type="time" class="pd-open" data-day="${day}" value="${defOpen}" style="background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 7px;color:var(--text);font-size:.78rem;outline:none;width:90px">
       <span style="color:var(--muted)">→</span>
-      <input type="time" class="pd-close" data-day="${day}" value="${h.close||'18:00'}" style="background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 7px;color:var(--text);font-size:.78rem;outline:none;width:90px">`;
+      <input type="time" class="pd-close" data-day="${day}" value="${defClose}" style="background:var(--card);border:1px solid var(--line);border-radius:7px;padding:5px 7px;color:var(--text);font-size:.78rem;outline:none;width:90px">`;
     wrap.appendChild(row);
   });
   container.appendChild(wrap);
@@ -1507,7 +1512,8 @@ function populateFormFromConfig(biz) {
   { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
   { const el = document.getElementById('u-accepts-orders');if(el) el.value = biz.accepts_orders ? 'si' : 'no'; }
   if (biz.appointment_duration) { const el = document.getElementById('u-appt-duration'); if(el) el.value = biz.appointment_duration; }
-  buildHoursEditor(biz.working_hours || {});
+  bizWorkingHours = biz.working_hours || {};
+  buildHoursEditor(bizWorkingHours);
   if (biz.social_links) {
     const sl = biz.social_links;
     if(sl.ig)    { const el = document.getElementById('u-ig');           if(el) el.value = sl.ig; }
