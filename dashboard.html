@@ -413,8 +413,6 @@ input[type=checkbox]{accent-color:var(--accent)}
       </div>
       <div class="u-grid">
         <div class="field"><label for="u-online">Modalidad de atención</label><select id="u-online"><option value="no">Solo presencial</option><option value="si">Presencial y online</option><option value="only">Solo online</option></select></div>
-        <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone" onchange="document.getElementById('field-emojis').style.display=this.value==='Formal'?'none':'block'"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
-        <div class="field" id="field-emojis"><label for="u-emoji-freq">Uso de emojis</label><select id="u-emoji-freq"><option value="moderado">Moderado (ocasional)</option><option value="nunca">Nunca</option><option value="siempre">Siempre</option></select></div>
       </div>
       <div class="u-grid" id="field-address-row">
         <div class="field"><label for="u-address">Dirección física</label><input type="text" id="u-address" placeholder="Ej: Av. Principal 123, Quito"></div>
@@ -600,8 +598,12 @@ input[type=checkbox]{accent-color:var(--accent)}
     <!-- SECCIÓN: Asistente -->
     <div class="u-section" id="u-asistente">
       <h3>🤖 Asistente</h3>
+      <div class="u-grid">
+        <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone" onchange="const f=this.value==='Formal';document.getElementById('field-emojis').style.display=f?'none':'block';document.getElementById('field-emojis-list').style.display=f?'none':'block';"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
+        <div class="field" id="field-emojis"><label for="u-emoji-freq">Uso de emojis</label><select id="u-emoji-freq"><option value="moderado">Moderado (ocasional)</option><option value="nunca">Nunca</option><option value="siempre">Siempre</option></select></div>
+      </div>
+      <div class="field" id="field-emojis-list"><label for="u-emojis">Emojis que puede usar el bot <span style="color:var(--muted);font-size:.78rem">(separados por espacio)</span></label><input type="text" id="u-emojis" placeholder="😊 🙌 ✅ 📅 💬 🎉" maxlength="80"><p class="f-hint">💡 Déjalo vacío para que el bot elija libremente. En tono Formal no se usan emojis.</p></div>
       <div class="field"><label for="u-rude">¿Qué debe responder el bot si alguien es irrespetuoso?</label><textarea id="u-rude" rows="2" placeholder="Ej: Entiendo que puedas estar frustrado, pero para poder ayudarte necesito que mantengamos una conversación respetuosa. Si tienes algún problema puntual, con gusto te ayudo a resolverlo 😊"></textarea><p class="f-hint">💡 Si no configuras esto, el bot ignorará los insultos y seguirá siendo amable</p></div>
-      <input type="hidden" id="u-emojis" value="">
       <div class="field">
         <label for="u-client-id">Al agendar una cita, ¿qué datos pedir al cliente?</label>
         <select id="u-client-id">
@@ -1186,7 +1188,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
         policies: {
           warranty: data['u-warranty'], emergency: data['u-emergency'],
           human: data['u-human'], rude: data['u-rude'],
-          emojis: data['u-emoji-freq'] || data['u-emojis'], clientId: data['u-client-id'],
+          emojis: data['u-emoji-freq'], emojiList: data['u-emojis'], clientId: data['u-client-id'],
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
         custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
@@ -1429,7 +1431,9 @@ function populateFormFromConfig(biz) {
   if (biz.welcome_message)      { const el = document.getElementById('u-welcome'); if(el) el.value = biz.welcome_message; }
   if (biz.bot_tone) {
     const el = document.getElementById('u-tone'); if(el) el.value = biz.bot_tone;
-    document.getElementById('field-emojis').style.display = biz.bot_tone === 'Formal' ? 'none' : 'block';
+    const isFormal = biz.bot_tone === 'Formal';
+    document.getElementById('field-emojis').style.display = isFormal ? 'none' : 'block';
+    document.getElementById('field-emojis-list').style.display = isFormal ? 'none' : 'block';
   }
   { const emojiVal = biz.config?.policies?.emojis || 'moderado'; const el = document.getElementById('u-emoji-freq'); if(el) el.value = emojiVal; }
   { const el = document.getElementById('u-online');        if(el) el.value = biz.only_online ? 'only' : (biz.is_online ? 'si' : 'no'); }
@@ -1478,6 +1482,7 @@ function populateFormFromConfig(biz) {
     'u-human':          pol.human,
     'u-rude':           pol.rude,
     'u-emoji-freq':     pol.emojis,
+    'u-emojis':         pol.emojiList,
     'u-client-id':      sc.clientId,
     'u-afterhours':     pol.afterhours,
     'u-stock':          pol.stock,
