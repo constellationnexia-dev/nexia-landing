@@ -1645,12 +1645,13 @@ pauseMsg.addEventListener('input', () => {
 const BACKEND_URL = 'https://nexia-backend-production-c65e.up.railway.app';
 async function loadGCalStatus() {
   if (!BIZ_ID) { setTimeout(loadGCalStatus, 800); return; }
-  const { data } = await db.from('businesses').select('google_refresh_token').eq('id', BIZ_ID).single();
+  const { data } = await db.from('businesses').select('google_refresh_token, google_calendar_email').eq('id', BIZ_ID).single();
   const connected = !!(data && data.google_refresh_token);
+  const email = data?.google_calendar_email;
   const statusEl = document.getElementById('gcal-status');
   const actionsEl = document.getElementById('gcal-actions');
   if (connected) {
-    statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600">✓ Conectado</span> — el bot puede agendar citas automáticamente.';
+    statusEl.innerHTML = `<span style="color:#22c55e;font-weight:600">✓ Conectado</span>${email ? ' — <span style="color:var(--muted);font-size:.9rem">' + email + '</span>' : ''} — el bot puede agendar citas automáticamente.`;
     actionsEl.innerHTML = `<a href="${BACKEND_URL}/auth/google/${BIZ_ID}" style="font-size:.8rem;color:var(--muted);text-decoration:underline;cursor:pointer">Cambiar cuenta de Google</a>`;
   } else {
     statusEl.textContent = 'No conectado — el bot no puede agendar citas automáticamente.';
@@ -1658,7 +1659,7 @@ async function loadGCalStatus() {
   }
   // Si viene de redirigir tras conectar
   if (new URLSearchParams(location.search).get('calendar') === 'connected') {
-    statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600">✓ ¡Conectado exitosamente!</span>';
+    statusEl.innerHTML = `<span style="color:#22c55e;font-weight:600">✓ ¡Conectado exitosamente!</span>${email ? ' — <span style="color:var(--muted);font-size:.9rem">' + email + '</span>' : ''}`;
     history.replaceState({}, '', location.pathname);
   }
 }
