@@ -414,7 +414,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="u-grid">
         <div class="field"><label for="u-online">Modalidad de atención</label><select id="u-online"><option value="no">Solo presencial</option><option value="si">Presencial y online</option><option value="only">Solo online</option></select></div>
         <div class="field"><label for="u-tone">Tono del asistente</label><select id="u-tone" onchange="document.getElementById('field-emojis').style.display=this.value==='Formal'?'none':'block'"><option value="Amigable">Amigable (tú, cercano)</option><option value="Formal">Formal (usted, profesional)</option></select></div>
-        <div class="field" id="field-emojis"><label for="u-emojis">Uso de emojis</label><select id="u-emojis"><option value="moderado">Moderado (ocasional)</option><option value="nunca">Nunca</option><option value="siempre">Siempre</option></select></div>
+        <div class="field" id="field-emojis"><label for="u-emoji-freq">Uso de emojis</label><select id="u-emoji-freq"><option value="moderado">Moderado (ocasional)</option><option value="nunca">Nunca</option><option value="siempre">Siempre</option></select></div>
       </div>
       <div class="u-grid" id="field-address-row">
         <div class="field"><label for="u-address">Dirección física</label><input type="text" id="u-address" placeholder="Ej: Av. Principal 123, Quito"></div>
@@ -601,11 +601,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     <div class="u-section" id="u-asistente">
       <h3>🤖 Asistente</h3>
       <div class="field"><label for="u-rude">¿Qué debe responder el bot si alguien es irrespetuoso?</label><textarea id="u-rude" rows="2" placeholder="Ej: Entiendo que puedas estar frustrado, pero para poder ayudarte necesito que mantengamos una conversación respetuosa. Si tienes algún problema puntual, con gusto te ayudo a resolverlo 😊"></textarea><p class="f-hint">💡 Si no configuras esto, el bot ignorará los insultos y seguirá siendo amable</p></div>
-      <div class="field">
-        <label for="u-emojis">Emojis que puede usar el bot <span style="color:var(--muted);font-size:.78rem">(máx. 10, separados por espacio)</span></label>
-        <input type="text" id="u-emojis" placeholder="😊 🙌 ✅ 📅 💬 🎉" maxlength="60">
-        <p class="f-hint">💡 Sugeridos: 😊 🙌 ✅ 📅 💬 🎉 — déjalo vacío para usar los predeterminados. En tono Formal el bot no usa emojis.</p>
-      </div>
+      <input type="hidden" id="u-emojis" value="">
       <div class="field">
         <label for="u-client-id">Al agendar una cita, ¿qué datos pedir al cliente?</label>
         <select id="u-client-id">
@@ -1042,7 +1038,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-client-id'];
+const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-emoji-freq', 'u-client-id'];
 /* ===== Plantillas de ejemplo ===== */
 const TEMPLATES = {
   viajes: {
@@ -1190,7 +1186,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
         policies: {
           warranty: data['u-warranty'], emergency: data['u-emergency'],
           human: data['u-human'], rude: data['u-rude'],
-          emojis: data['u-emojis'], clientId: data['u-client-id'],
+          emojis: data['u-emoji-freq'] || data['u-emojis'], clientId: data['u-client-id'],
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
         custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
@@ -1435,7 +1431,7 @@ function populateFormFromConfig(biz) {
     const el = document.getElementById('u-tone'); if(el) el.value = biz.bot_tone;
     document.getElementById('field-emojis').style.display = biz.bot_tone === 'Formal' ? 'none' : 'block';
   }
-  { const emojiVal = biz.config?.policies?.emojis || 'moderado'; const el = document.getElementById('u-emojis'); if(el) el.value = emojiVal; }
+  { const emojiVal = biz.config?.policies?.emojis || 'moderado'; const el = document.getElementById('u-emoji-freq'); if(el) el.value = emojiVal; }
   { const el = document.getElementById('u-online');        if(el) el.value = biz.only_online ? 'only' : (biz.is_online ? 'si' : 'no'); }
   { const el = document.getElementById('u-accepts-appt');  if(el) el.value = biz.accepts_appointments === false ? 'no' : 'si'; }
   { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
@@ -1481,7 +1477,7 @@ function populateFormFromConfig(biz) {
     'u-emergency':      pol.emergency,
     'u-human':          pol.human,
     'u-rude':           pol.rude,
-    'u-emojis':         pol.emojis,
+    'u-emoji-freq':     pol.emojis,
     'u-client-id':      sc.clientId,
     'u-afterhours':     pol.afterhours,
     'u-stock':          pol.stock,
