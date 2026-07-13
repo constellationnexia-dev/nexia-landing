@@ -233,7 +233,7 @@ input[type=checkbox]{accent-color:var(--accent)}
 .convo-item{display:flex;gap:11px;padding:14px 14px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .2s;align-items:center}
 .convo-item:hover{background:rgba(255,255,255,.03)}
 .convo-item.active{background:rgba(var(--accent-rgb),.08)}
-.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-title);flex-shrink:0;font-size:.9rem;color:#fff}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-title);flex-shrink:0;font-size:.9rem;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .convo-info{min-width:0;flex:1}
 .convo-info .c-name{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .convo-info .c-last{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -748,18 +748,6 @@ if (!hasProducts)  document.getElementById('metric-orders').style.display  = 'no
 const PLAN_PRICES = { starter:29, consultorio:49, negocio:79, empresa:149, premium:249 };
 const PLAN_NAMES  = { starter:'Starter', consultorio:'Consultorio', negocio:'Negocio', empresa:'Empresa', premium:'Premium' };
 
-const AVATAR_COLORS = [
-  ['#7C3AED','#4F46E5'],['#0EA5E9','#0891B2'],['#10B981','#059669'],
-  ['#F59E0B','#D97706'],['#EF4444','#DC2626'],['#EC4899','#DB2777'],
-  ['#8B5CF6','#6D28D9'],['#14B8A6','#0D9488'],['#F97316','#EA580C'],
-  ['#6366F1','#4338CA'],
-];
-function avatarColor(seed) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) & 0xffff;
-  const [a, b] = AVATAR_COLORS[hash % AVATAR_COLORS.length];
-  return `background:linear-gradient(135deg,${a},${b})`;
-}
 
 function formatTime(iso, showHour) {
   if (!iso) return '';
@@ -1374,7 +1362,7 @@ async function loadConversations() {
     const name = c.client_name || c.client_phone;
     const item = document.createElement('div'); item.className = 'convo-item';
     item.innerHTML = `
-      <div class="avatar" style="${avatarColor(c.client_phone)}">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
       <div class="convo-info"><div class="c-name">${name}</div><div class="c-last">Toca para ver la conversación</div></div>
       <span class="c-time">${formatTime(c.updated_at)}</span>`;
     item.addEventListener('click', () => openConvo(c, item));
@@ -1390,7 +1378,7 @@ async function openConvo(c, item) {
   chatPane.innerHTML = `
     <div class="chat-header">
       <button class="back-btn" aria-label="Volver">←</button>
-      <div class="avatar" style="${avatarColor(c.client_phone)}">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
+      <div class="avatar">${/[A-Za-zÁ-Úá-ú]/.test(name) ? name.charAt(0).toUpperCase() : '#'}</div>
       <div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div>
     </div>
     <div class="chat-msgs">
@@ -1413,7 +1401,7 @@ function renderDemoConvos() {
   demos.forEach(c => {
     const name = c.client_name; const last = c.msgs[c.msgs.length-1];
     const item = document.createElement('div'); item.className = 'convo-item';
-    item.innerHTML = `<div class="avatar" style="${avatarColor(c.client_phone)}">${name.charAt(0)}</div><div class="convo-info"><div class="c-name">${name}</div><div class="c-last">${last.content.slice(0,60)}</div></div><span class="c-time">${formatTime(c.updated_at)}</span>`;
+    item.innerHTML = `<div class="avatar">${name.charAt(0)}</div><div class="convo-info"><div class="c-name">${name}</div><div class="c-last">${last.content.slice(0,60)}</div></div><span class="c-time">${formatTime(c.updated_at)}</span>`;
     item.addEventListener('click', () => {
       document.querySelectorAll('.convo-item').forEach(x => x.classList.toggle('active', x === item));
       chatPane.innerHTML = `<div class="chat-header"><button class="back-btn">←</button><div class="avatar">${name.charAt(0)}</div><div><div class="ch-name">${name}</div><div class="ch-num">${c.client_phone}</div></div></div><div class="chat-msgs">${c.msgs.map(m=>`<div class="msg ${m.role==='user'?'in':'out'}">${m.content}<span class="m-time">${formatTime(m.created_at,true)}</span></div>`).join('')}</div><div class="chat-note">🤖 Datos de ejemplo — conecta tu negocio para ver chats reales.</div>`;
