@@ -1609,6 +1609,23 @@ async function loadDashboard() {
           </div>`;
       }
     }
+    // Cargar servicios y productos desde Supabase (override localStorage)
+    if (BIZ_ID) {
+      const [{ data: dbSvcs }, { data: dbProds }] = await Promise.all([
+        db.from('services').select('name, price, duration, description').eq('business_id', BIZ_ID).eq('is_active', true),
+        db.from('products').select('name, price, description').eq('business_id', BIZ_ID).eq('is_available', true),
+      ]);
+      if (dbSvcs !== null) {
+        itemsSvc.innerHTML = '';
+        dbSvcs.forEach(s => addItemRow(itemsSvc, { name: s.name, price: s.price || '', time: s.duration || '', desc: s.description || '' }, 'Duración'));
+        localStorage.setItem('nexiaServices', JSON.stringify(dbSvcs.map(s => ({ name: s.name, price: s.price || '', time: s.duration || '', desc: s.description || '' }))));
+      }
+      if (dbProds !== null) {
+        itemsProd.innerHTML = '';
+        dbProds.forEach(p => addItemRow(itemsProd, { name: p.name, price: p.price || '', time: '', desc: p.description || '' }, 'Entrega'));
+        localStorage.setItem('nexiaProducts', JSON.stringify(dbProds.map(p => ({ name: p.name, price: p.price || '', time: '', desc: p.description || '' }))));
+      }
+    }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
     console.error('Dashboard error:', err);
