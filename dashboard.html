@@ -1541,7 +1541,7 @@ async function loadDashboard() {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
     const currentMonth = now.toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
-      db.from('businesses').select('business_name,business_description,city,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
@@ -1559,6 +1559,8 @@ async function loadDashboard() {
       document.getElementById('bot-dot').classList.toggle('paused', paused);
       document.getElementById('bot-status-text').textContent = paused ? 'Bot pausado' : 'Bot activo';
       document.getElementById('pause-toggle').checked = paused;
+      if (biz.bot_pause_message) document.getElementById('pause-msg').value = biz.bot_pause_message;
+      updatePauseUI();
       if (!biz.accepts_appointments) document.getElementById('metric-services').style.display = 'none';
       if (!biz.accepts_orders) document.getElementById('metric-orders').style.display = 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
@@ -1620,7 +1622,7 @@ const pauseToggle = document.getElementById('pause-toggle');
 const pauseMsg = document.getElementById('pause-msg');
 const DEFAULT_PAUSE_MSG = 'En este momento no estamos atendiendo por este medio, volvemos pronto.';
 /* recuerda el mensaje personalizado */
-pauseMsg.value = localStorage.getItem('nexiaPauseMsg') || DEFAULT_PAUSE_MSG;
+pauseMsg.value = DEFAULT_PAUSE_MSG; // se sobreescribe con el valor de DB al cargar
 function updatePauseUI(){
   const paused = pauseToggle.checked;
   const msg = pauseMsg.value.trim() || DEFAULT_PAUSE_MSG;
@@ -1633,12 +1635,20 @@ function updatePauseUI(){
 pauseToggle.addEventListener('change', async () => {
   updatePauseUI();
   if (BIZ_ID) {
-    await db.from('businesses').update({ bot_active: !pauseToggle.checked }).eq('id', BIZ_ID);
+    await db.from('businesses').update({
+      bot_active: !pauseToggle.checked,
+      bot_pause_message: pauseMsg.value.trim() || DEFAULT_PAUSE_MSG,
+    }).eq('id', BIZ_ID);
   }
 });
 pauseMsg.addEventListener('input', () => {
   localStorage.setItem('nexiaPauseMsg', pauseMsg.value);
   updatePauseUI();
+});
+pauseMsg.addEventListener('blur', async () => {
+  if (BIZ_ID) {
+    await db.from('businesses').update({ bot_pause_message: pauseMsg.value.trim() || DEFAULT_PAUSE_MSG }).eq('id', BIZ_ID);
+  }
 });
 
 /* ── Google Calendar — estado de conexión ── */
