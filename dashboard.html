@@ -1619,12 +1619,16 @@ async function loadDashboard() {
         itemsSvc.innerHTML = '';
         dbSvcs.forEach(s => addItemRow(itemsSvc, { name: s.name, price: s.price || '', time: s.duration || '', desc: s.description || '' }, 'Duración'));
         localStorage.setItem('nexiaServices', JSON.stringify(dbSvcs.map(s => ({ name: s.name, price: s.price || '', time: s.duration || '', desc: s.description || '' }))));
+        localStorage.setItem('nexiaSvcCount', dbSvcs.length);
       }
       if (dbProds !== null) {
         itemsProd.innerHTML = '';
         dbProds.forEach(p => addItemRow(itemsProd, { name: p.name, price: p.price || '', time: '', desc: p.description || '' }, 'Entrega'));
         localStorage.setItem('nexiaProducts', JSON.stringify(dbProds.map(p => ({ name: p.name, price: p.price || '', time: '', desc: p.description || '' }))));
+        localStorage.setItem('nexiaProdCount', dbProds.length);
       }
+      // Actualizar chipNames con datos reales de Supabase
+      chipNames = [...(dbSvcs || []), ...(dbProds || [])].map(x => x.name).filter(Boolean).slice(0, 30);
     }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
