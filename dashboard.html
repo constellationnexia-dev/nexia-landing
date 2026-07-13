@@ -480,16 +480,15 @@ input[type=checkbox]{accent-color:var(--accent)}
       </div>
       <div class="field">
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
-        <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
+          <label id="prof-horarios-toggle-wrap" style="display:none;align-items:center;gap:8px;cursor:pointer;font-size:.83rem;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px 12px;background:var(--bg2)">
+            <input type="checkbox" id="u-profs-diff-hours" style="accent-color:var(--accent);width:15px;height:15px">
+            ¿Horarios distintos?
+          </label>
+        </div>
       </div>
       <div id="prof-list"></div>
-      <div id="prof-horarios-toggle-wrap" style="display:none;margin-bottom:16px">
-        <label class="chk-row" style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:.86rem;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--bg2)">
-          <input type="checkbox" id="u-profs-diff-hours" style="accent-color:var(--accent);width:16px;height:16px">
-          ¿Trabajan en horarios distintos?
-        </label>
-        <p class="f-hint">Si está activado, puedes definir el horario de cada profesional por separado.</p>
-      </div>
       <div class="field">
         <label for="u-break">¿Tienen descanso o almuerzo?</label>
         <select id="u-break"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
