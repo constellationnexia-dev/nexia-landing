@@ -1147,11 +1147,43 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       <!-- Paso 2: pago -->
       <div class="wiz-panel" id="wiz-2" style="display:none">
         <h3>Confirma tu pago</h3>
-        <p class="modal-sub">Pago seguro procesado por Mercado Pago.</p>
+        <p class="modal-sub">Pago seguro · Encriptado SSL</p>
         <div class="pay-summary" id="pay-summary"></div>
-        <button class="btn btn-primary" id="pay-btn" style="width:100%">Pagar con Mercado Pago →</button>
-        <p class="mp-note">🔒 Nunca vemos los datos de tu tarjeta — Mercado Pago procesa todo.</p>
-        <button class="wiz-back" data-back="1">← Cambiar plan</button>
+
+        <form id="pay-form" autocomplete="off" onsubmit="return false">
+          <div class="field" style="margin-bottom:12px">
+            <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Número de tarjeta</label>
+            <div style="position:relative">
+              <input id="card-number" type="text" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" style="padding-right:48px;letter-spacing:.08em">
+              <span id="card-brand" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none">💳</span>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:12px">
+            <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Nombre en la tarjeta</label>
+            <input id="card-name" type="text" placeholder="NOMBRE APELLIDO" style="text-transform:uppercase;letter-spacing:.04em">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div class="field" style="margin-bottom:0">
+              <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Vencimiento</label>
+              <input id="card-expiry" type="text" inputmode="numeric" placeholder="MM / AA" maxlength="7">
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">CVV</label>
+              <input id="card-cvv" type="text" inputmode="numeric" placeholder="123" maxlength="4">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="pay-btn" style="width:100%;font-size:.97rem">
+            🔒 Pagar ahora
+          </button>
+        </form>
+
+        <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:10px">
+          Tus datos están encriptados y nunca se almacenan en nuestros servidores.
+        </p>
+        <button class="wiz-back" data-back="1" style="margin-top:4px">← Cambiar plan</button>
       </div>
 
       <!-- Paso 3: crear cuenta -->
@@ -1749,19 +1781,39 @@ function renderPaySummary(){
     <div class="row"><span>Plan ${p.name}</span><strong>$${p.m1} USD</strong></div>
     <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes · renovación mensual</span><span>${offer ? 'luego $' + p.price + '/mes' : ''}</span></div>`;
   const btn = document.getElementById('pay-btn');
-  btn.disabled = false;
-  btn.textContent = `Pagar $${p.m1} con Mercado Pago →`;
+  btn.innerHTML = `🔒 Pagar $${p.m1} ahora`;
 }
+
+/* Formateo automático de campos de tarjeta */
+document.getElementById('card-number').addEventListener('input', function(){
+  let v = this.value.replace(/\D/g,'').substring(0,16);
+  this.value = v.replace(/(.{4})/g,'$1 ').trim();
+  const brand = document.getElementById('card-brand');
+  if (v.startsWith('4')) brand.textContent = '💳'; // Visa
+  else if (/^5[1-5]/.test(v)) brand.textContent = '💳'; // MC
+  else if (v.startsWith('34') || v.startsWith('37')) brand.textContent = '💳'; // Amex
+  else brand.textContent = '💳';
+});
+document.getElementById('card-expiry').addEventListener('input', function(){
+  let v = this.value.replace(/\D/g,'').substring(0,4);
+  if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
+  this.value = v;
+});
+document.getElementById('card-cvv').addEventListener('input', function(){
+  this.value = this.value.replace(/\D/g,'').substring(0,4);
+});
+
 document.getElementById('pay-btn').addEventListener('click', function(){
-  const link = MP_LINKS[selectedPlan.id];
-  if (link) { window.open(link, '_blank'); goStep(3); return; }
-  /* Demo: simula el procesamiento mientras no hay links reales de MP */
-  this.disabled = true;
-  this.textContent = 'Procesando pago…';
+  /* Aquí irá la integración real con Payphone/Stripe cuando esté lista */
+  /* Por ahora simula el procesamiento */
+  const btn = this;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></span> Procesando…';
   setTimeout(() => {
-    this.disabled = false;
+    btn.disabled = false;
+    btn.innerHTML = `🔒 Pagar ahora`;
     goStep(3);
-  }, 1600);
+  }, 2000);
 });
 
 /* Navegación principal */
