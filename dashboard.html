@@ -109,6 +109,16 @@ button{font-family:var(--font-body)}
 .bar-labels{display:flex;gap:4px;margin-top:8px}
 .bar-labels span{flex:1;text-align:center;font-size:.62rem;color:var(--muted);overflow:hidden;white-space:nowrap}
 
+/* ===== Editor de horarios (dashboard) ===== */
+.dash-day-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:.84rem}
+.dash-day-row .dname{width:72px;color:var(--muted);flex-shrink:0;font-size:.8rem}
+.dash-day-row input[type=time]{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 8px;color:var(--text);font-family:var(--font-body);font-size:.8rem;outline:none;color-scheme:dark;transition:border-color .3s;width:96px}
+.dash-day-row input[type=time]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.12)}
+.dash-day-row .dsep{color:var(--muted);font-size:.72rem}
+.dash-day-row .dclosed{margin-left:auto;display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.74rem;cursor:pointer;white-space:nowrap}
+.dash-day-row .dclosed input{accent-color:var(--accent)}
+.dash-day-row.closed input[type=time]{opacity:.3;pointer-events:none}
+
 /* ===== Página vacía (Mi Negocio / Config) ===== */
 .empty-card{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:44px 24px;text-align:center;color:var(--muted)}
 .empty-card .e-ico{font-size:2.2rem;display:block;margin-bottom:12px}
@@ -449,10 +459,14 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="si">Sí</option><option value="no">No</option></select></div>
         <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
       </div>
-      <div id="schedule-preview" style="display:none;margin:4px 0 16px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
-        <p style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">📅 Horario en que el bot agendará citas</p>
+      <div class="field" style="margin-top:4px">
+        <label>Horarios de atención</label>
+        <div id="dash-hours-list" style="margin-top:10px"></div>
+      </div>
+      <div id="schedule-preview" style="display:none;margin:4px 0 4px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
+        <p style="font-size:.76rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">⏰ El bot agendará citas en estos horarios</p>
         <div id="schedule-preview-rows" style="display:flex;flex-direction:column;gap:5px"></div>
-        <p style="font-size:.74rem;color:var(--muted);margin-top:10px">⚠️ La última cita debe terminar antes del cierre — por eso el horario disponible es menor al de atención. Para cambiar los horarios, <a href="/" style="color:var(--accent)">vuelve a la configuración inicial</a>.</p>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5">La última cita debe <strong style="color:var(--text)">terminar</strong> antes del cierre, por eso el rango disponible es menor al horario de atención.</p>
       </div>
       <div class="field">
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
@@ -847,32 +861,87 @@ const uBreak = document.getElementById('u-break');
 uBreak.addEventListener('change', () => {
   document.getElementById('u-break-times').style.display = uBreak.value === 'si' ? 'flex' : 'none';
 });
-/* ── Aviso de horario de agendamiento ── */
+/* ── Editor y aviso de horarios de agendamiento ── */
+const DAY_KEYS  = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+const DAY_LABEL = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const DAY_SHORT = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+function buildHoursEditor(savedHours) {
+  const list = document.getElementById('dash-hours-list');
+  list.innerHTML = '';
+  DAY_KEYS.forEach((key, i) => {
+    const h = (savedHours && savedHours[key]) || {};
+    const isClosed = !!h.closed;
+    const row = document.createElement('div');
+    row.className = 'dash-day-row' + (isClosed ? ' closed' : '');
+    row.innerHTML = `
+      <span class="dname">${DAY_LABEL[i]}</span>
+      <input type="time" value="${h.open || '09:00'}">
+      <span class="dsep">a</span>
+      <input type="time" value="${h.close || '18:00'}">
+      <label class="dclosed"><input type="checkbox" ${isClosed ? 'checked' : ''}> Cerrado</label>`;
+    const chk = row.querySelector('input[type=checkbox]');
+    chk.addEventListener('change', () => {
+      row.classList.toggle('closed', chk.checked);
+      renderSchedulePreview();
+      markDirty();
+    });
+    row.querySelectorAll('input[type=time]').forEach(t => {
+      t.addEventListener('change', () => { renderSchedulePreview(); markDirty(); });
+    });
+    list.appendChild(row);
+  });
+  renderSchedulePreview();
+}
+
+function collectWorkingHours() {
+  const rows = document.querySelectorAll('#dash-hours-list .dash-day-row');
+  const out = {};
+  rows.forEach((row, i) => {
+    const closed = row.querySelector('input[type=checkbox]').checked;
+    const times = row.querySelectorAll('input[type=time]');
+    out[DAY_KEYS[i]] = closed ? { closed: true } : { open: times[0].value, close: times[1].value };
+  });
+  return out;
+}
+
+function lastSlot(closeStr, durMin) {
+  if (!closeStr || !durMin) return closeStr || null;
+  const [h, m] = closeStr.split(':').map(Number);
+  const total = h * 60 + m - durMin;
+  if (total < 0) return null;
+  return String(Math.floor(total / 60)).padStart(2,'0') + ':' + String(total % 60).padStart(2,'0');
+}
+
 function renderSchedulePreview() {
-  const hours = window._bizWorkingHours;
   const preview = document.getElementById('schedule-preview');
   const rows = document.getElementById('schedule-preview-rows');
-  if (!hours || !Object.keys(hours).length) { preview.style.display = 'none'; return; }
   const dur = parseInt(document.getElementById('u-appt-duration').value) || 0;
-  const DAY_ORDER = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
-  const DAY_LABEL = {lunes:'Lun',martes:'Mar',miercoles:'Mié',jueves:'Jue',viernes:'Vie',sabado:'Sáb',domingo:'Dom'};
-  function lastSlot(closeStr, durMin) {
-    if (!closeStr || !durMin) return closeStr;
-    const [h, m] = closeStr.split(':').map(Number);
-    const total = h * 60 + m - durMin;
-    if (total < 0) return null;
-    return String(Math.floor(total / 60)).padStart(2,'0') + ':' + String(total % 60).padStart(2,'0');
-  }
-  rows.innerHTML = DAY_ORDER.map(d => {
-    const h = hours[d];
-    if (!h) return '';
-    if (h.closed) return `<div style="display:flex;gap:8px;align-items:center;font-size:.82rem"><span style="width:28px;color:var(--muted)">${DAY_LABEL[d]}</span><span style="color:var(--muted)">Cerrado</span></div>`;
-    const last = lastSlot(h.close, dur);
-    const lastTxt = last ? `hasta las <strong style="color:var(--text)">${last}</strong>` : `<span style="color:#f97316">⚠️ duración mayor al horario</span>`;
-    return `<div style="display:flex;gap:8px;align-items:center;font-size:.82rem"><span style="width:28px;color:var(--muted)">${DAY_LABEL[d]}</span><span style="color:var(--accent)">${h.open}</span><span style="color:var(--muted)">→</span>${lastTxt}${dur ? `<span style="font-size:.7rem;color:var(--muted)">(última cita a las ${last || '—'})</span>` : ''}</div>`;
-  }).join('');
-  preview.style.display = rows.innerHTML.trim() ? 'block' : 'none';
+  const hourRows = document.querySelectorAll('#dash-hours-list .dash-day-row');
+  if (!hourRows.length) { preview.style.display = 'none'; return; }
+  let html = '';
+  hourRows.forEach((row, i) => {
+    const closed = row.querySelector('input[type=checkbox]').checked;
+    if (closed) {
+      html += `<div style="display:flex;gap:10px;align-items:center;font-size:.82rem"><span style="width:32px;color:var(--muted);font-weight:600">${DAY_SHORT[i]}</span><span style="color:var(--muted)">Cerrado</span></div>`;
+      return;
+    }
+    const times = row.querySelectorAll('input[type=time]');
+    const open = times[0].value, close = times[1].value;
+    if (!dur) {
+      html += `<div style="display:flex;gap:10px;align-items:center;font-size:.82rem"><span style="width:32px;color:var(--muted);font-weight:600">${DAY_SHORT[i]}</span><span style="color:var(--accent)">${open}</span><span style="color:var(--muted)">→</span><span style="color:var(--text)">${close}</span></div>`;
+      return;
+    }
+    const last = lastSlot(close, dur);
+    const lastTag = last
+      ? `<span style="color:var(--text);font-weight:600">${last}</span>`
+      : `<span style="color:#f97316;font-size:.74rem">⚠️ duración excede horario</span>`;
+    html += `<div style="display:flex;gap:10px;align-items:center;font-size:.82rem;flex-wrap:wrap"><span style="width:32px;color:var(--muted);font-weight:600">${DAY_SHORT[i]}</span><span style="color:var(--accent)">${open}</span><span style="color:var(--muted)">→</span>${lastTag}<span style="font-size:.72rem;color:var(--muted)">(atienden hasta ${close}, última cita a las ${last || '—'})</span></div>`;
+  });
+  rows.innerHTML = html;
+  preview.style.display = 'block';
 }
+
 document.getElementById('u-appt-duration').addEventListener('input', renderSchedulePreview);
 
 const uReminder = document.getElementById('u-reminder');
@@ -1145,6 +1214,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
         accepts_walkins: data['u-accepts-walkin'] === 'si',
         accepts_orders: data['u-accepts-orders'] === 'si',
         appointment_duration: parseInt(data['u-appt-duration']) || null,
+        working_hours: collectWorkingHours(),
       }).eq('id', BIZ_ID);
     } catch(e) { console.error('Supabase sync error:', e); }
   }
@@ -1364,7 +1434,7 @@ function populateFormFromConfig(biz) {
   { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
   { const el = document.getElementById('u-accepts-orders');if(el) el.value = biz.accepts_orders ? 'si' : 'no'; }
   if (biz.appointment_duration) { const el = document.getElementById('u-appt-duration'); if(el) el.value = biz.appointment_duration; }
-  if (biz.working_hours) { window._bizWorkingHours = biz.working_hours; renderSchedulePreview(); }
+  buildHoursEditor(biz.working_hours || {});
   if (biz.social_links) {
     const sl = biz.social_links;
     if(sl.ig)    { const el = document.getElementById('u-ig');           if(el) el.value = sl.ig; }
