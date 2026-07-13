@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activar Plan — Constellation Nexia</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #00FF88;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #f0f0f0;
+      font-size: 14px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #00FF88;
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .plan-option {
+      cursor: pointer;
+      border: 2px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 14px 12px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .plan-option:hover {
+      border-color: #444;
+    }
+
+    .plan-option.selected {
+      border-color: #00FF88;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .plan-option input {
+      display: none;
+    }
+
+    .plan-name {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: capitalize;
+      margin-bottom: 4px;
+    }
+
+    .plan-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #00FF88;
+    }
+
+    .plan-price span {
+      font-size: 12px;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .plan-msgs {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #00FF88;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .test-badge {
+      display: inline-block;
+      background: rgba(255, 200, 0, 0.12);
+      color: #ffc800;
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+    }
+
+    #result.success {
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: #00FF88;
+    }
+
+    #result.error {
+      background: rgba(255, 80, 80, 0.08);
+      border: 1px solid rgba(255, 80, 80, 0.3);
+      color: #ff6060;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1e1e1e;
+      margin: 20px 0;
+    }
+
+    .status-block {
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+      color: #aaa;
+    }
+
+    .status-row .val { color: #f0f0f0; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="logo">◆ Constellation Nexia</div>
+  <div class="subtitle">Panel de activación</div>
+
+  <div class="card">
+    <div class="test-badge">⚠ MODO SIMULACIÓN — solo para testing</div>
+    <h2>Activar suscripción</h2>
+    <p class="card-subtitle">Ingresá el Business ID del negocio y seleccioná el plan a activar.</p>
+
+    <label>Business ID</label>
+    <input type="text" id="businessId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+
+    <label>Seleccioná un plan</label>
+    <div class="plans">
+      <label class="plan-option selected">
+        <input type="radio" name="plan" value="starter" checked />
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$19 <span>/mes</span></div>
+        <div class="plan-msgs">500 mensajes</div>
+      </label>
+      <label class="plan-option">
+        <input type="radio" name="plan" value="consultorio" />
+        <div class="plan-name">Consultorio</div>
+        <div class="plan-price">$35 <span>/mes</span></div>
+        <div class="plan-msgs">1,000 mensajes</div>
+      </label>
+      <label class="plan-option">
+        <input type="radio" name="plan" value="negocio" />
+        <div class="plan-name">Negocio</div>
+        <div class="plan-price">$59 <span>/mes</span></div>
+        <div class="plan-msgs">2,500 mensajes</div>
+      </label>
+      <label class="plan-option">
+        <input type="radio" name="plan" value="empresa" />
+        <div class="plan-name">Empresa</div>
+        <div class="plan-price">$99 <span>/mes</span></div>
+        <div class="plan-msgs">5,000 mensajes</div>
+      </label>
+    </div>
+
+    <button class="btn" id="payBtn" onclick="simulatePay()">
+      Simular pago exitoso
+    </button>
+
+    <div id="result"></div>
+
+    <hr class="divider" />
+
+    <div style="margin-bottom: 12px;">
+      <label style="margin-bottom: 10px; display: block;">Verificar estado del negocio</label>
+      <button class="btn" style="background:#1e1e1e; color:#f0f0f0; border: 1px solid #333;" onclick="checkStatus()">
+        Ver estado actual
+      </button>
+    </div>
+
+    <div id="statusBlock" style="display:none;" class="status-block">
+      <div class="status-row"><span>Plan</span><span class="val" id="s-plan">—</span></div>
+      <div class="status-row"><span>Suscripción</span><span class="val" id="s-sub">—</span></div>
+      <div class="status-row"><span>Bot activo</span><span class="val" id="s-bot">—</span></div>
+      <div class="status-row"><span>Número WhatsApp</span><span class="val" id="s-phone">—</span></div>
+      <div class="status-row"><span>Mensajes usados</span><span class="val" id="s-msgs">—</span></div>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+
+    // Highlight plan seleccionado
+    document.querySelectorAll('.plan-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+
+    async function simulatePay() {
+      const businessId = document.getElementById('businessId').value.trim();
+      const plan = document.querySelector('input[name="plan"]:checked').value;
+      const btn = document.getElementById('payBtn');
+      const result = document.getElementById('result');
+
+      if (!businessId) {
+        showResult('error', 'Ingresá el Business ID primero.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Procesando...';
+      result.style.display = 'none';
+
+      try {
+        const res = await fetch(`${BACKEND}/payments/simulate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessId, plan }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showResult('success', `✅ ${data.message}`);
+          checkStatus();
+        } else {
+          showResult('error', `❌ Error: ${data.error || 'Algo salió mal'}`);
+        }
+      } catch (err) {
+        showResult('error', `❌ No se pudo conectar al backend: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Simular pago exitoso';
+      }
+    }
+
+    async function checkStatus() {
+      const businessId = document.getElementById('businessId').value.trim();
+      if (!businessId) {
+        showResult('error', 'Ingresá el Business ID primero.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BACKEND}/payments/status/${businessId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          showResult('error', `❌ ${data.error || 'Negocio no encontrado'}`);
+          return;
+        }
+
+        document.getElementById('s-plan').textContent = data.plan || '—';
+        document.getElementById('s-sub').textContent = data.subscription_active ? '✅ Activa' : '❌ Inactiva';
+        document.getElementById('s-bot').textContent = data.bot_active ? '✅ Sí' : '❌ No';
+        document.getElementById('s-phone').textContent = data.phone_number || '⏳ Asignando...';
+        document.getElementById('s-msgs').textContent = `${data.messages_used || 0} / ${data.messages_limit || 0}`;
+        document.getElementById('statusBlock').style.display = 'block';
+      } catch (err) {
+        showResult('error', `❌ Error al consultar: ${err.message}`);
+      }
+    }
+
+    function showResult(type, msg) {
+      const result = document.getElementById('result');
+      result.className = type;
+      result.textContent = msg;
+      result.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
