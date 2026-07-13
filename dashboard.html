@@ -482,10 +482,12 @@ input[type=checkbox]{accent-color:var(--accent)}
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
-          <label id="prof-horarios-toggle-wrap" style="display:none;align-items:center;gap:8px;cursor:pointer;font-size:.83rem;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px 12px;background:var(--bg2)">
-            <input type="checkbox" id="u-profs-diff-hours" style="accent-color:var(--accent);width:15px;height:15px">
-            ¿Horarios distintos?
-          </label>
+          <div id="prof-horarios-toggle-wrap" style="display:none" class="chk-row">
+            <label>
+              <input type="checkbox" id="u-profs-diff-hours">
+              Horarios distintos
+            </label>
+          </div>
         </div>
       </div>
       <div id="prof-list"></div>
