@@ -1967,11 +1967,18 @@ document.getElementById('sub-3').addEventListener('submit', async e => {
   let userId = null;
   if (password) {
     const { data: authData, error: authError } = await auth.signUp({ email, password });
-    if (authError && !authError.message.includes('already registered')) {
+    if (authError) {
       submitBtn.disabled = false; submitBtn.textContent = originalText;
       let errEl = document.getElementById('sub3-error');
-      if (!errEl) { errEl = document.createElement('p'); errEl.id = 'sub3-error'; errEl.style.cssText = 'color:#FF5C5C;font-size:.84rem;margin-top:10px;text-align:center'; submitBtn.parentNode.insertBefore(errEl, submitBtn.nextSibling); }
-      errEl.textContent = '⚠️ ' + authError.message;
+      if (!errEl) { errEl = document.createElement('p'); errEl.id = 'sub3-error'; errEl.style.cssText = 'font-size:.84rem;margin-top:10px;text-align:center'; submitBtn.parentNode.insertBefore(errEl, submitBtn.nextSibling); }
+      if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+        errEl.style.color = '#facc15';
+        errEl.innerHTML = '⚠️ Este email ya tiene una cuenta. <a href="#" class="js-login" style="color:#a78bfa;text-decoration:underline">Inicia sesión →</a>';
+        errEl.querySelector('.js-login').addEventListener('click', e => { e.preventDefault(); closeWizard(); openLogin(); });
+      } else {
+        errEl.style.color = '#FF5C5C';
+        errEl.textContent = '⚠️ ' + authError.message;
+      }
       return;
     }
     if (authData && authData.user) userId = authData.user.id;

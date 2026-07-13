@@ -321,6 +321,16 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="metric" id="metric-services"><div class="m-label">Citas agendadas este mes</div><div class="m-value">—</div><div class="m-note" id="note-appts">este mes</div></div>
       <div class="metric" id="metric-orders"><div class="m-label">Pedidos realizados</div><div class="m-value">—</div><div class="m-note" id="note-orders">este mes</div></div>
     </div>
+    <div style="background:linear-gradient(135deg,#0f0524 0%,#1e0a4a 40%,#0d1f4f 100%);border-radius:14px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <p style="margin:0 0 4px;color:#c4b5fd;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700">✦ Tu número de WhatsApp dedicado ✦</p>
+        <div id="wa-number-display" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:.04em;text-shadow:0 0 18px rgba(167,139,250,.5)">cargando...</div>
+        <p style="margin:6px 0 0;color:#fcd34d;font-size:11px">⚠️ No instales este número en WhatsApp — es exclusivo de tu asistente.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;font-size:12px;color:#a5b4fc;line-height:1.5;max-width:240px">
+        Comparte este número con tus clientes para que hablen con tu bot 24/7.
+      </div>
+    </div>
     <div class="usage-card">
       <div class="usage-top">
         <span class="u-label">Mensajes usados vs límite del plan</span>
@@ -1543,7 +1553,7 @@ async function loadDashboard() {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
     const currentMonth = now.toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
-      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours,phone_number').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
@@ -1553,6 +1563,10 @@ async function loadDashboard() {
     ]);
     if (biz) {
       document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
+      if (biz.phone_number) {
+        const el = document.getElementById('wa-number-display');
+        if (el) el.textContent = biz.phone_number;
+      }
       const used = biz.messages_used || 0, limit = biz.plan_messages_limit || 500;
       document.querySelector('.u-nums').innerHTML = `<b>${used.toLocaleString('es-EC')}</b> / ${limit.toLocaleString('es-EC')}`;
       document.querySelector('.usage-note').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} · Mensajes extra: $0,05 c/u.`;
