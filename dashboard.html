@@ -449,6 +449,11 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="si">Sí</option><option value="no">No</option></select></div>
         <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
       </div>
+      <div id="schedule-preview" style="display:none;margin:4px 0 16px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">📅 Horario en que el bot agendará citas</p>
+        <div id="schedule-preview-rows" style="display:flex;flex-direction:column;gap:5px"></div>
+        <p style="font-size:.74rem;color:var(--muted);margin-top:10px">⚠️ La última cita debe terminar antes del cierre — por eso el horario disponible es menor al de atención. Para cambiar los horarios, <a href="/" style="color:var(--accent)">vuelve a la configuración inicial</a>.</p>
+      </div>
       <div class="field">
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
         <input type="number" id="u-profs" min="1" value="1" style="max-width:130px">
@@ -842,6 +847,34 @@ const uBreak = document.getElementById('u-break');
 uBreak.addEventListener('change', () => {
   document.getElementById('u-break-times').style.display = uBreak.value === 'si' ? 'flex' : 'none';
 });
+/* ── Aviso de horario de agendamiento ── */
+function renderSchedulePreview() {
+  const hours = window._bizWorkingHours;
+  const preview = document.getElementById('schedule-preview');
+  const rows = document.getElementById('schedule-preview-rows');
+  if (!hours || !Object.keys(hours).length) { preview.style.display = 'none'; return; }
+  const dur = parseInt(document.getElementById('u-appt-duration').value) || 0;
+  const DAY_ORDER = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+  const DAY_LABEL = {lunes:'Lun',martes:'Mar',miercoles:'Mié',jueves:'Jue',viernes:'Vie',sabado:'Sáb',domingo:'Dom'};
+  function lastSlot(closeStr, durMin) {
+    if (!closeStr || !durMin) return closeStr;
+    const [h, m] = closeStr.split(':').map(Number);
+    const total = h * 60 + m - durMin;
+    if (total < 0) return null;
+    return String(Math.floor(total / 60)).padStart(2,'0') + ':' + String(total % 60).padStart(2,'0');
+  }
+  rows.innerHTML = DAY_ORDER.map(d => {
+    const h = hours[d];
+    if (!h) return '';
+    if (h.closed) return `<div style="display:flex;gap:8px;align-items:center;font-size:.82rem"><span style="width:28px;color:var(--muted)">${DAY_LABEL[d]}</span><span style="color:var(--muted)">Cerrado</span></div>`;
+    const last = lastSlot(h.close, dur);
+    const lastTxt = last ? `hasta las <strong style="color:var(--text)">${last}</strong>` : `<span style="color:#f97316">⚠️ duración mayor al horario</span>`;
+    return `<div style="display:flex;gap:8px;align-items:center;font-size:.82rem"><span style="width:28px;color:var(--muted)">${DAY_LABEL[d]}</span><span style="color:var(--accent)">${h.open}</span><span style="color:var(--muted)">→</span>${lastTxt}${dur ? `<span style="font-size:.7rem;color:var(--muted)">(última cita a las ${last || '—'})</span>` : ''}</div>`;
+  }).join('');
+  preview.style.display = rows.innerHTML.trim() ? 'block' : 'none';
+}
+document.getElementById('u-appt-duration').addEventListener('input', renderSchedulePreview);
+
 const uReminder = document.getElementById('u-reminder');
 uReminder.addEventListener('change', () => {
   document.getElementById('u-reminder-hours-wrap').style.display = uReminder.value === 'si' ? 'block' : 'none';
@@ -1331,6 +1364,7 @@ function populateFormFromConfig(biz) {
   { const el = document.getElementById('u-accepts-walkin');if(el) el.value = biz.accepts_walkins ? 'si' : 'no'; }
   { const el = document.getElementById('u-accepts-orders');if(el) el.value = biz.accepts_orders ? 'si' : 'no'; }
   if (biz.appointment_duration) { const el = document.getElementById('u-appt-duration'); if(el) el.value = biz.appointment_duration; }
+  if (biz.working_hours) { window._bizWorkingHours = biz.working_hours; renderSchedulePreview(); }
   if (biz.social_links) {
     const sl = biz.social_links;
     if(sl.ig)    { const el = document.getElementById('u-ig');           if(el) el.value = sl.ig; }
@@ -1429,7 +1463,7 @@ async function loadDashboard() {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
     const currentMonth = now.toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
-      db.from('businesses').select('business_name,business_description,city,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,city,plan,bot_active,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
