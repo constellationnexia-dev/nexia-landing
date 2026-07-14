@@ -287,6 +287,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   <button class="nav-item active" data-page="stats"><span class="ico">📊</span><span class="label">Estadísticas</span></button>
   <button class="nav-item" data-page="org" id="nav-org"><span class="ico" id="org-ico">🏪</span><span class="label" id="org-label">Mi Negocio</span></button>
   <button class="nav-item" data-page="convos"><span class="ico">💬</span><span class="label">Conversaciones</span></button>
+  <button class="nav-item" data-page="appts"><span class="ico">📅</span><span class="label">Citas</span></button>
   <button class="nav-item" data-page="config"><span class="ico">⚙️</span><span class="label">Configuración</span></button>
   <div class="bottom">
     <div class="bot-status"><span class="bot-dot" id="bot-dot"></span><span class="bs-text" id="bot-status-text">Bot activo</span></div>
@@ -660,6 +661,20 @@ input[type=checkbox]{accent-color:var(--accent)}
   </section>
 
   <!-- PÁGINA: CONFIGURACIÓN -->
+  <!-- ── PÁGINA: CITAS ─────────────────────────────────────── -->
+  <section class="page" id="page-appts">
+    <div class="page-head">
+      <h1>Citas agendadas</h1>
+      <p>Últimas citas confirmadas por tu asistente.</p>
+    </div>
+    <div id="appts-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando citas...</div>
+    <div id="appts-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="appts-empty" style="display:none;text-align:center;padding:48px 20px">
+      <div style="font-size:2.5rem;margin-bottom:12px">📅</div>
+      <p style="color:var(--muted);font-size:.9rem">Aún no hay citas confirmadas.<br>Cuando un cliente agende por WhatsApp aparecerán aquí.</p>
+    </div>
+  </section>
+
   <section class="page" id="page-config">
     <div class="page-head">
       <h1>Configuración</h1>
@@ -1353,12 +1368,17 @@ document.getElementById('logout-yes').addEventListener('click', () => { localSto
 /* ============================================================
    Navegación del menú lateral
    ============================================================ */
+let apptsLoaded = false;
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === btn));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + btn.dataset.page).classList.add('active');
     window.scrollTo({ top: 0 });
+    if (btn.dataset.page === 'appts' && !apptsLoaded) {
+      apptsLoaded = true;
+      loadAppointments();
+    }
   });
 });
 
@@ -1613,6 +1633,56 @@ function populateFormFromConfig(biz) {
 /* ============================================================
    CARGA INICIAL DESDE SUPABASE
    ============================================================ */
+async function loadAppointments() {
+  if (!BIZ_ID) return;
+  const loadingEl = document.getElementById('appts-loading');
+  const listEl    = document.getElementById('appts-list');
+  const emptyEl   = document.getElementById('appts-empty');
+  try {
+    const { data: appts } = await db
+      .from('appointments')
+      .select('id,client_name,client_phone,service_name,appointment_date,appointment_time,assigned_professional,status,notes,created_at')
+      .eq('business_id', BIZ_ID)
+      .order('appointment_date', { ascending: false })
+      .order('appointment_time', { ascending: false })
+      .limit(30);
+
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (!appts || !appts.length) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+
+    const fmtDate = iso => {
+      const [y, m, d] = iso.split('-');
+      return new Date(iso + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    };
+    const STATUS_LABEL = { confirmed:'Confirmada', cancelled:'Cancelada', pending:'Pendiente' };
+    const STATUS_COLOR = { confirmed:'#22c55e', cancelled:'#ef4444', pending:'#f59e0b' };
+
+    listEl.innerHTML = appts.map(a => `
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:.95rem;margin-bottom:3px">${a.client_name || 'Cliente'}</div>
+            <div style="font-size:.8rem;color:var(--muted)">${a.client_phone || ''}</div>
+          </div>
+          <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${STATUS_COLOR[a.status]||'#6b7280'}22;color:${STATUS_COLOR[a.status]||'#6b7280'}">${STATUS_LABEL[a.status]||a.status}</span>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.83rem;color:var(--muted)">
+          ${a.service_name ? `<span>🔧 ${a.service_name}</span>` : ''}
+          <span>📅 ${fmtDate(a.appointment_date)}</span>
+          <span>⏰ ${(a.appointment_time||'').slice(0,5)}</span>
+          ${a.assigned_professional ? `<span style="color:var(--accent)">👤 ${a.assigned_professional}</span>` : ''}
+        </div>
+        ${a.notes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    console.error('loadAppointments error:', e);
+    if (loadingEl) loadingEl.textContent = 'Error cargando citas.';
+  }
+}
+
 async function loadDashboard() {
   if (!BIZ_ID) {
     await loadChart(7); renderDemoConvos();
