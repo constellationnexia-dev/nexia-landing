@@ -1212,6 +1212,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
   data.profs = collectProfs();
+  data.profsDiffHours = document.getElementById('u-profs-diff-hours').checked;
   data.payMethods = [...document.querySelectorAll('.pm:checked')].map(c => c.value);
   const basicSel = basicPayBox.querySelector('input[type=radio]:checked');
   data.basicPay = { mode: basicSel ? basicSel.value : '', pct: basicPct.value };
@@ -1309,6 +1310,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
     U_IDS.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; });
     /* compatibilidad con datos guardados con el checkbox anterior */
     if (data.break === true && data['u-break'] === undefined) uBreak.value = 'si';
+    if (data.profsDiffHours) document.getElementById('u-profs-diff-hours').checked = true;
     renderProfs(Math.max(1, parseInt(data['u-profs'], 10) || 1), data.profs);
     (data.payMethods || []).forEach(v => {
       const c = [...document.querySelectorAll('.pm')].find(x => x.value === v);
