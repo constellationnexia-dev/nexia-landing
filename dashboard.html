@@ -665,13 +665,19 @@ input[type=checkbox]{accent-color:var(--accent)}
   <section class="page" id="page-appts">
     <div class="page-head">
       <h1>Citas agendadas</h1>
-      <p>Últimas citas confirmadas por tu asistente.</p>
+      <p>Gestiona las citas confirmadas por tu asistente.</p>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button id="tab-upcoming" onclick="switchApptTab('upcoming')" style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:var(--accent);color:white">Próximas <span id="count-upcoming"></span></button>
+      <button id="tab-done" onclick="switchApptTab('done')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Realizadas <span id="count-done"></span></button>
+      <button id="tab-cancelled" onclick="switchApptTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Canceladas <span id="count-cancelled"></span></button>
     </div>
     <div id="appts-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando citas...</div>
     <div id="appts-list" style="display:flex;flex-direction:column;gap:10px"></div>
     <div id="appts-empty" style="display:none;text-align:center;padding:48px 20px">
       <div style="font-size:2.5rem;margin-bottom:12px">📅</div>
-      <p style="color:var(--muted);font-size:.9rem">Aún no hay citas confirmadas.<br>Cuando un cliente agende por WhatsApp aparecerán aquí.</p>
+      <p style="color:var(--muted);font-size:.9rem" id="appts-empty-text">No hay citas en esta sección.</p>
     </div>
   </section>
 
@@ -1633,6 +1639,113 @@ function populateFormFromConfig(biz) {
 /* ============================================================
    CARGA INICIAL DESDE SUPABASE
    ============================================================ */
+let allAppts = [];
+let currentApptTab = 'upcoming';
+const TODAY = new Date().toISOString().split('T')[0];
+
+function isUpcoming(a) { return a.status !== 'cancelled' && a.appointment_date >= TODAY; }
+function isDone(a)     { return a.status !== 'cancelled' && a.appointment_date < TODAY; }
+function isCancelled(a){ return a.status === 'cancelled'; }
+
+function switchApptTab(tab) {
+  currentApptTab = tab;
+  const tabs = { upcoming: '#7c3aed', done: '#22c55e', cancelled: '#ef4444' };
+  ['upcoming','done','cancelled'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (!el) return;
+    const active = t === tab;
+    el.style.background = active ? tabs[t] : 'none';
+    el.style.color      = active ? 'white' : 'var(--muted)';
+    el.style.border     = active ? 'none'  : '1px solid var(--line)';
+  });
+  renderAppts();
+}
+
+function renderAppts() {
+  const listEl   = document.getElementById('appts-list');
+  const emptyEl  = document.getElementById('appts-empty');
+  const emptyTxt = document.getElementById('appts-empty-text');
+
+  const emptyMsgs = {
+    upcoming:  'No hay citas próximas. Cuando un cliente agende por WhatsApp aparecerán aquí.',
+    done:      'No hay citas realizadas aún.',
+    cancelled: 'No hay citas canceladas.',
+  };
+  const filterFn = { upcoming: isUpcoming, done: isDone, cancelled: isCancelled };
+  const filtered = allAppts.filter(filterFn[currentApptTab]);
+
+  if (!filtered.length) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    emptyTxt.textContent = emptyMsgs[currentApptTab];
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+
+  // Próximas: orden ascendente (la más próxima arriba); Realizadas y Canceladas: descendente
+  const sorted = [...filtered].sort((a, b) => {
+    const d = a.appointment_date.localeCompare(b.appointment_date);
+    return currentApptTab === 'upcoming' ? d : -d;
+  });
+
+  listEl.innerHTML = sorted.map(a => `
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;${isCancelled(a)||isDone(a)?'opacity:.75':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:700;color:var(--text);font-size:.95rem;margin-bottom:3px">${a.client_name || 'Cliente'}</div>
+          <div style="font-size:.8rem;color:var(--muted)">${a.client_phone || ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${isUpcoming(a) ? `
+            <button onclick="cancelAppointment('${a.id}')" style="padding:5px 12px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.75rem;font-weight:600;cursor:pointer">Cancelar</button>
+          ` : isCancelled(a) ? `
+            <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#ef444422;color:#ef4444">Cancelada</span>
+          ` : `
+            <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#22c55e22;color:#22c55e">Realizada</span>
+          `}
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.83rem;color:var(--muted)">
+        ${a.service_name ? `<span>🔧 ${a.service_name}</span>` : ''}
+        <span>📅 ${fmtDate(a.appointment_date)}</span>
+        <span>⏰ ${(a.appointment_time||'').slice(0,5)}</span>
+        ${a.assigned_professional ? `<span style="color:var(--accent)">👤 ${a.assigned_professional}</span>` : ''}
+      </div>
+      ${a.notes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>` : ''}
+    </div>`).join('');
+}
+
+async function cancelAppointment(apptId) {
+  if (!confirm('¿Cancelar esta cita? Se eliminará también del Google Calendar.')) return;
+  try {
+    const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+    const res = await fetch(`${BACKEND}/appointments/${apptId}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID }),
+    });
+    if (!res.ok) throw new Error('Error del servidor');
+    const appt = allAppts.find(a => a.id === apptId);
+    if (appt) appt.status = 'cancelled';
+    updateApptCounts();
+    renderAppts();
+  } catch(e) {
+    alert('No se pudo cancelar la cita. Intenta de nuevo.');
+    console.error(e);
+  }
+}
+
+function updateApptCounts() {
+  const upcoming  = allAppts.filter(isUpcoming).length;
+  const done      = allAppts.filter(isDone).length;
+  const cancelled = allAppts.filter(isCancelled).length;
+  document.getElementById('count-upcoming').textContent  = upcoming  ? `(${upcoming})`  : '';
+  document.getElementById('count-done').textContent      = done      ? `(${done})`      : '';
+  document.getElementById('count-cancelled').textContent = cancelled ? `(${cancelled})` : '';
+}
+
 async function loadAppointments() {
   if (!BIZ_ID) return;
   const loadingEl = document.getElementById('appts-loading');
@@ -1645,38 +1758,18 @@ async function loadAppointments() {
       .eq('business_id', BIZ_ID)
       .order('appointment_date', { ascending: false })
       .order('appointment_time', { ascending: false })
-      .limit(30);
+      .limit(100);
 
     if (loadingEl) loadingEl.style.display = 'none';
-    if (!appts || !appts.length) {
+
+    allAppts = appts || [];
+    updateApptCounts();
+
+    if (!allAppts.length) {
       if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
-
-    const fmtDate = iso => {
-      const [y, m, d] = iso.split('-');
-      return new Date(iso + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-    };
-    const STATUS_LABEL = { confirmed:'Confirmada', cancelled:'Cancelada', pending:'Pendiente' };
-    const STATUS_COLOR = { confirmed:'#22c55e', cancelled:'#ef4444', pending:'#f59e0b' };
-
-    listEl.innerHTML = appts.map(a => `
-      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:700;color:var(--text);font-size:.95rem;margin-bottom:3px">${a.client_name || 'Cliente'}</div>
-            <div style="font-size:.8rem;color:var(--muted)">${a.client_phone || ''}</div>
-          </div>
-          <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${STATUS_COLOR[a.status]||'#6b7280'}22;color:${STATUS_COLOR[a.status]||'#6b7280'}">${STATUS_LABEL[a.status]||a.status}</span>
-        </div>
-        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.83rem;color:var(--muted)">
-          ${a.service_name ? `<span>🔧 ${a.service_name}</span>` : ''}
-          <span>📅 ${fmtDate(a.appointment_date)}</span>
-          <span>⏰ ${(a.appointment_time||'').slice(0,5)}</span>
-          ${a.assigned_professional ? `<span style="color:var(--accent)">👤 ${a.assigned_professional}</span>` : ''}
-        </div>
-        ${a.notes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>` : ''}
-      </div>`).join('');
+    renderAppts();
   } catch(e) {
     console.error('loadAppointments error:', e);
     if (loadingEl) loadingEl.textContent = 'Error cargando citas.';
