@@ -886,9 +886,13 @@ function renderProfs(n, saved){
   if (n < 2) { if (toggleWrap) toggleWrap.style.display = 'none'; return; }
   if (toggleWrap) toggleWrap.style.display = 'block';
   const diffHours = document.getElementById('u-profs-diff-hours').checked;
+  // Fallback: si Supabase no tiene working_hours aún, usar localStorage
+  let lsProfs = [];
+  try { lsProfs = JSON.parse(localStorage.getItem('nexiaUltra') || 'null')?.profs || []; } catch(e){}
   const names = chipNames.length ? chipNames : ['Servicio 1', 'Servicio 2'];
   for (let i = 0; i < n; i++) {
     const sv = (saved && saved[i]) || null;
+    const profHours = (sv && sv.working_hours) || (lsProfs[i] && lsProfs[i].working_hours) || null;
     const card = document.createElement('div');
     card.className = 'prof-card';
     card.innerHTML = `
@@ -914,7 +918,7 @@ function renderProfs(n, saved){
       schedLabel.style.marginTop = '10px';
       schedLabel.textContent = 'Horario de este profesional';
       card.appendChild(schedLabel);
-      renderProfSchedule(card, sv && sv.working_hours);
+      renderProfSchedule(card, profHours);
     }
     card.querySelectorAll('input').forEach(inp => inp.addEventListener('change', markDirty));
     card.querySelectorAll('input').forEach(inp => inp.addEventListener('input', markDirty));
@@ -1587,7 +1591,8 @@ function populateFormFromConfig(biz) {
   /* Profesionales */
   if (cfg.professionals && cfg.professionals.length) {
     uProfs.value = cfg.professionals.length;
-    const hasDiffHours = cfg.professionals.some(p => p.working_hours);
+    let lsRawProf = null; try { lsRawProf = JSON.parse(localStorage.getItem('nexiaUltra') || 'null'); } catch(e){}
+    const hasDiffHours = cfg.professionals.some(p => p.working_hours) || !!(lsRawProf && lsRawProf.profsDiffHours);
     if (hasDiffHours) document.getElementById('u-profs-diff-hours').checked = true;
     renderProfs(cfg.professionals.length, cfg.professionals);
   }
