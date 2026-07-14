@@ -916,6 +916,8 @@ function renderProfs(n, saved){
       card.appendChild(schedLabel);
       renderProfSchedule(card, sv && sv.working_hours);
     }
+    card.querySelectorAll('input').forEach(inp => inp.addEventListener('change', markDirty));
+    card.querySelectorAll('input').forEach(inp => inp.addEventListener('input', markDirty));
     profList.appendChild(card);
   }
 }
@@ -928,7 +930,7 @@ function collectProfs(){
   }));
 }
 uProfs.addEventListener('change', () => renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), collectProfs()));
-document.getElementById('u-profs-diff-hours').addEventListener('change', () => renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), collectProfs()));
+document.getElementById('u-profs-diff-hours').addEventListener('change', () => { markDirty(); renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), collectProfs()); });
 
 /* Condicionales de la sección de citas */
 const uBreak = document.getElementById('u-break');
@@ -1583,6 +1585,8 @@ function populateFormFromConfig(biz) {
   /* Profesionales */
   if (cfg.professionals && cfg.professionals.length) {
     uProfs.value = cfg.professionals.length;
+    const hasDiffHours = cfg.professionals.some(p => p.working_hours);
+    if (hasDiffHours) document.getElementById('u-profs-diff-hours').checked = true;
     renderProfs(cfg.professionals.length, cfg.professionals);
   }
 
