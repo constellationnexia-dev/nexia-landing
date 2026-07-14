@@ -854,7 +854,7 @@ function renderProfSchedule(container, savedHours) {
     const bh = bizWorkingHours[day] || {};
     const defOpen  = h.open  || bh.open  || '09:00';
     const defClose = h.close || bh.close || '18:00';
-    const isActive = h.open ? !h.closed : (bh.open && !bh.closed);
+    const isActive = h.closed === true ? false : (h.open ? true : (bh.open && !bh.closed));
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:.8rem';
     row.innerHTML = `
