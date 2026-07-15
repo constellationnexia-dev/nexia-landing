@@ -288,6 +288,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   <button class="nav-item" data-page="org" id="nav-org"><span class="ico" id="org-ico">🏪</span><span class="label" id="org-label">Mi Negocio</span></button>
   <button class="nav-item" data-page="convos"><span class="ico">💬</span><span class="label">Conversaciones</span></button>
   <button class="nav-item" data-page="appts"><span class="ico">📅</span><span class="label">Citas</span></button>
+  <button class="nav-item" data-page="orders"><span class="ico">🛒</span><span class="label">Pedidos</span></button>
   <button class="nav-item" data-page="config"><span class="ico">⚙️</span><span class="label">Configuración</span></button>
   <div class="bottom">
     <div class="bot-status"><span class="bot-dot" id="bot-dot"></span><span class="bs-text" id="bot-status-text">Bot activo</span></div>
@@ -672,12 +673,33 @@ input[type=checkbox]{accent-color:var(--accent)}
       <button id="tab-upcoming" onclick="switchApptTab('upcoming')" style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:var(--accent);color:white">Próximas <span id="count-upcoming"></span></button>
       <button id="tab-done" onclick="switchApptTab('done')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Realizadas <span id="count-done"></span></button>
       <button id="tab-cancelled" onclick="switchApptTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Canceladas <span id="count-cancelled"></span></button>
+      <button id="tab-all" onclick="switchApptTab('all')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todas <span id="count-all"></span></button>
     </div>
     <div id="appts-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando citas...</div>
     <div id="appts-list" style="display:flex;flex-direction:column;gap:10px"></div>
     <div id="appts-empty" style="display:none;text-align:center;padding:48px 20px">
       <div style="font-size:2.5rem;margin-bottom:12px">📅</div>
       <p style="color:var(--muted);font-size:.9rem" id="appts-empty-text">No hay citas en esta sección.</p>
+    </div>
+  </section>
+
+  <section class="page" id="page-orders">
+    <div class="page-head">
+      <h1>Pedidos</h1>
+      <p>Pedidos recibidos por tu asistente. Actualiza el estado en tiempo real.</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button id="otab-pending"   onclick="switchOrderTab('pending')"   style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:#f59e0b;color:white">Pendientes <span id="ocount-pending"></span></button>
+      <button id="otab-preparing" onclick="switchOrderTab('preparing')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">En preparación <span id="ocount-preparing"></span></button>
+      <button id="otab-ready"     onclick="switchOrderTab('ready')"     style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Listos <span id="ocount-ready"></span></button>
+      <button id="otab-delivered" onclick="switchOrderTab('delivered')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Entregados <span id="ocount-delivered"></span></button>
+      <button id="otab-all"       onclick="switchOrderTab('all')"       style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todos <span id="ocount-all"></span></button>
+    </div>
+    <div id="orders-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando pedidos...</div>
+    <div id="orders-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="orders-empty" style="display:none;text-align:center;padding:48px 20px">
+      <div style="font-size:2.5rem;margin-bottom:12px">🛒</div>
+      <p style="color:var(--muted);font-size:.9rem" id="orders-empty-text">No hay pedidos en esta sección.</p>
     </div>
   </section>
 
@@ -1375,6 +1397,7 @@ document.getElementById('logout-yes').addEventListener('click', () => { localSto
    Navegación del menú lateral
    ============================================================ */
 let apptsLoaded = false;
+let ordersLoaded = false;
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === btn));
@@ -1384,6 +1407,10 @@ document.querySelectorAll('.nav-item').forEach(btn => {
     if (btn.dataset.page === 'appts' && !apptsLoaded) {
       apptsLoaded = true;
       loadAppointments();
+    }
+    if (btn.dataset.page === 'orders' && !ordersLoaded) {
+      ordersLoaded = true;
+      loadOrders();
     }
   });
 });
@@ -1649,8 +1676,8 @@ function isCancelled(a){ return a.status === 'cancelled'; }
 
 function switchApptTab(tab) {
   currentApptTab = tab;
-  const tabs = { upcoming: '#7c3aed', done: '#22c55e', cancelled: '#ef4444' };
-  ['upcoming','done','cancelled'].forEach(t => {
+  const tabs = { upcoming: '#7c3aed', done: '#22c55e', cancelled: '#ef4444', all: '#6b7280' };
+  ['upcoming','done','cancelled','all'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (!el) return;
     const active = t === tab;
@@ -1670,8 +1697,9 @@ function renderAppts() {
     upcoming:  'No hay citas próximas. Cuando un cliente agende por WhatsApp aparecerán aquí.',
     done:      'No hay citas realizadas aún.',
     cancelled: 'No hay citas canceladas.',
+    all:       'No hay citas registradas aún.',
   };
-  const filterFn = { upcoming: isUpcoming, done: isDone, cancelled: isCancelled };
+  const filterFn = { upcoming: isUpcoming, done: isDone, cancelled: isCancelled, all: () => true };
   const filtered = allAppts.filter(filterFn[currentApptTab]);
 
   if (!filtered.length) {
@@ -1741,9 +1769,140 @@ function updateApptCounts() {
   const upcoming  = allAppts.filter(isUpcoming).length;
   const done      = allAppts.filter(isDone).length;
   const cancelled = allAppts.filter(isCancelled).length;
-  document.getElementById('count-upcoming').textContent  = upcoming  ? `(${upcoming})`  : '';
-  document.getElementById('count-done').textContent      = done      ? `(${done})`      : '';
-  document.getElementById('count-cancelled').textContent = cancelled ? `(${cancelled})` : '';
+  document.getElementById('count-upcoming').textContent  = upcoming        ? `(${upcoming})`        : '';
+  document.getElementById('count-done').textContent      = done            ? `(${done})`            : '';
+  document.getElementById('count-cancelled').textContent = cancelled       ? `(${cancelled})`       : '';
+  document.getElementById('count-all').textContent       = allAppts.length ? `(${allAppts.length})` : '';
+}
+
+/* ── PEDIDOS ── */
+let allOrders = [];
+let currentOrderTab = 'pending';
+const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+
+const ORDER_STATUS = {
+  pending:   { label: 'Pendiente',      color: '#f59e0b', next: 'preparing', nextLabel: '▶ En preparación' },
+  preparing: { label: 'En preparación', color: '#3b82f6', next: 'ready',     nextLabel: '✓ Marcar listo' },
+  ready:     { label: 'Listo',          color: '#22c55e', next: 'delivered',  nextLabel: '📦 Entregado' },
+  delivered: { label: 'Entregado',      color: '#6b7280', next: null,         nextLabel: null },
+  cancelled: { label: 'Cancelado',      color: '#ef4444', next: null,         nextLabel: null },
+};
+
+function switchOrderTab(tab) {
+  currentOrderTab = tab;
+  const colors = { pending:'#f59e0b', preparing:'#3b82f6', ready:'#22c55e', delivered:'#6b7280', all:'#7c3aed' };
+  ['pending','preparing','ready','delivered','all'].forEach(t => {
+    const el = document.getElementById('otab-' + t);
+    if (!el) return;
+    const active = t === tab;
+    el.style.background = active ? (colors[t] || '#7c3aed') : 'none';
+    el.style.color      = active ? 'white' : 'var(--muted)';
+    el.style.border     = active ? 'none'  : '1px solid var(--line)';
+  });
+  renderOrders();
+}
+
+function renderOrders() {
+  const listEl  = document.getElementById('orders-list');
+  const emptyEl = document.getElementById('orders-empty');
+  const emptyTxt = document.getElementById('orders-empty-text');
+
+  const filtered = currentOrderTab === 'all'
+    ? allOrders
+    : allOrders.filter(o => o.status === currentOrderTab);
+
+  if (!filtered.length) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    emptyTxt.textContent = currentOrderTab === 'all'
+      ? 'No hay pedidos aún. Cuando un cliente pida por WhatsApp aparecerán aquí.'
+      : `No hay pedidos en estado "${ORDER_STATUS[currentOrderTab]?.label || currentOrderTab}".`;
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const fmtDate = iso => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short' }) : null;
+
+  listEl.innerHTML = filtered.map(o => {
+    const st = ORDER_STATUS[o.status] || ORDER_STATUS.pending;
+    const items = (o.items || []).map(i => `${i.quantity}x ${i.name}${i.notes ? ` <span style="color:var(--muted);font-size:.75rem">(${i.notes})</span>` : ''}`).join(' · ');
+    const entrega = o.requested_date ? `📅 ${fmtDate(o.requested_date)}${o.requested_time ? ' ' + o.requested_time.slice(0,5) : ''}` : '';
+    return `
+    <div style="background:var(--card);border:1px solid var(--line);border-left:4px solid ${st.color};border-radius:14px;padding:16px 18px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+        <div>
+          <div style="font-weight:700;color:var(--text);font-size:.95rem">${o.client_name || 'Cliente'}</div>
+          <div style="font-size:.8rem;color:var(--muted)">${o.client_phone || ''}</div>
+        </div>
+        <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${st.color}22;color:${st.color}">${st.label}</span>
+      </div>
+      <div style="font-size:.85rem;color:var(--text);margin-bottom:8px">${items}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted);margin-bottom:12px">
+        ${entrega ? `<span>${entrega}</span>` : ''}
+        <span>🚚 ${o.delivery_mode === 'delivery' ? 'Delivery' : 'Retiro'}</span>
+        <span style="font-weight:700;color:var(--text)">$${(o.total||0).toFixed(2)}</span>
+      </div>
+      ${o.notes ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px">📝 ${o.notes}</div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${st.next ? `<button onclick="updateOrderStatus('${o.id}','${st.next}')" style="padding:6px 14px;border-radius:8px;border:none;background:${ORDER_STATUS[st.next].color};color:white;font-size:.78rem;font-weight:600;cursor:pointer">${st.nextLabel}</button>` : ''}
+        ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button onclick="updateOrderStatus('${o.id}','cancelled')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const { error } = await db.from('orders').update({ status: newStatus }).eq('id', orderId);
+  if (error) { alert('Error actualizando estado'); return; }
+  const order = allOrders.find(o => o.id === orderId);
+  if (order) order.status = newStatus;
+  updateOrderCounts();
+  renderOrders();
+}
+
+function updateOrderCounts() {
+  ['pending','preparing','ready','delivered'].forEach(s => {
+    const n = allOrders.filter(o => o.status === s).length;
+    const el = document.getElementById('ocount-' + s);
+    if (el) el.textContent = n ? `(${n})` : '';
+  });
+  const allEl = document.getElementById('ocount-all');
+  if (allEl) allEl.textContent = allOrders.length ? `(${allOrders.length})` : '';
+}
+
+async function loadOrders() {
+  if (!BIZ_ID) return;
+  const loadingEl = document.getElementById('orders-loading');
+  try {
+    const { data } = await db.from('orders')
+      .select('id,client_name,client_phone,items,total,delivery_mode,requested_date,requested_time,status,notes,created_at')
+      .eq('business_id', BIZ_ID)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (loadingEl) loadingEl.style.display = 'none';
+    allOrders = data || [];
+    updateOrderCounts();
+    renderOrders();
+
+    // Realtime: actualizar si entra un pedido nuevo
+    db.channel('orders-' + BIZ_ID)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        allOrders.unshift(payload.new);
+        updateOrderCounts();
+        if (currentOrderTab === 'pending' || currentOrderTab === 'all') renderOrders();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        const idx = allOrders.findIndex(o => o.id === payload.new.id);
+        if (idx !== -1) allOrders[idx] = { ...allOrders[idx], ...payload.new };
+        updateOrderCounts();
+        renderOrders();
+      })
+      .subscribe();
+  } catch(e) {
+    console.error('loadOrders error:', e);
+    if (loadingEl) loadingEl.textContent = 'Error cargando pedidos.';
+  }
 }
 
 async function loadAppointments() {
