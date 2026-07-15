@@ -938,9 +938,6 @@ document.getElementById('u-accepts-orders-toggle').addEventListener('change', as
   document.getElementById('u-accepts-orders').value = active ? 'si' : 'no';
   const label = document.getElementById('orders-mode-label');
   if (label) { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
-  // Nav también refleja el toggle de pedidos
-  const navO = document.getElementById('nav-orders');
-  if (navO) navO.style.display = active ? '' : 'none';
   markDirty();
   if (BIZ_ID) await db.from('businesses').update({ accepts_orders: active }).eq('id', BIZ_ID);
 });
@@ -2149,13 +2146,13 @@ async function loadDashboard() {
       document.getElementById('pause-toggle').checked = paused;
       if (biz.bot_pause_message) document.getElementById('pause-msg').value = biz.bot_pause_message;
       updatePauseUI();
-      if (!biz.accepts_appointments) document.getElementById('metric-services').style.display = 'none';
-      if (!biz.accepts_orders) document.getElementById('metric-orders').style.display = 'none';
-      // Nav items: mostrar solo si el negocio tiene esa feature
+      if (!hasServices) document.getElementById('metric-services').style.display = 'none';
+      if (!hasProducts) document.getElementById('metric-orders').style.display = 'none';
+      // Nav items: mostrar si hay servicios/productos registrados
       const navAppts = document.getElementById('nav-appts');
       const navOrders = document.getElementById('nav-orders');
-      if (navAppts) navAppts.style.display = biz.accepts_appointments ? '' : 'none';
-      if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
+      if (navAppts)  navAppts.style.display  = hasServices ? '' : 'none';
+      if (navOrders) navOrders.style.display = hasProducts ? '' : 'none';
       // Profile tabs: Citas si hay servicios, Pedidos si hay productos
       const tabCitas   = document.getElementById('orgtab-citas');
       const tabPedidos = document.getElementById('orgtab-pedidos');
