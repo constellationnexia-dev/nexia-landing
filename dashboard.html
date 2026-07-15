@@ -214,11 +214,9 @@ input[type=checkbox]{accent-color:var(--accent)}
 .svc-chks label:hover{border-color:rgba(var(--accent-rgb),.5)}
 .svc-chks label:has(input:checked){border-color:var(--accent);color:var(--accent);background:rgba(var(--accent-rgb),.08)}
 .svc-chks label:has(input:checked)::before{content:'✓';font-weight:700}
-.save-bar{display:none;align-items:center;gap:14px;position:sticky;bottom:14px;background:rgba(5,5,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:12px 16px;z-index:5}
-.save-bar.dirty{display:flex}
-.btn-save{background:var(--accent);color:#04140b;border:none;border-radius:11px;padding:12px 28px;font-weight:700;font-family:var(--font-body);font-size:.9rem;cursor:pointer;box-shadow:0 0 18px rgba(var(--accent-rgb),.3);transition:all .3s}
-.btn-save:hover{box-shadow:0 0 30px rgba(var(--accent-rgb),.55);transform:translateY(-1px)}
-.save-note{color:var(--accent);font-size:.82rem;opacity:0;transition:opacity .3s}
+.btn-save{background:var(--accent);color:#04140b;border:none;border-radius:12px;padding:14px 36px;font-weight:700;font-family:var(--font-body);font-size:1rem;cursor:pointer;box-shadow:0 0 24px rgba(var(--accent-rgb),.4);transition:all .3s}
+.btn-save:hover{box-shadow:0 0 36px rgba(var(--accent-rgb),.65);transform:translateY(-2px)}
+.save-note{color:var(--accent);font-size:.83rem;opacity:0;transition:opacity .3s}
 
 /* ===== Profile panel tabs ===== */
 .org-tabs{display:flex;gap:5px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:6px;margin-bottom:20px}
@@ -722,10 +720,6 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Configura al menos un servicio o producto en tu formulario de personalización para desbloquear estos ajustes.</p>
     </div>
 
-    <div class="save-bar" id="u-save-bar">
-      <button class="btn-save" id="u-save">Guardar cambios</button>
-      <span class="save-note" id="u-save-note">✓ Cambios guardados</span>
-    </div>
   </section>
 
   <!-- PÁGINA: CONVERSACIONES -->
@@ -826,6 +820,25 @@ input[type=checkbox]{accent-color:var(--accent)}
       </div>
     </div>
   </section>
+<!-- ── Save bar flotante (fixed, fuera de los page sections) ── -->
+<div id="u-save-bar" style="display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:200;align-items:center;gap:16px;background:rgba(8,8,14,.95);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:18px;padding:14px 28px;box-shadow:0 8px 40px rgba(0,0,0,.5);white-space:nowrap">
+  <button class="btn-save" id="u-save">💾 Guardar cambios</button>
+  <span class="save-note" id="u-save-note">✓ Cambios guardados</span>
+</div>
+
+<!-- ── Diálogo temático: salir sin guardar ── -->
+<div id="unsaved-dialog" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px 36px;max-width:380px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.6);text-align:center">
+    <div style="font-size:2rem;margin-bottom:14px">⚠️</div>
+    <h3 style="margin:0 0 10px;font-size:1.05rem;color:var(--text)">Cambios sin guardar</h3>
+    <p style="color:var(--muted);font-size:.87rem;margin:0 0 24px;line-height:1.6">Si sales ahora perderás los cambios que hiciste en Mi Perfil. ¿Quieres salir de todas formas?</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button id="unsaved-cancel"  style="flex:1;padding:11px 20px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--text);font-size:.88rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">Seguir editando</button>
+      <button id="unsaved-confirm" style="flex:1;padding:11px 20px;border-radius:11px;border:none;background:var(--accent);color:#04140b;font-size:.88rem;font-weight:700;cursor:pointer;font-family:var(--font-body);box-shadow:0 0 16px rgba(var(--accent-rgb),.35)">Salir sin guardar</button>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -1017,8 +1030,9 @@ switchOrgTab(localStorage.getItem('nexiaOrgTab') || 'info');
 
 /* ── Dirty tracking ── */
 const saveBar = document.getElementById('u-save-bar');
-function markDirty()   { saveBar.classList.add('dirty'); }
-function unmarkDirty() { saveBar.classList.remove('dirty'); }
+let _isDirty = false;
+function markDirty()   { _isDirty = true; }
+function unmarkDirty() { _isDirty = false; }
 
 /* ── Snapshot para revertir cambios no guardados ── */
 let _bizSnapshot = null, _svcsSnapshot = [], _prodsSnapshot = [];
@@ -1038,10 +1052,31 @@ function revertToSnapshot() {
   unmarkDirty();
 }
 
-/* Advertir al cerrar/recargar si hay cambios pendientes */
+/* Advertir solo al cerrar/recargar la pestaña (no en navegación interna) */
+let _navigationIntent = false;
 window.addEventListener('beforeunload', e => {
-  if (saveBar.classList.contains('dirty')) { e.preventDefault(); e.returnValue = ''; }
+  if (_isDirty && !_navigationIntent) { e.preventDefault(); e.returnValue = ''; }
 });
+
+/* Diálogo temático al salir sin guardar */
+function showUnsavedDialog() {
+  return new Promise(resolve => {
+    const modal = document.getElementById('unsaved-dialog');
+    modal.style.display = 'flex';
+    const onConfirm = () => { cleanup(); resolve(true); };
+    const onCancel  = () => { cleanup(); resolve(false); };
+    const onBg      = (e) => { if (e.target === modal) { cleanup(); resolve(false); } };
+    function cleanup() {
+      modal.style.display = 'none';
+      document.getElementById('unsaved-confirm').removeEventListener('click', onConfirm);
+      document.getElementById('unsaved-cancel').removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBg);
+    }
+    document.getElementById('unsaved-confirm').addEventListener('click', onConfirm);
+    document.getElementById('unsaved-cancel').addEventListener('click', onCancel);
+    modal.addEventListener('click', onBg);
+  });
+}
 
 /* Delivery según modalidad del negocio: online no tiene retiro en local */
 const bizMode = localStorage.getItem('nexiaMode');
@@ -1618,19 +1653,24 @@ function doNavigate(btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + btn.dataset.page).classList.add('active');
   window.scrollTo({ top: 0 });
+  // Save bar solo visible en Mi Perfil
+  const sb = document.getElementById('u-save-bar');
+  if (sb) sb.style.display = btn.dataset.page === 'org' ? 'flex' : 'none';
   if (btn.dataset.page === 'appts' && !apptsLoaded) { apptsLoaded = true; loadAppointments(); }
   if (btn.dataset.page === 'orders' && !ordersLoaded) { ordersLoaded = true; loadOrders(); switchOrderTab('pending'); }
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const leavingOrg = document.getElementById('page-org').classList.contains('active') && btn.dataset.page !== 'org';
-    if (leavingOrg && saveBar.classList.contains('dirty')) {
-      const leave = window.confirm('¿Salir sin guardar?\nLos cambios se descartarán y volverás a la configuración guardada.');
+    if (leavingOrg && _isDirty) {
+      const leave = await showUnsavedDialog();
       if (!leave) return;
       revertToSnapshot();
     }
+    _navigationIntent = true;
     doNavigate(btn);
+    _navigationIntent = false;
   });
 });
 
