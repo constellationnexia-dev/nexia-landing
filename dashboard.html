@@ -220,6 +220,12 @@ input[type=checkbox]{accent-color:var(--accent)}
 .btn-save:hover{box-shadow:0 0 30px rgba(var(--accent-rgb),.55);transform:translateY(-1px)}
 .save-note{color:var(--accent);font-size:.82rem;opacity:0;transition:opacity .3s}
 
+/* ===== Profile panel tabs ===== */
+.org-tabs{display:flex;gap:5px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:6px;margin-bottom:20px}
+.org-tab{flex:1;min-width:76px;background:none;border:none;color:var(--muted);font-size:.78rem;font-weight:600;padding:9px 8px;border-radius:10px;cursor:pointer;transition:all .25s;font-family:var(--font-body);white-space:nowrap;text-align:center}
+.org-tab:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.org-tab.active{background:rgba(var(--accent-rgb),.12);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.28)}
+
 /* ===== Scrollbar temático ===== */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -287,8 +293,8 @@ input[type=checkbox]{accent-color:var(--accent)}
   <button class="nav-item active" data-page="stats"><span class="ico">📊</span><span class="label">Estadísticas</span></button>
   <button class="nav-item" data-page="org" id="nav-org"><span class="ico" id="org-ico">🏪</span><span class="label" id="org-label">Mi Negocio</span></button>
   <button class="nav-item" data-page="convos"><span class="ico">💬</span><span class="label">Conversaciones</span></button>
-  <button class="nav-item" data-page="appts"><span class="ico">📅</span><span class="label">Citas</span></button>
-  <button class="nav-item" data-page="orders"><span class="ico">🛒</span><span class="label">Pedidos</span></button>
+  <button class="nav-item" id="nav-appts" data-page="appts" style="display:none"><span class="ico">📅</span><span class="label">Citas</span></button>
+  <button class="nav-item" id="nav-orders" data-page="orders" style="display:none"><span class="ico">🛒</span><span class="label">Pedidos</span></button>
   <button class="nav-item" data-page="config"><span class="ico">⚙️</span><span class="label">Configuración</span></button>
   <div class="bottom">
     <div class="bot-status"><span class="bot-dot" id="bot-dot"></span><span class="bs-text" id="bot-status-text">Bot activo</span></div>
@@ -383,16 +389,21 @@ input[type=checkbox]{accent-color:var(--accent)}
     </div>
 
     <!-- Guía rápida -->
-    <div style="background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:14px;padding:18px 22px;margin-bottom:16px">
-      <div style="font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--accent)">💡 Guía rápida — cuanto más completes, mejor atiende tu bot</div>
+    <div id="org-guide" style="background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:14px;padding:18px 22px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.95rem;color:var(--accent)">💡 Guía rápida — cuanto más completes, mejor atiende tu bot</div>
+        <button onclick="toggleGuide(false)" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;flex-shrink:0" title="Cerrar guía">×</button>
+      </div>
       <div style="font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:6px">
-        <span>📍 <strong style="color:var(--text)">Información del negocio</strong> — nombre, dirección, descripción y mensaje de bienvenida. El bot lo usa para presentarse y responder preguntas básicas.</span>
-        <span>🛍️ <strong style="color:var(--text)">Servicios y productos</strong> — lista todo lo que ofreces con precios y duración. El bot los citará exactos cuando un cliente pregunte.</span>
-        <span>📆 <strong style="color:var(--text)">Citas</strong> — horarios, duración, políticas de cancelación y no-show. El bot agenda, recuerda y gestiona la agenda por ti.</span>
-        <span>💳 <strong style="color:var(--text)">Pagos</strong> — métodos aceptados, anticipo y facturación. El bot lo informa antes de confirmar cada cita o pedido.</span>
-        <span>🧭 <strong style="color:var(--text)">General y asistente</strong> — garantías, tono, emojis y cómo manejar situaciones especiales.</span>
+        <span>📍 <strong style="color:var(--text)">Negocio</strong> — nombre, dirección, descripción y mensaje de bienvenida. El bot lo usa para presentarse y responder preguntas básicas.</span>
+        <span>🛍️ <strong style="color:var(--text)">Servicios</strong> — lista todo lo que ofreces con precios y duración. El bot los citará exactos cuando un cliente pregunte.</span>
+        <span>📅 <strong style="color:var(--text)">Citas</strong> — horarios, duración, políticas de cancelación y no-show. El bot agenda, recuerda y gestiona la agenda por ti.</span>
+        <span>📦 <strong style="color:var(--text)">Pedidos</strong> — modalidad de entrega, zona, costos y límites. Aparece solo si tienes productos.</span>
+        <span>💳 <strong style="color:var(--text)">Pagos</strong> — métodos aceptados, anticipo y facturación. El bot lo informa antes de confirmar.</span>
+        <span>🤖 <strong style="color:var(--text)">Asistente</strong> — tono, emojis, garantías y cómo manejar situaciones especiales.</span>
       </div>
     </div>
+    <button id="guide-reopen-btn" onclick="toggleGuide(true)" style="display:none;background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.2);border-radius:10px;color:var(--accent);font-size:.78rem;font-weight:600;padding:7px 14px;cursor:pointer;font-family:var(--font-body);margin-bottom:16px">💡 Ver guía rápida</button>
 
     <!-- Plantillas de ejemplo -->
     <div id="tpl-block" style="background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:16px 20px;margin-bottom:24px">
@@ -414,6 +425,16 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div id="tpl-modal-body" style="display:flex;flex-direction:column;gap:14px;font-size:.88rem"></div>
         <p style="margin-top:20px;font-size:.78rem;color:var(--muted);text-align:center">Este es solo un ejemplo de referencia — no modifica tu información</p>
       </div>
+    </div>
+
+    <!-- Tabs de sección -->
+    <div class="org-tabs" id="org-tabs-row">
+      <button class="org-tab active" data-panel="info"      onclick="switchOrgTab('info')">📍 Negocio</button>
+      <button class="org-tab"        data-panel="items"     onclick="switchOrgTab('items')">🛍️ Servicios</button>
+      <button class="org-tab"        data-panel="citas"     id="orgtab-citas"   onclick="switchOrgTab('citas')"   style="display:none">📅 Citas</button>
+      <button class="org-tab"        data-panel="pedidos"   id="orgtab-pedidos" onclick="switchOrgTab('pedidos')" style="display:none">📦 Pedidos</button>
+      <button class="org-tab"        data-panel="pagos"     onclick="switchOrgTab('pagos')">💳 Pagos</button>
+      <button class="org-tab"        data-panel="asistente" onclick="switchOrgTab('asistente')">🤖 Asistente</button>
     </div>
 
     <!-- SECCIÓN 0: Información del negocio -->
@@ -820,14 +841,42 @@ function formatTime(iso, showHour) {
   return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
 }
 
+/* ===== Guía rápida — toggle ===== */
+function toggleGuide(show) {
+  document.getElementById('org-guide').style.display = show ? '' : 'none';
+  document.getElementById('guide-reopen-btn').style.display = show ? 'none' : '';
+  localStorage.setItem('nexiaGuideHidden', show ? '0' : '1');
+}
+if (localStorage.getItem('nexiaGuideHidden') === '1') toggleGuide(false);
+
+/* ===== Profile tabs ===== */
+const ORG_PANELS = {
+  info:      ['u-info'],
+  items:     ['u-items'],
+  citas:     ['u-citas'],
+  pedidos:   ['u-pedidos'],
+  pagos:     ['u-pagos'],
+  asistente: ['u-general', 'u-asistente']
+};
+let currentOrgTab = 'info';
+function switchOrgTab(tab) {
+  const tabBtn = document.querySelector('.org-tab[data-panel="' + tab + '"]');
+  if (tabBtn && tabBtn.style.display === 'none') tab = 'info';
+  currentOrgTab = tab;
+  Object.values(ORG_PANELS).flat().forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  (ORG_PANELS[tab] || []).forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'block';
+  });
+  document.querySelectorAll('.org-tab').forEach(b => b.classList.toggle('active', b.dataset.panel === tab));
+  localStorage.setItem('nexiaOrgTab', tab);
+}
+switchOrgTab(localStorage.getItem('nexiaOrgTab') || 'info');
+
 /* ============================================================
    Ultra personalización (página Mi Negocio)
    ============================================================ */
-document.getElementById('u-citas').style.display = hasServices ? 'block' : 'none';
-document.getElementById('u-pedidos').style.display = hasProducts ? 'block' : 'none';
-if (!hasServices && !hasProducts) {
-  document.getElementById('u-empty').style.display = 'block';
-}
 
 /* ── Dirty tracking ── */
 const saveBar = document.getElementById('u-save-bar');
@@ -1937,6 +1986,11 @@ async function loadAppointments() {
 
 async function loadDashboard() {
   if (!BIZ_ID) {
+    // En demo mostramos ambos nav items
+    const navA = document.getElementById('nav-appts'), navO = document.getElementById('nav-orders');
+    if (navA) navA.style.display = ''; if (navO) navO.style.display = '';
+    const tC = document.getElementById('orgtab-citas'), tP = document.getElementById('orgtab-pedidos');
+    if (tC) tC.style.display = ''; if (tP) tP.style.display = '';
     await loadChart(7); renderDemoConvos();
     requestAnimationFrame(() => setTimeout(() => { document.getElementById('usage-fill').style.width = '85.6%'; }, 200));
     return;
@@ -1974,6 +2028,19 @@ async function loadDashboard() {
       updatePauseUI();
       if (!biz.accepts_appointments) document.getElementById('metric-services').style.display = 'none';
       if (!biz.accepts_orders) document.getElementById('metric-orders').style.display = 'none';
+      // Nav items: mostrar solo si el negocio tiene esa feature
+      const navAppts = document.getElementById('nav-appts');
+      const navOrders = document.getElementById('nav-orders');
+      if (navAppts) navAppts.style.display = biz.accepts_appointments ? '' : 'none';
+      if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
+      // Profile tabs: mostrar Citas/Pedidos solo si aplica
+      const tabCitas   = document.getElementById('orgtab-citas');
+      const tabPedidos = document.getElementById('orgtab-pedidos');
+      if (tabCitas)   tabCitas.style.display   = biz.accepts_appointments ? '' : 'none';
+      if (tabPedidos) tabPedidos.style.display = biz.accepts_orders       ? '' : 'none';
+      // Si el tab activo quedó oculto, ir a info
+      if ((currentOrgTab === 'citas'   && !biz.accepts_appointments) ||
+          (currentOrgTab === 'pedidos' && !biz.accepts_orders)) switchOrgTab('info');
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
