@@ -1020,6 +1020,29 @@ const saveBar = document.getElementById('u-save-bar');
 function markDirty()   { saveBar.classList.add('dirty'); }
 function unmarkDirty() { saveBar.classList.remove('dirty'); }
 
+/* ── Snapshot para revertir cambios no guardados ── */
+let _bizSnapshot = null, _svcsSnapshot = [], _prodsSnapshot = [];
+function saveBizSnapshot(biz, svcs, prods) {
+  _bizSnapshot   = JSON.parse(JSON.stringify(biz));
+  _svcsSnapshot  = JSON.parse(JSON.stringify(svcs  || []));
+  _prodsSnapshot = JSON.parse(JSON.stringify(prods || []));
+}
+function revertToSnapshot() {
+  if (!_bizSnapshot) return;
+  populateFormFromConfig(_bizSnapshot);
+  syncApptToggle(); syncOrdersToggle(); syncAddressVisibility();
+  const useDurVal = _bizSnapshot.config?.scheduling?.useDuration;
+  if (useDurVal !== undefined) { document.getElementById('u-use-duration').checked = useDurVal; syncDurationToggle(); }
+  if (itemsSvc)  { itemsSvc.innerHTML  = ''; (_svcsSnapshot  || []).forEach(s => addItemRow(itemsSvc,  { name:s.name, price:s.price, time:s.duration, desc:s.description }, 'Duración')); }
+  if (itemsProd) { itemsProd.innerHTML = ''; (_prodsSnapshot || []).forEach(p => addItemRow(itemsProd, { name:p.name, price:p.price, desc:p.description             }, 'Entrega'));  }
+  unmarkDirty();
+}
+
+/* Advertir al cerrar/recargar si hay cambios pendientes */
+window.addEventListener('beforeunload', e => {
+  if (saveBar.classList.contains('dirty')) { e.preventDefault(); e.returnValue = ''; }
+});
+
 /* Delivery según modalidad del negocio: online no tiene retiro en local */
 const bizMode = localStorage.getItem('nexiaMode');
 const dmSelect = document.getElementById('u-delivery-mode');
@@ -1533,6 +1556,11 @@ document.getElementById('u-save').addEventListener('click', async () => {
   chipNames = [...freshNames.svcs, ...freshNames.prods].filter(Boolean).slice(0, 30);
   buildPayList(data.payPlan, freshNames);
   renderProfs(Math.max(1, parseInt(uProfs.value, 10) || 1), data.profs);
+  // Actualizar snapshot con el estado recién guardado
+  if (_bizSnapshot) {
+    const savedBiz = { ..._bizSnapshot, ...{ config, business_name: data['u-bizname'], business_description: data['u-desc'] } };
+    saveBizSnapshot(savedBiz, svcs.map(s => ({ name:s.name, price:s.price, duration:s.time, description:s.desc })), prods.map(p => ({ name:p.name, price:p.price, description:p.desc })));
+  }
   unmarkDirty();
   const note = document.getElementById('u-save-note');
   note.style.opacity = '1';
@@ -1585,21 +1613,24 @@ document.getElementById('logout-yes').addEventListener('click', () => { localSto
    ============================================================ */
 let apptsLoaded = false;
 let ordersLoaded = false;
+function doNavigate(btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + btn.dataset.page).classList.add('active');
+  window.scrollTo({ top: 0 });
+  if (btn.dataset.page === 'appts' && !apptsLoaded) { apptsLoaded = true; loadAppointments(); }
+  if (btn.dataset.page === 'orders' && !ordersLoaded) { ordersLoaded = true; loadOrders(); switchOrderTab('pending'); }
+}
+
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + btn.dataset.page).classList.add('active');
-    window.scrollTo({ top: 0 });
-    if (btn.dataset.page === 'appts' && !apptsLoaded) {
-      apptsLoaded = true;
-      loadAppointments();
+    const leavingOrg = document.getElementById('page-org').classList.contains('active') && btn.dataset.page !== 'org';
+    if (leavingOrg && saveBar.classList.contains('dirty')) {
+      const leave = window.confirm('¿Salir sin guardar?\nLos cambios se descartarán y volverás a la configuración guardada.');
+      if (!leave) return;
+      revertToSnapshot();
     }
-    if (btn.dataset.page === 'orders' && !ordersLoaded) {
-      ordersLoaded = true;
-      loadOrders();
-      switchOrderTab('pending');
-    }
+    doNavigate(btn);
   });
 });
 
@@ -2252,6 +2283,8 @@ async function loadDashboard() {
       }
       // Actualizar chipNames con datos reales de Supabase
       chipNames = [...(dbSvcs || []), ...(dbProds || [])].map(x => x.name).filter(Boolean).slice(0, 30);
+      // Guardar snapshot para poder revertir si el usuario sale sin guardar
+      saveBizSnapshot(biz, dbSvcs, dbProds);
     }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
