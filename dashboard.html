@@ -406,14 +406,18 @@ input[type=checkbox]{accent-color:var(--accent)}
     <button id="guide-reopen-btn" onclick="toggleGuide(true)" style="display:none;background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.2);border-radius:10px;color:var(--accent);font-size:.78rem;font-weight:600;padding:7px 14px;cursor:pointer;font-family:var(--font-body);margin-bottom:16px">💡 Ver guía rápida</button>
 
     <!-- Plantillas de ejemplo -->
-    <div id="tpl-block" style="background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:16px 20px;margin-bottom:24px">
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:6px;color:#a78bfa">📋 ¿Primera vez? Mira cómo luce un perfil completo</div>
+    <div id="tpl-block" style="background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:16px 20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:700;font-size:.88rem;color:#a78bfa">📋 ¿Primera vez? Mira cómo luce un perfil completo</div>
+        <button onclick="toggleTemplates(false)" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;flex-shrink:0" title="Cerrar plantillas">×</button>
+      </div>
       <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px">Abre un ejemplo como referencia mientras completas tu información.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button type="button" onclick="openTemplatePreview('viajes')" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;padding:8px 16px;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)">✈️ Ver ejemplo: Agencia de Viajes</button>
         <button type="button" onclick="openTemplatePreview('peluqueria')" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;padding:8px 16px;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)">✂️ Ver ejemplo: Peluquería</button>
       </div>
     </div>
+    <button id="tpl-reopen-btn" onclick="toggleTemplates(true)" style="display:none;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:10px;color:#a78bfa;font-size:.78rem;font-weight:600;padding:7px 14px;cursor:pointer;font-family:var(--font-body);margin-bottom:16px">📋 Ver ejemplos de perfil</button>
 
     <!-- Modal de preview de plantilla -->
     <div id="tpl-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(3,3,6,.8);backdrop-filter:blur(6px);overflow-y:auto;padding:24px 16px">
@@ -456,8 +460,8 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="field"><label for="u-desc">Descripción del negocio</label><textarea id="u-desc" rows="4" placeholder="Ej: Somos una peluquería unisex en Quito especializada en cortes modernos, tintes y tratamientos capilares. Atendemos desde 2018. Nuestro equipo tiene 3 estilistas profesionales. Somos conocidos por el ambiente relajado y los cortes de tendencia. / Ej: Agencia de viajes especializada en paquetes a destinos internacionales y nacionales. Ofrecemos viajes grupales, familiares e individuales con todo incluido. Trabajamos con los mejores hoteles y aerolíneas para garantizar la mejor experiencia."></textarea><p class="f-hint">💡 Cuéntale al bot quiénes son, qué hacen y qué los hace especiales — mientras más detalle, mejores respuestas</p></div>
       <div class="field"><label for="u-welcome">Mensaje de bienvenida personalizado</label><input type="text" id="u-welcome" placeholder="Ej: ¡Hola! 👋 Bienvenido a Peluquería Estilo. Soy tu asistente virtual. ¿En qué te puedo ayudar hoy? Puedo darte info sobre nuestros servicios, precios o agendar una cita 😊"><p class="f-hint">💡 Lo que dirá el bot la primera vez que alguien escriba — sé cálido y menciona qué puede hacer el bot</p></div>
       <div class="field"><label for="u-extra-info">Información adicional para el bot <span style="font-weight:400;opacity:.6">(opcional)</span></label><textarea id="u-extra-info" rows="4" placeholder="Ej: Tenemos estacionamiento gratuito en la calle. Contamos con WiFi para clientes (red: MiNegocio, clave: 1234). Acceso para sillas de ruedas. Usamos productos L'Oréal Professionnel. Descuento del 10% para estudiantes con carnet..."></textarea><p class="f-hint">💡 Todo lo que escribas aquí el bot lo sabrá y podrá responder</p></div>
-      <div class="field"><label>Redes sociales y contacto</label>
-        <div class="u-grid" style="margin-top:8px">
+      <div class="field" style="border-top:1px solid var(--line);padding-top:20px;margin-top:8px"><label>Redes sociales y contacto</label>
+        <div class="u-grid" style="margin-top:10px">
           <input type="text" id="u-ig" placeholder="Instagram (usuario o link)">
           <input type="text" id="u-fb" placeholder="Facebook (usuario o link)">
           <input type="text" id="u-tt" placeholder="TikTok (usuario o link)">
@@ -485,21 +489,44 @@ input[type=checkbox]{accent-color:var(--accent)}
 
     <!-- SECCIÓN 2: Calendario y citas (solo si tiene servicios) -->
     <div class="u-section" id="u-citas">
-      <h3>📅 Calendario y citas</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="margin:0">📅 Calendario y citas</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="appt-mode-label" style="font-size:.82rem;color:var(--accent);font-weight:600">Activo</span>
+          <label class="switch" style="margin-top:0">
+            <input type="checkbox" id="u-accepts-appt-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <input type="hidden" id="u-accepts-appt" value="si">
+      <div id="citas-body">
       <div class="u-grid">
-        <div class="field"><label for="u-accepts-appt">¿Agendan citas?</label><select id="u-accepts-appt"><option value="si">Sí</option><option value="no">No</option></select></div>
         <div class="field"><label for="u-accepts-walkin">¿También atienden sin cita?</label><select id="u-accepts-walkin"><option value="">Selecciona</option><option value="si">Sí, sujeto a disponibilidad</option><option value="no">No, solo con cita</option></select></div>
-        <div class="field"><label for="u-accepts-orders">¿Toman pedidos por WhatsApp?</label><select id="u-accepts-orders"><option value="no">No</option><option value="si">Sí</option></select></div>
-        <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
       </div>
       <div class="field" style="margin-top:4px">
         <label>Horarios de atención</label>
         <div id="dash-hours-list" style="margin-top:10px"></div>
       </div>
-      <div id="schedule-preview" style="display:none;margin:4px 0 4px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
-        <p style="font-size:.76rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">⏰ El bot agendará citas en estos horarios</p>
-        <div id="schedule-preview-rows" style="display:flex;flex-direction:column;gap:5px"></div>
-        <p style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5">La última cita debe <strong style="color:var(--text)">terminar</strong> antes del cierre, por eso el rango disponible es menor al horario de atención.</p>
+
+      <!-- Toggle: calcular slots por duración -->
+      <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0 0">
+        <div>
+          <div style="font-size:.88rem;font-weight:600">⏱️ Calcular disponibilidad por duración de cita</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Activo: el bot solo ofrece horas donde cabe la cita completa · Inactivo: cualquier hora del horario</div>
+        </div>
+        <label class="switch" style="margin-top:0;flex-shrink:0;margin-left:16px">
+          <input type="checkbox" id="u-use-duration" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="duration-config" style="margin-top:12px">
+        <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
+        <div id="schedule-preview" style="display:none;margin:4px 0 4px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
+          <p style="font-size:.76rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">⏰ El bot agendará citas en estos horarios</p>
+          <div id="schedule-preview-rows" style="display:flex;flex-direction:column;gap:5px"></div>
+          <p style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5">La última cita debe <strong style="color:var(--text)">terminar</strong> antes del cierre, por eso el rango disponible es menor al horario de atención.</p>
+        </div>
       </div>
       <div class="field">
         <label for="u-profs">¿Cuántos profesionales atienden?</label>
@@ -555,11 +582,22 @@ input[type=checkbox]{accent-color:var(--accent)}
         </div>
       </div>
       <div class="field"><label for="u-noshow">¿Qué pasa si el cliente no aparece?</label><textarea id="u-noshow" rows="2" placeholder="Ej: Si el cliente no se presenta y no avisa con al menos 2 horas de anticipación, pierde el anticipo pagado y deberá reagendar. Para citas sin anticipo, después de 2 inasistencias seguidas se requiere pago por adelantado."></textarea><p class="f-hint">💡 El bot informará esta política antes de confirmar la cita y si alguien pregunta</p></div>
+      </div><!-- /citas-body -->
     </div>
 
     <!-- SECCIÓN 2: Pedidos y entrega (solo si tiene productos) -->
     <div class="u-section" id="u-pedidos">
-      <h3>📦 Pedidos y entrega</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="margin:0">📦 Pedidos y entrega</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="orders-mode-label" style="font-size:.82rem;color:var(--accent);font-weight:600">Activo</span>
+          <label class="switch" style="margin-top:0">
+            <input type="checkbox" id="u-accepts-orders-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <input type="hidden" id="u-accepts-orders" value="si">
       <div class="field"><label for="u-delivery-mode">¿Cómo entregan los pedidos?</label>
         <select id="u-delivery-mode"><option value="">Selecciona una opción</option><option value="delivery">Delivery</option><option value="retiro">Retiro en local</option><option value="ambos">Ambos</option></select>
       </div>
@@ -849,14 +887,92 @@ function toggleGuide(show) {
 }
 if (localStorage.getItem('nexiaGuideHidden') === '1') toggleGuide(false);
 
+/* ===== Plantillas — toggle ===== */
+function toggleTemplates(show) {
+  document.getElementById('tpl-block').style.display = show ? '' : 'none';
+  document.getElementById('tpl-reopen-btn').style.display = show ? 'none' : '';
+  localStorage.setItem('nexiaTplHidden', show ? '0' : '1');
+}
+if (localStorage.getItem('nexiaTplHidden') === '1') toggleTemplates(false);
+
+/* ===== Toggle de citas ===== */
+function syncApptToggle() {
+  const val    = document.getElementById('u-accepts-appt').value;
+  const active = val !== 'no';
+  const toggle = document.getElementById('u-accepts-appt-toggle');
+  const body   = document.getElementById('citas-body');
+  const label  = document.getElementById('appt-mode-label');
+  if (toggle) toggle.checked = active;
+  if (body)   body.style.display = active ? '' : 'none';
+  if (label)  { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+}
+document.getElementById('u-accepts-appt-toggle').addEventListener('change', async function() {
+  const active = this.checked;
+  document.getElementById('u-accepts-appt').value = active ? 'si' : 'no';
+  document.getElementById('citas-body').style.display = active ? '' : 'none';
+  const label = document.getElementById('appt-mode-label');
+  label.textContent = active ? 'Activo' : 'Inactivo';
+  label.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  const navA = document.getElementById('nav-appts');
+  if (navA) navA.style.display = active ? '' : 'none';
+  const tabC = document.getElementById('orgtab-citas');
+  if (tabC) tabC.style.display = active ? '' : 'none';
+  if (!active && currentOrgTab === 'citas') switchOrgTab('info');
+  markDirty();
+  if (BIZ_ID) await db.from('businesses').update({ accepts_appointments: active }).eq('id', BIZ_ID);
+});
+
+document.getElementById('u-accepts-orders-toggle').addEventListener('change', async function() {
+  const active = this.checked;
+  document.getElementById('u-accepts-orders').value = active ? 'si' : 'no';
+  const label = document.getElementById('orders-mode-label');
+  label.textContent = active ? 'Activo' : 'Inactivo';
+  label.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  const navO = document.getElementById('nav-orders');
+  if (navO) navO.style.display = active ? '' : 'none';
+  const tabP = document.getElementById('orgtab-pedidos');
+  if (tabP) tabP.style.display = active ? '' : 'none';
+  if (!active && currentOrgTab === 'pedidos') switchOrgTab('info');
+  markDirty();
+  if (BIZ_ID) await db.from('businesses').update({ accepts_orders: active }).eq('id', BIZ_ID);
+});
+
+function syncOrdersToggle() {
+  const val    = document.getElementById('u-accepts-orders').value;
+  const active = val === 'si';
+  const toggle = document.getElementById('u-accepts-orders-toggle');
+  const label  = document.getElementById('orders-mode-label');
+  if (toggle) toggle.checked = active;
+  if (label)  { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+}
+
+/* ===== Toggle duración de cita ===== */
+const useDurationToggle = document.getElementById('u-use-duration');
+function syncDurationToggle() {
+  const active = useDurationToggle.checked;
+  const cfg = document.getElementById('duration-config');
+  if (cfg) cfg.style.display = active ? '' : 'none';
+  if (!active) {
+    // Si se desactiva, ocultar preview
+    const prev = document.getElementById('schedule-preview');
+    if (prev) prev.style.display = 'none';
+  } else {
+    renderSchedulePreview();
+  }
+}
+useDurationToggle.addEventListener('change', () => { syncDurationToggle(); markDirty(); });
+// Por defecto ON si hay servicios, OFF si no hay
+if (!hasServices) useDurationToggle.checked = false;
+syncDurationToggle();
+
 /* ===== Profile tabs ===== */
 const ORG_PANELS = {
-  info:      ['u-info'],
+  info:      ['u-info', 'u-general'],
   items:     ['u-items'],
   citas:     ['u-citas'],
   pedidos:   ['u-pedidos'],
   pagos:     ['u-pagos'],
-  asistente: ['u-general', 'u-asistente']
+  asistente: ['u-asistente']
 };
 let currentOrgTab = 'info';
 function switchOrgTab(tab) {
@@ -1344,7 +1460,8 @@ document.getElementById('u-save').addEventListener('click', async () => {
           minHours: data['u-min-hours'], confirm: data['u-confirm'],
           reminder: data['u-reminder'], reminderHours: data['u-reminder-hours'],
           cancel: data['u-cancel'], reprog: data['u-reprog'], crTime: data['u-cr-time'],
-          noshow: data['u-noshow'], waitlist: data['u-waitlist'], lastmin: data['u-lastmin']
+          noshow: data['u-noshow'], waitlist: data['u-waitlist'], lastmin: data['u-lastmin'],
+          useDuration: document.getElementById('u-use-duration').checked
         },
         delivery: {
           mode: data['u-delivery-mode'], zone: data['u-zone'],
@@ -2072,15 +2189,24 @@ async function loadDashboard() {
       /* Rellenar formulario Mi Negocio desde Supabase (override localStorage) */
       populateFormFromConfig(biz);
       syncAddressVisibility();
+      syncApptToggle();
+      syncOrdersToggle();
+      // useDuration: true por defecto si no está guardado
+      const useDurVal = biz.config?.scheduling?.useDuration;
+      if (useDurVal !== undefined) {
+        document.getElementById('u-use-duration').checked = useDurVal;
+        syncDurationToggle();
+      }
       // Si hay datos reales, cambiar plantillas a modo compacto
       if (biz.business_name || biz.business_description) {
         const tplBlock = document.getElementById('tpl-block');
         if (tplBlock) tplBlock.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
             <span style="font-size:.82rem;color:var(--muted)">📋 ¿Necesitas inspiración? Mira ejemplos de perfiles completos</span>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <button type="button" onclick="openTemplatePreview('viajes')" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#c4b5fd;padding:6px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">✈️ Agencia de Viajes</button>
               <button type="button" onclick="openTemplatePreview('peluqueria')" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#c4b5fd;padding:6px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">✂️ Peluquería</button>
+              <button onclick="toggleTemplates(false)" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px" title="Cerrar">×</button>
             </div>
           </div>`;
       }
