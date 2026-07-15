@@ -271,7 +271,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   .bot-status .bs-text{display:none}
   .logout .lg-text{display:none}
   .main{padding:20px 16px 40px}
-  #u-save-bar{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+  #u-save-bar{left:12px;right:12px;top:14px}
   .convos{grid-template-columns:1fr;height:calc(100vh - 190px)}
   .convo-list{border-right:none}
   .chat-pane{display:none}
@@ -721,10 +721,11 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Configura al menos un servicio o producto en tu formulario de personalización para desbloquear estos ajustes.</p>
     </div>
 
-    <!-- Save bar: ancho completo del área de perfil, solo visible cuando hay cambios -->
-    <div id="u-save-bar" style="display:none;position:sticky;bottom:0;margin:32px -34px 0;padding:14px 34px;background:rgba(8,8,14,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:10;align-items:center;gap:16px">
+    <!-- Save bar flotante, ancho del área de contenido -->
+    <div id="u-save-bar" style="display:none;position:fixed;top:20px;left:246px;right:20px;z-index:100;align-items:center;gap:14px;background:rgba(8,8,14,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px;padding:10px 18px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
       <button class="btn-save" id="u-save">Guardar cambios</button>
-      <span class="save-note" id="u-save-note">✓ Cambios guardados</span>
+      <span style="color:var(--muted);font-size:.82rem;flex:1">Tienes cambios sin guardar</span>
+      <span id="u-save-note" style="opacity:0;color:var(--accent);font-size:.82rem;font-weight:600;transition:opacity .4s">✓ Guardado</span>
     </div>
 
   </section>
@@ -2323,6 +2324,7 @@ async function loadDashboard() {
       chipNames = [...(dbSvcs || []), ...(dbProds || [])].map(x => x.name).filter(Boolean).slice(0, 30);
       // Guardar snapshot para poder revertir si el usuario sale sin guardar
       saveBizSnapshot(biz, dbSvcs, dbProds);
+      unmarkDirty(); // asegurar que la carga inicial no active el save bar
     }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
@@ -2431,53 +2433,4 @@ loadGCalStatus();
 /* Todos los temas — igual que la landing (normales + secretos accesibles en el panel) */
 const DB_THEMES = [
   { name:'purple', accent:'#A855F7', accent2:'#FF2E63', accentRgb:'168,85,247',  bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#14061F' },
-  { name:'galaxy', accent:'#C77DFF', accent2:'#7B2CBF', accentRgb:'199,125,255', bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#1A0533' },
-  { name:'green',  accent:'#00FF88', accent2:'#7C3AED', accentRgb:'0,255,136',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#04140b' },
-  { name:'acid',   accent:'#4BFF3C', accent2:'#00CC66', accentRgb:'75,255,60',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#07140A' },
-  { name:'cyan',   accent:'#00E5FF', accent2:'#8B5CF6', accentRgb:'0,229,255',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#041420' },
-  { name:'night',  accent:'#6366F1', accent2:'#818CF8', accentRgb:'99,102,241',  bg:'#000000', bg2:'#05050E', card:'#0A0A1A', btnSave:'#E0E7FF' },
-  { name:'dusk',   accent:'#7A68B5', accent2:'#4A3F73', accentRgb:'122,104,181', bg:'#010102', bg2:'#050408', card:'#08070D', btnSave:'#EFEAFB' },
-  { name:'red',    accent:'#FF2E63', accent2:'#A855F7', accentRgb:'255,46,99',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#fff' },
-  { name:'rose',   accent:'#FF3399', accent2:'#FF6B6B', accentRgb:'255,51,153',  bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#fff' },
-  { name:'mono',   accent:'#FFFFFF', accent2:'#8E8E9E', accentRgb:'255,255,255', bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#0A0A0F' },
-  { name:'noir',   accent:'#F2F2F2', accent2:'#F2F2F2', accentRgb:'242,242,242', bg:'#000000', bg2:'#050505', card:'#0A0A0A', btnSave:'#000' },
-];
-let dbThemeIdx = 0;
-
-function applyDbTheme(t) {
-  const r = document.documentElement.style;
-  r.setProperty('--accent',     t.accent);
-  r.setProperty('--accent2',    t.accent2);
-  r.setProperty('--accent-rgb', t.accentRgb);
-  r.setProperty('--bg',   t.bg);
-  r.setProperty('--bg2',  t.bg2);
-  r.setProperty('--card', t.card);
-  document.querySelectorAll('.btn-save').forEach(el => el.style.color = t.btnSave);
-  window._avatarTextColor = (t.name === 'mono' || t.name === 'noir') ? '#111' : '';
-  document.querySelectorAll('.avatar').forEach(el => el.style.color = window._avatarTextColor);
-  const star = document.querySelector('.star');
-  if (star) {
-    star.style.transform = 'scale(1.6) rotate(180deg)';
-    star.style.transition = 'transform .3s ease';
-    setTimeout(() => { star.style.transform = ''; }, 300);
-  }
-  localStorage.setItem('nexiaTheme', t.name);
-}
-
-/* Cargar tema guardado */
-const savedDb = localStorage.getItem('nexiaTheme');
-if (savedDb) {
-  const fi = DB_THEMES.findIndex(t => t.name === savedDb);
-  if (fi >= 0) { dbThemeIdx = fi; applyDbTheme(DB_THEMES[dbThemeIdx]); }
-} else {
-  applyDbTheme(DB_THEMES[0]);
-}
-
-/* Click en ✦ Bienvenido — cicla TODOS los temas (en el panel no hay secretos) */
-document.getElementById('theme-toggle').addEventListener('click', () => {
-  dbThemeIdx = (dbThemeIdx + 1) % DB_THEMES.length;
-  applyDbTheme(DB_THEMES[dbThemeIdx]);
-});
-</script>
-</body>
-</html>
+  { name:'galaxy'
