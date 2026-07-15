@@ -599,7 +599,7 @@ input[type=checkbox]{accent-color:var(--accent)}
 
     <!-- SECCIÓN 2: Pedidos y entrega (solo si tiene productos) -->
     <div class="u-section" id="u-pedidos">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <h3 style="margin:0">📦 Pedidos y entrega</h3>
         <div style="display:flex;align-items:center;gap:10px">
           <span id="orders-mode-label" style="font-size:.82rem;color:var(--accent);font-weight:600">Activo</span>
@@ -609,7 +609,16 @@ input[type=checkbox]{accent-color:var(--accent)}
           </label>
         </div>
       </div>
+      <!-- Select visible siempre — sincronizado con el toggle -->
+      <div class="field" style="margin-bottom:18px">
+        <label for="u-accepts-orders-sel">¿Toman pedidos por WhatsApp?</label>
+        <select id="u-accepts-orders-sel">
+          <option value="si">Sí, tomamos pedidos</option>
+          <option value="no">No, solo damos información</option>
+        </select>
+      </div>
       <input type="hidden" id="u-accepts-orders" value="si">
+      <div id="pedidos-body">
       <div class="field"><label for="u-delivery-mode">¿Cómo entregan los pedidos?</label>
         <select id="u-delivery-mode"><option value="">Selecciona una opción</option><option value="delivery">Delivery</option><option value="retiro">Retiro en local</option><option value="ambos">Ambos</option></select>
       </div>
@@ -632,6 +641,7 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-stock">¿Tienen stock limitado de algún producto?</label><input type="text" id="u-stock" placeholder="Cuáles y cuántas unidades"><p class="f-hint">💡 El bot avisará cuando un producto esté agotado</p></div>
         <div class="field"><label for="u-afterhours">¿Aceptan pedidos fuera del horario para entregar después?</label><select id="u-afterhours"><option value="">Selecciona una opción</option><option>Sí</option><option>No</option></select></div>
       </div>
+      </div><!-- /pedidos-body -->
     </div>
 
     <!-- SECCIÓN: Pagos -->
@@ -760,7 +770,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Pedidos recibidos por tu asistente. Actualiza el estado en tiempo real.</p>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-      <button id="otab-pending"   onclick="switchOrderTab('pending')"   style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:#f59e0b;color:white">Pendientes <span id="ocount-pending"></span></button>
+      <button id="otab-pending"   onclick="switchOrderTab('pending')"   style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Pendientes <span id="ocount-pending"></span></button>
       <button id="otab-preparing" onclick="switchOrderTab('preparing')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">En preparación <span id="ocount-preparing"></span></button>
       <button id="otab-ready"     onclick="switchOrderTab('ready')"     style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Listos <span id="ocount-ready"></span></button>
       <button id="otab-delivered" onclick="switchOrderTab('delivered')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Entregados <span id="ocount-delivered"></span></button>
@@ -933,23 +943,31 @@ document.getElementById('u-accepts-appt-sel').addEventListener('change', async f
   if (BIZ_ID) await db.from('businesses').update({ accepts_appointments: active }).eq('id', BIZ_ID);
 });
 
-document.getElementById('u-accepts-orders-toggle').addEventListener('change', async function() {
-  const active = this.checked;
-  document.getElementById('u-accepts-orders').value = active ? 'si' : 'no';
+function applyOrdersActive(active) {
+  const val = active ? 'si' : 'no';
+  document.getElementById('u-accepts-orders').value          = val;
+  document.getElementById('u-accepts-orders-sel').value      = val;
+  document.getElementById('u-accepts-orders-toggle').checked = active;
+  const body = document.getElementById('pedidos-body');
+  if (body) body.style.display = active ? '' : 'none';
   const label = document.getElementById('orders-mode-label');
   if (label) { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+}
+function syncOrdersToggle() {
+  const val = document.getElementById('u-accepts-orders').value;
+  applyOrdersActive(val === 'si');
+}
+document.getElementById('u-accepts-orders-toggle').addEventListener('change', async function() {
+  applyOrdersActive(this.checked);
+  markDirty();
+  if (BIZ_ID) await db.from('businesses').update({ accepts_orders: this.checked }).eq('id', BIZ_ID);
+});
+document.getElementById('u-accepts-orders-sel').addEventListener('change', async function() {
+  const active = this.value === 'si';
+  applyOrdersActive(active);
   markDirty();
   if (BIZ_ID) await db.from('businesses').update({ accepts_orders: active }).eq('id', BIZ_ID);
 });
-
-function syncOrdersToggle() {
-  const val    = document.getElementById('u-accepts-orders').value;
-  const active = val === 'si';
-  const toggle = document.getElementById('u-accepts-orders-toggle');
-  const label  = document.getElementById('orders-mode-label');
-  if (toggle) toggle.checked = active;
-  if (label)  { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
-}
 
 /* ===== Toggle duración de cita ===== */
 const useDurationToggle = document.getElementById('u-use-duration');
@@ -1580,6 +1598,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
     if (btn.dataset.page === 'orders' && !ordersLoaded) {
       ordersLoaded = true;
       loadOrders();
+      switchOrderTab('pending');
     }
   });
 });
@@ -1959,14 +1978,13 @@ const ORDER_STATUS = {
 
 function switchOrderTab(tab) {
   currentOrderTab = tab;
-  const colors = { pending:'#f59e0b', preparing:'#3b82f6', ready:'#22c55e', delivered:'#6b7280', all:'#7c3aed' };
   ['pending','preparing','ready','delivered','all'].forEach(t => {
     const el = document.getElementById('otab-' + t);
     if (!el) return;
     const active = t === tab;
-    el.style.background = active ? (colors[t] || '#7c3aed') : 'none';
-    el.style.color      = active ? 'white' : 'var(--muted)';
-    el.style.border     = active ? 'none'  : '1px solid var(--line)';
+    el.style.background = active ? 'rgba(var(--accent-rgb),.12)' : 'none';
+    el.style.color      = active ? 'var(--accent)' : 'var(--muted)';
+    el.style.border     = active ? '1px solid rgba(var(--accent-rgb),.28)' : '1px solid var(--line)';
   });
   renderOrders();
 }
