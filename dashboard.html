@@ -489,7 +489,7 @@ input[type=checkbox]{accent-color:var(--accent)}
 
     <!-- SECCIÓN 2: Calendario y citas (solo si tiene servicios) -->
     <div class="u-section" id="u-citas">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <h3 style="margin:0">📅 Calendario y citas</h3>
         <div style="display:flex;align-items:center;gap:10px">
           <span id="appt-mode-label" style="font-size:.82rem;color:var(--accent);font-weight:600">Activo</span>
@@ -498,6 +498,14 @@ input[type=checkbox]{accent-color:var(--accent)}
             <span class="slider"></span>
           </label>
         </div>
+      </div>
+      <!-- Select visible siempre — sincronizado con el toggle -->
+      <div class="field" style="margin-bottom:18px">
+        <label for="u-accepts-appt-sel">¿Agendan citas?</label>
+        <select id="u-accepts-appt-sel">
+          <option value="si">Sí, agendamos citas</option>
+          <option value="no">No, solo damos información</option>
+        </select>
       </div>
       <input type="hidden" id="u-accepts-appt" value="si">
       <div id="citas-body">
@@ -520,8 +528,12 @@ input[type=checkbox]{accent-color:var(--accent)}
           <span class="slider"></span>
         </label>
       </div>
-      <div id="duration-config" style="margin-top:12px">
-        <div class="field"><label for="u-appt-duration">Duración promedio por cita (minutos)</label><input type="number" id="u-appt-duration" min="5" placeholder="30"></div>
+      <div class="field" style="margin-top:12px">
+        <label for="u-appt-duration">Duración promedio por cita (minutos)</label>
+        <input type="number" id="u-appt-duration" min="5" placeholder="30">
+        <p class="f-hint">💡 Si el servicio tiene duración propia, se usará esa; este valor se usa como respaldo</p>
+      </div>
+      <div id="duration-config">
         <div id="schedule-preview" style="display:none;margin:4px 0 4px;padding:14px 16px;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px">
           <p style="font-size:.76rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">⏰ El bot agendará citas en estos horarios</p>
           <div id="schedule-preview-rows" style="display:flex;flex-direction:column;gap:5px"></div>
@@ -895,29 +907,28 @@ function toggleTemplates(show) {
 }
 if (localStorage.getItem('nexiaTplHidden') === '1') toggleTemplates(false);
 
-/* ===== Toggle de citas ===== */
+/* ===== Toggle + Select de citas ===== */
+function applyApptActive(active) {
+  const val = active ? 'si' : 'no';
+  document.getElementById('u-accepts-appt').value        = val;
+  document.getElementById('u-accepts-appt-sel').value    = val;
+  document.getElementById('u-accepts-appt-toggle').checked = active;
+  document.getElementById('citas-body').style.display    = active ? '' : 'none';
+  const label = document.getElementById('appt-mode-label');
+  if (label) { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+}
 function syncApptToggle() {
-  const val    = document.getElementById('u-accepts-appt').value;
-  const active = val !== 'no';
-  const toggle = document.getElementById('u-accepts-appt-toggle');
-  const body   = document.getElementById('citas-body');
-  const label  = document.getElementById('appt-mode-label');
-  if (toggle) toggle.checked = active;
-  if (body)   body.style.display = active ? '' : 'none';
-  if (label)  { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+  const val = document.getElementById('u-accepts-appt').value;
+  applyApptActive(val !== 'no');
 }
 document.getElementById('u-accepts-appt-toggle').addEventListener('change', async function() {
-  const active = this.checked;
-  document.getElementById('u-accepts-appt').value = active ? 'si' : 'no';
-  document.getElementById('citas-body').style.display = active ? '' : 'none';
-  const label = document.getElementById('appt-mode-label');
-  label.textContent = active ? 'Activo' : 'Inactivo';
-  label.style.color = active ? 'var(--accent)' : 'var(--muted)';
-  const navA = document.getElementById('nav-appts');
-  if (navA) navA.style.display = active ? '' : 'none';
-  const tabC = document.getElementById('orgtab-citas');
-  if (tabC) tabC.style.display = active ? '' : 'none';
-  if (!active && currentOrgTab === 'citas') switchOrgTab('info');
+  applyApptActive(this.checked);
+  markDirty();
+  if (BIZ_ID) await db.from('businesses').update({ accepts_appointments: this.checked }).eq('id', BIZ_ID);
+});
+document.getElementById('u-accepts-appt-sel').addEventListener('change', async function() {
+  const active = this.value === 'si';
+  applyApptActive(active);
   markDirty();
   if (BIZ_ID) await db.from('businesses').update({ accepts_appointments: active }).eq('id', BIZ_ID);
 });
@@ -926,13 +937,10 @@ document.getElementById('u-accepts-orders-toggle').addEventListener('change', as
   const active = this.checked;
   document.getElementById('u-accepts-orders').value = active ? 'si' : 'no';
   const label = document.getElementById('orders-mode-label');
-  label.textContent = active ? 'Activo' : 'Inactivo';
-  label.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  if (label) { label.textContent = active ? 'Activo' : 'Inactivo'; label.style.color = active ? 'var(--accent)' : 'var(--muted)'; }
+  // Nav también refleja el toggle de pedidos
   const navO = document.getElementById('nav-orders');
   if (navO) navO.style.display = active ? '' : 'none';
-  const tabP = document.getElementById('orgtab-pedidos');
-  if (tabP) tabP.style.display = active ? '' : 'none';
-  if (!active && currentOrgTab === 'pedidos') switchOrgTab('info');
   markDirty();
   if (BIZ_ID) await db.from('businesses').update({ accepts_orders: active }).eq('id', BIZ_ID);
 });
@@ -950,11 +958,9 @@ function syncOrdersToggle() {
 const useDurationToggle = document.getElementById('u-use-duration');
 function syncDurationToggle() {
   const active = useDurationToggle.checked;
-  const cfg = document.getElementById('duration-config');
-  if (cfg) cfg.style.display = active ? '' : 'none';
+  // Solo muestra/oculta el preview (el campo de duración es siempre visible)
+  const prev = document.getElementById('schedule-preview');
   if (!active) {
-    // Si se desactiva, ocultar preview
-    const prev = document.getElementById('schedule-preview');
     if (prev) prev.style.display = 'none';
   } else {
     renderSchedulePreview();
@@ -2150,14 +2156,14 @@ async function loadDashboard() {
       const navOrders = document.getElementById('nav-orders');
       if (navAppts) navAppts.style.display = biz.accepts_appointments ? '' : 'none';
       if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
-      // Profile tabs: mostrar Citas/Pedidos solo si aplica
+      // Profile tabs: Citas si hay servicios, Pedidos si hay productos
       const tabCitas   = document.getElementById('orgtab-citas');
       const tabPedidos = document.getElementById('orgtab-pedidos');
-      if (tabCitas)   tabCitas.style.display   = biz.accepts_appointments ? '' : 'none';
-      if (tabPedidos) tabPedidos.style.display = biz.accepts_orders       ? '' : 'none';
+      if (tabCitas)   tabCitas.style.display   = hasServices ? '' : 'none';
+      if (tabPedidos) tabPedidos.style.display = hasProducts ? '' : 'none';
       // Si el tab activo quedó oculto, ir a info
-      if ((currentOrgTab === 'citas'   && !biz.accepts_appointments) ||
-          (currentOrgTab === 'pedidos' && !biz.accepts_orders)) switchOrgTab('info');
+      if ((currentOrgTab === 'citas'   && !hasServices) ||
+          (currentOrgTab === 'pedidos' && !hasProducts)) switchOrgTab('info');
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
