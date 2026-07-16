@@ -279,6 +279,44 @@ input[type=checkbox]{accent-color:var(--accent)}
   .convos.show-chat .chat-pane{display:flex}
   .chat-header .back-btn{display:block}
 }
+
+/* ===== Optimizaciones de rendimiento para móvil ===== */
+@media(max-width:860px){
+  /* Desactivar animaciones costosas (text-shadow y box-shadow animados causan repaint cada frame) */
+  .star{animation:none;text-shadow:none}
+  .bot-dot{animation:none;box-shadow:none;opacity:1}
+  .bot-dot.paused{box-shadow:none}
+
+  /* Desactivar backdrop-filter en todos los overlays (muy costoso en GPU móvil) */
+  .confirm-overlay,
+  #tpl-modal,
+  #unsaved-dialog{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(3,3,6,.92)}
+
+  /* Simplificar page transitions — sin translateY, solo opacity */
+  .page{animation:none}
+  .page.active{animation:fade-in-mobile .2s ease-out}
+  @keyframes fade-in-mobile{from{opacity:0}to{opacity:1}}
+
+  /* Reemplazar transition:all por propiedades específicas (más eficiente) */
+  .nav-item{transition:background .2s,color .2s}
+  .metric{transition:none}
+  .bar{transition:height .4s ease-out}
+  .add-item{transition:border-color .2s}
+  .adv-toggle{transition:border-color .2s}
+  .item-del{transition:none}
+
+  /* Eliminar glow/box-shadow decorativos que fuerzan composite layers */
+  .chk-row label:has(input:checked){box-shadow:none}
+  .usage-fill{box-shadow:none}
+  .chart-tip{box-shadow:none}
+
+  /* Hint al browser para compositing de elementos fijos */
+  #u-save-bar{will-change:transform}
+  .sidebar{will-change:auto}
+
+  /* Eliminar 300ms delay en taps */
+  button,a,[role=button]{touch-action:manipulation}
+}
 </style>
 </head>
 <body>
