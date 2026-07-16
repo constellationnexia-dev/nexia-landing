@@ -271,7 +271,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   .bot-status .bs-text{display:none}
   .logout .lg-text{display:none}
   .main{padding:20px 16px 40px}
-  #u-save-bar{left:12px;right:12px;top:14px}
+  #u-save-bar{left:12px;right:12px;top:14px;backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(8,8,14,.99)}
   .convos{grid-template-columns:1fr;height:calc(100vh - 190px)}
   .convo-list{border-right:none}
   .chat-pane{display:none}
@@ -1033,7 +1033,8 @@ switchOrgTab(localStorage.getItem('nexiaOrgTab') || 'info');
 /* ── Dirty tracking ── */
 const saveBar = document.getElementById('u-save-bar');
 let _isDirty = false;
-function markDirty()   { _isDirty = true;  saveBar.style.display = 'flex'; }
+let _initDone = false; // evita que eventos de carga inicial activen el save bar
+function markDirty()   { if (!_initDone) return; _isDirty = true;  saveBar.style.display = 'flex'; }
 function unmarkDirty() { _isDirty = false; saveBar.style.display = 'none'; }
 
 /* ── Snapshot para revertir cambios no guardados ── */
@@ -1501,7 +1502,10 @@ function syncAddressVisibility() {
 document.getElementById('u-online').addEventListener('change', syncAddressVisibility);
 syncAddressVisibility();
 
+let _isSaving = false;
 document.getElementById('u-save').addEventListener('click', async () => {
+  if (_isSaving) return;
+  _isSaving = true;
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
   data.profs = collectProfs();
@@ -1602,6 +1606,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
   const note = document.getElementById('u-save-note');
   note.style.opacity = '1';
   setTimeout(() => { note.style.opacity = '0'; }, 2500);
+  _isSaving = false;
 });
 (function loadUltra(){
   const data = JSON.parse(localStorage.getItem('nexiaUltra') || 'null');
@@ -2324,7 +2329,8 @@ async function loadDashboard() {
       chipNames = [...(dbSvcs || []), ...(dbProds || [])].map(x => x.name).filter(Boolean).slice(0, 30);
       // Guardar snapshot para poder revertir si el usuario sale sin guardar
       saveBizSnapshot(biz, dbSvcs, dbProds);
-      unmarkDirty(); // asegurar que la carga inicial no active el save bar
+      unmarkDirty();
+      _initDone = true; // a partir de aquí, markDirty responde a cambios reales del usuario
     }
     await Promise.all([loadChart(7), loadConversations()]);
   } catch(err) {
@@ -2433,4 +2439,53 @@ loadGCalStatus();
 /* Todos los temas — igual que la landing (normales + secretos accesibles en el panel) */
 const DB_THEMES = [
   { name:'purple', accent:'#A855F7', accent2:'#FF2E63', accentRgb:'168,85,247',  bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#14061F' },
-  { name:'galaxy'
+  { name:'galaxy', accent:'#C77DFF', accent2:'#7B2CBF', accentRgb:'199,125,255', bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#1A0533' },
+  { name:'green',  accent:'#00FF88', accent2:'#7C3AED', accentRgb:'0,255,136',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#04140b' },
+  { name:'acid',   accent:'#4BFF3C', accent2:'#00CC66', accentRgb:'75,255,60',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#07140A' },
+  { name:'cyan',   accent:'#00E5FF', accent2:'#8B5CF6', accentRgb:'0,229,255',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#041420' },
+  { name:'night',  accent:'#6366F1', accent2:'#818CF8', accentRgb:'99,102,241',  bg:'#000000', bg2:'#05050E', card:'#0A0A1A', btnSave:'#E0E7FF' },
+  { name:'dusk',   accent:'#7A68B5', accent2:'#4A3F73', accentRgb:'122,104,181', bg:'#010102', bg2:'#050408', card:'#08070D', btnSave:'#EFEAFB' },
+  { name:'red',    accent:'#FF2E63', accent2:'#A855F7', accentRgb:'255,46,99',   bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#fff' },
+  { name:'rose',   accent:'#FF3399', accent2:'#FF6B6B', accentRgb:'255,51,153',  bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#fff' },
+  { name:'mono',   accent:'#FFFFFF', accent2:'#8E8E9E', accentRgb:'255,255,255', bg:'#050508', bg2:'#0F0F1A', card:'#12121E', btnSave:'#0A0A0F' },
+  { name:'noir',   accent:'#F2F2F2', accent2:'#F2F2F2', accentRgb:'242,242,242', bg:'#000000', bg2:'#050505', card:'#0A0A0A', btnSave:'#000' },
+];
+let dbThemeIdx = 0;
+
+function applyDbTheme(t) {
+  const r = document.documentElement.style;
+  r.setProperty('--accent',     t.accent);
+  r.setProperty('--accent2',    t.accent2);
+  r.setProperty('--accent-rgb', t.accentRgb);
+  r.setProperty('--bg',   t.bg);
+  r.setProperty('--bg2',  t.bg2);
+  r.setProperty('--card', t.card);
+  document.querySelectorAll('.btn-save').forEach(el => el.style.color = t.btnSave);
+  window._avatarTextColor = (t.name === 'mono' || t.name === 'noir') ? '#111' : '';
+  document.querySelectorAll('.avatar').forEach(el => el.style.color = window._avatarTextColor);
+  const star = document.querySelector('.star');
+  if (star) {
+    star.style.transform = 'scale(1.6) rotate(180deg)';
+    star.style.transition = 'transform .3s ease';
+    setTimeout(() => { star.style.transform = ''; }, 300);
+  }
+  localStorage.setItem('nexiaTheme', t.name);
+}
+
+/* Cargar tema guardado */
+const savedDb = localStorage.getItem('nexiaTheme');
+if (savedDb) {
+  const fi = DB_THEMES.findIndex(t => t.name === savedDb);
+  if (fi >= 0) { dbThemeIdx = fi; applyDbTheme(DB_THEMES[dbThemeIdx]); }
+} else {
+  applyDbTheme(DB_THEMES[0]);
+}
+
+/* Click en ✦ Bienvenido — cicla TODOS los temas (en el panel no hay secretos) */
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  dbThemeIdx = (dbThemeIdx + 1) % DB_THEMES.length;
+  applyDbTheme(DB_THEMES[dbThemeIdx]);
+});
+</script>
+</body>
+</html>
