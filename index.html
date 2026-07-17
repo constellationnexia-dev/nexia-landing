@@ -1221,6 +1221,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
               <label class="org-opt"><input type="radio" name="org" value="institucion"><span><b>🏫</b>Institución</span></label>
               <label class="org-opt"><input type="radio" name="org" value="gobierno"><span><b>🏛️</b>Gobierno</span></label>
             </div>
+            <p style="font-size:.74rem;color:var(--muted);margin-top:8px">💡 Elige la opción que más se acerque a tu perfil — es solo para personalización visual, no afecta el funcionamiento del bot.</p>
           </div>
           <div class="field"><label for="b-type">¿A qué se dedica tu negocio?</label><input type="text" id="b-type" placeholder="Cuéntanos en pocas palabras" required></div>
           <div class="field"><label for="b-mode">¿Atención presencial, online o ambas?</label>
@@ -1270,6 +1271,16 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
               <label><input type="checkbox"> Tarjeta</label>
               <label><input type="checkbox"> Transferencia</label>
             </div>
+          </div>
+          <div class="field"><label for="s-order-fields">¿Qué datos necesita recopilar el bot cuando alguien hace un pedido o cotización? <em class="opt">opcional</em></label>
+            <textarea id="s-order-fields" rows="2" placeholder="Déjalo vacío si no aplica"></textarea>
+            <p style="font-size:.74rem;color:var(--muted);margin-top:6px">
+              Ejemplos según tu tipo de negocio:<br>
+              🧳 <em>Agencia de viajes:</em> destino, fechas de viaje, número de viajeros, presupuesto por persona<br>
+              🎂 <em>Pastelería/catering:</em> sabor, diseño, número de porciones, fecha de entrega<br>
+              🔧 <em>Técnico/servicios a domicilio:</em> dirección, descripción del problema, disponibilidad horaria<br>
+              👗 <em>Ropa personalizada:</em> talla, diseño, colores, fecha límite de entrega
+            </p>
           </div>
           <div class="field"><label for="s-walkin">¿Atienden sin cita también? <em class="opt">opcional</em></label>
             <select id="s-walkin">
@@ -1864,6 +1875,7 @@ document.getElementById('sub-2').addEventListener('submit', e => {
     localStorage.setItem('nexiaProdCount', prodItems.length);
     localStorage.setItem('nexiaServices', JSON.stringify(svcItems));
     localStorage.setItem('nexiaProducts', JSON.stringify(prodItems));
+    localStorage.setItem('nexiaOrderFields', document.getElementById('s-order-fields').value.trim());
     goSub(3);
   }
 });
@@ -2008,6 +2020,7 @@ document.getElementById('sub-3').addEventListener('submit', async e => {
     accepts_walkins,
     appointment_duration,
     payment_methods: payment_methods.length ? payment_methods : ['efectivo'],
+    config: localStorage.getItem('nexiaOrderFields') ? { order_fields: localStorage.getItem('nexiaOrderFields') } : null,
   };
 
   try {

@@ -671,6 +671,7 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-rtime">¿En cuánto tiempo estará listo el pedido para retirar?</label><input type="text" id="u-rtime" placeholder="Ej: 30 min"></div>
       </div>
       <div class="u-grid">
+        <div class="field"><label for="u-order-fields">¿Qué información necesita recopilar el bot para cada pedido o cotización?</label><textarea id="u-order-fields" rows="2" placeholder="Ej: destino del viaje, fechas de viaje, número de viajeros, presupuesto por persona&#10;Ej: sabor de torta, diseño, porciones, fecha de entrega"></textarea><p class="f-hint">💡 El bot preguntará estos datos antes de confirmar el pedido</p></div>
         <div class="field"><label for="u-custom">¿Requieren anticipo o pago adelantado?</label><textarea id="u-custom" rows="2" placeholder="Ej: Se requiere el 30% de anticipo para reservar citas de más de 1 hora"></textarea><p class="f-hint">💡 El bot lo informará automáticamente al confirmar</p></div>
         <div class="field"><label for="u-custom-ant">¿Hacen pedidos o productos personalizados?</label><input type="text" id="u-custom-ant" placeholder="Ej: Tortas con dedicatoria con 2 días de anticipación"></div>
         <div class="field"><label for="u-max-day">¿Máximo de pedidos por día?</label><input type="number" id="u-max-day" min="1" placeholder="20"><p class="f-hint">💡 El bot cerrará pedidos automáticamente al llegar al límite</p></div>
@@ -1447,7 +1448,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-emoji-freq', 'u-client-id'];
+const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-order-fields', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-emoji-freq', 'u-client-id'];
 /* ===== Plantillas de ejemplo ===== */
 const TEMPLATES = {
   viajes: {
@@ -1603,6 +1604,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
           emojis: data['u-emoji-freq'], emojiList: data['u-emojis'], clientId: data['u-client-id'],
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
+        order_fields: data['u-order-fields'] || null,
         custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
       };
       await db.from('businesses').update({
@@ -1922,6 +1924,7 @@ function populateFormFromConfig(biz) {
     'u-client-id':      sc.clientId,
     'u-afterhours':     pol.afterhours,
     'u-stock':          pol.stock,
+    'u-order-fields':   cfg.order_fields,
     'u-custom':         cst.notes,
     'u-custom-ant':     cst.ant,
     'u-extra-info':     cst.extra,
