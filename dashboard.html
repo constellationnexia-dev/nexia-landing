@@ -2299,8 +2299,10 @@ async function confirmQuote(quoteId) {
 }
 
 async function rejectQuote(quoteId) {
+  const reason = prompt('Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp):');
+  if (reason === null) return;
   try {
-    const res = await fetch(`${BACKEND}/orders/${quoteId}/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ businessId: BIZ_ID }) });
+    const res = await fetch(`${BACKEND}/orders/${quoteId}/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ businessId: BIZ_ID, reason }) });
     if (!res.ok) throw new Error();
     const q = allQuotes.find(q => q.id === quoteId);
     if (q) q.status = 'cancelled';
