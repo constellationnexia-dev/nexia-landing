@@ -1649,7 +1649,8 @@ document.getElementById('u-save').addEventListener('click', async () => {
           emojis: data['u-emoji-freq'], emojiList: data['u-emojis'], clientId: data['u-client-id'],
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
-        order_fields: data['u-order-fields-svc'] || data['u-order-fields'] || null,
+        service_fields: data['u-order-fields-svc'] || null,
+        order_fields: data['u-order-fields'] || null,
         orders: { confirm: data['u-orders-confirm'] || 'auto' },
         custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
       };
@@ -1977,7 +1978,7 @@ function populateFormFromConfig(biz) {
     'u-stock':          pol.stock,
     'u-orders-confirm':   cfg.orders?.confirm || 'auto',
     'u-order-fields':     cfg.order_fields,
-    'u-order-fields-svc': cfg.order_fields,
+    'u-order-fields-svc': cfg.service_fields,
     'u-custom':         cst.notes,
     'u-custom-ant':     cst.ant,
     'u-extra-info':     cst.extra,
@@ -2559,7 +2560,7 @@ async function loadDashboard() {
       const navQuotes = document.getElementById('nav-quotes');
       if (navAppts)  navAppts.style.display  = biz.accepts_appointments ? '' : 'none';
       if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
-      if (navQuotes) navQuotes.style.display = biz.config?.order_fields ? '' : 'none';
+      if (navQuotes) navQuotes.style.display = biz.config?.service_fields ? '' : 'none';
       // Profile tabs: Citas si hay servicios, Pedidos si hay productos
       const tabCitas   = document.getElementById('orgtab-citas');
       const tabPedidos = document.getElementById('orgtab-pedidos');
