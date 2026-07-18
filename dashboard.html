@@ -803,7 +803,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     </div>
     <!-- Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-      <button id="tab-pending_confirmation" onclick="switchApptTab('pending_confirmation')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="count-pending_confirmation"></span></button>
+      <button id="tab-pending_confirmation" onclick="switchApptTab('pending_confirmation')" style="display:none;padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="count-pending_confirmation"></span></button>
       <button id="tab-upcoming" onclick="switchApptTab('upcoming')" style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:var(--accent);color:white">Próximas <span id="count-upcoming"></span></button>
       <button id="tab-done" onclick="switchApptTab('done')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Realizadas <span id="count-done"></span></button>
       <button id="tab-cancelled" onclick="switchApptTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Canceladas <span id="count-cancelled"></span></button>
@@ -1049,6 +1049,16 @@ function syncDurationToggle() {
   }
 }
 useDurationToggle.addEventListener('change', () => { syncDurationToggle(); markDirty(); });
+
+// Mostrar/ocultar tabs "Por confirmar" en tiempo real al cambiar los selects
+document.getElementById('u-confirm').addEventListener('change', function() {
+  const tab = document.getElementById('tab-pending_confirmation');
+  if (tab) tab.style.display = this.value === 'manual' ? '' : 'none';
+});
+document.getElementById('u-orders-confirm').addEventListener('change', function() {
+  const tab = document.getElementById('otab-pending_confirmation');
+  if (tab) tab.style.display = this.value === 'manual' ? '' : 'none';
+});
 // Por defecto ON si hay servicios, OFF si no hay
 if (!hasServices) useDurationToggle.checked = false;
 syncDurationToggle();
@@ -2410,9 +2420,11 @@ async function loadDashboard() {
       if (tabPedidos) tabPedidos.style.display = hasProducts ? '' : 'none';
       // Si el tab activo quedó oculto, ir a info
       if (currentOrgTab === 'pedidos' && !hasProducts) switchOrgTab('info');
-      // Tab "Por confirmar" en pedidos: solo si confirmación manual
+      // Tabs "Por confirmar": solo si confirmación manual
       const tabOrderConfirm = document.getElementById('otab-pending_confirmation');
       if (tabOrderConfirm) tabOrderConfirm.style.display = biz.config?.orders?.confirm === 'manual' ? '' : 'none';
+      const tabApptConfirm = document.getElementById('tab-pending_confirmation');
+      if (tabApptConfirm) tabApptConfirm.style.display = biz.config?.scheduling?.confirm === 'manual' ? '' : 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
