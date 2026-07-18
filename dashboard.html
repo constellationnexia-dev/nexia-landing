@@ -332,6 +332,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   <button class="nav-item" data-page="convos"><span class="ico">💬</span><span class="label">Conversaciones</span></button>
   <button class="nav-item" id="nav-appts" data-page="appts" style="display:none"><span class="ico">📅</span><span class="label">Citas</span></button>
   <button class="nav-item" id="nav-orders" data-page="orders" style="display:none"><span class="ico">🛒</span><span class="label">Pedidos</span></button>
+  <button class="nav-item" id="nav-quotes" data-page="quotes" style="display:none"><span class="ico">📋</span><span class="label">Cotizaciones</span></button>
   <button class="nav-item" data-page="config"><span class="ico">⚙️</span><span class="label">Configuración</span></button>
   <div class="bottom">
     <div class="bot-status"><span class="bot-dot" id="bot-dot"></span><span class="bs-text" id="bot-status-text">Bot activo</span></div>
@@ -835,6 +836,25 @@ input[type=checkbox]{accent-color:var(--accent)}
     <div id="orders-empty" style="display:none;text-align:center;padding:48px 20px">
       <div style="font-size:2.5rem;margin-bottom:12px">🛒</div>
       <p style="color:var(--muted);font-size:.9rem" id="orders-empty-text">No hay pedidos en esta sección.</p>
+    </div>
+  </section>
+
+  <section class="page" id="page-quotes">
+    <div class="page-head">
+      <h1>Cotizaciones</h1>
+      <p>Solicitudes de servicio recibidas por tu asistente.</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button id="qtab-pending_confirmation" onclick="switchQuoteTab('pending_confirmation')" style="display:none;padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="qcount-pending_confirmation"></span></button>
+      <button id="qtab-pending" onclick="switchQuoteTab('pending')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Nuevas <span id="qcount-pending"></span></button>
+      <button id="qtab-cancelled" onclick="switchQuoteTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Rechazadas <span id="qcount-cancelled"></span></button>
+      <button id="qtab-all" onclick="switchQuoteTab('all')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todas <span id="qcount-all"></span></button>
+    </div>
+    <div id="quotes-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando cotizaciones...</div>
+    <div id="quotes-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="quotes-empty" style="display:none;text-align:center;padding:48px 20px">
+      <div style="font-size:2.5rem;margin-bottom:12px">📋</div>
+      <p style="color:var(--muted);font-size:.9rem">No hay cotizaciones en esta sección.</p>
     </div>
   </section>
 
@@ -1732,6 +1752,7 @@ function doNavigate(btn) {
   window.scrollTo({ top: 0 });
   if (btn.dataset.page === 'appts' && !apptsLoaded) { apptsLoaded = true; loadAppointments(); }
   if (btn.dataset.page === 'orders' && !ordersLoaded) { ordersLoaded = true; loadOrders(); switchOrderTab('pending'); }
+  if (btn.dataset.page === 'quotes' && !quotesLoaded) { quotesLoaded = true; loadQuotes(); switchQuoteTab('pending'); }
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -2159,6 +2180,128 @@ let allOrders = [];
 let currentOrderTab = 'pending';
 const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
 
+/* ── COTIZACIONES ── */
+let allQuotes = [];
+let currentQuoteTab = 'pending';
+let quotesLoaded = false;
+
+function switchQuoteTab(tab) {
+  currentQuoteTab = tab;
+  ['pending_confirmation','pending','cancelled','all'].forEach(t => {
+    const el = document.getElementById('qtab-' + t);
+    if (!el) return;
+    const active = t === tab;
+    el.style.background = active ? 'rgba(var(--accent-rgb),.12)' : 'none';
+    el.style.color       = active ? 'var(--accent)' : 'var(--muted)';
+    el.style.border      = active ? '1px solid rgba(var(--accent-rgb),.28)' : '1px solid var(--line)';
+  });
+  renderQuotes();
+}
+
+function updateQuoteCounts() {
+  const counts = { pending_confirmation: 0, pending: 0, cancelled: 0, all: allQuotes.length };
+  allQuotes.forEach(q => { if (counts[q.status] !== undefined) counts[q.status]++; });
+  Object.entries(counts).forEach(([s, c]) => {
+    const el = document.getElementById('qcount-' + s);
+    if (el) el.textContent = c > 0 ? ` (${c})` : '';
+  });
+  const pcTab = document.getElementById('qtab-pending_confirmation');
+  if (pcTab && counts.pending_confirmation > 0) {
+    pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+  }
+}
+
+function renderQuotes() {
+  const listEl  = document.getElementById('quotes-list');
+  const emptyEl = document.getElementById('quotes-empty');
+  if (!listEl) return;
+  const filtered = currentQuoteTab === 'all' ? allQuotes : allQuotes.filter(q => q.status === currentQuoteTab);
+  listEl.innerHTML = '';
+  if (!filtered.length) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  filtered.forEach(q => {
+    const date = new Date(q.created_at).toLocaleDateString('es-EC', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    const details = q.notes || (q.items||[]).map(i => `${i.quantity}x ${i.name}`).join(', ') || '—';
+    const reqDate = q.requested_date ? `📅 ${q.requested_date}${q.requested_time ? ' ' + q.requested_time : ''}` : '';
+    const statusLabel = { pending_confirmation:'⏳ Por confirmar', pending:'✅ Recibida', cancelled:'❌ Rechazada' }[q.status] || q.status;
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <strong style="font-size:.97rem">${q.client_name || 'Cliente'}</strong>
+        <span style="font-size:.78rem;color:var(--muted)">${date}</span>
+      </div>
+      <div style="font-size:.87rem;color:var(--text);opacity:.85">${details}</div>
+      ${reqDate ? `<div style="font-size:.82rem;color:var(--muted)">${reqDate}</div>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px">
+        <span style="font-size:.8rem;color:var(--muted)">${statusLabel}</span>
+        ${q.status === 'pending_confirmation' ? `
+          <div style="display:flex;gap:8px">
+            <button onclick="confirmQuote('${q.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#04140b;font-size:.8rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
+            <button onclick="rejectQuote('${q.id}')"  style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.8rem;font-weight:600;cursor:pointer">❌ Rechazar</button>
+          </div>` : ''}
+        ${q.status === 'pending' ? `<span style="font-size:.8rem;color:var(--accent)">📱 ${q.client_phone || '—'}</span>` : ''}
+      </div>`;
+    listEl.appendChild(card);
+  });
+}
+
+async function confirmQuote(quoteId) {
+  try {
+    const res = await fetch(`${BACKEND}/orders/${quoteId}/confirm`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ businessId: BIZ_ID }) });
+    if (!res.ok) throw new Error();
+    const q = allQuotes.find(q => q.id === quoteId);
+    if (q) q.status = 'pending';
+    updateQuoteCounts(); renderQuotes();
+  } catch { alert('No se pudo confirmar. Intenta de nuevo.'); }
+}
+
+async function rejectQuote(quoteId) {
+  try {
+    const res = await fetch(`${BACKEND}/orders/${quoteId}/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ businessId: BIZ_ID }) });
+    if (!res.ok) throw new Error();
+    const q = allQuotes.find(q => q.id === quoteId);
+    if (q) q.status = 'cancelled';
+    updateQuoteCounts(); renderQuotes();
+  } catch { alert('No se pudo rechazar. Intenta de nuevo.'); }
+}
+
+async function loadQuotes() {
+  if (!BIZ_ID) return;
+  const loadingEl = document.getElementById('quotes-loading');
+  try {
+    const { data } = await db.from('orders')
+      .select('id,client_name,client_phone,items,notes,requested_date,requested_time,status,created_at')
+      .eq('business_id', BIZ_ID)
+      .eq('type', 'quote')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (loadingEl) loadingEl.style.display = 'none';
+    allQuotes = data || [];
+    updateQuoteCounts();
+    renderQuotes();
+    // Tab Por confirmar visible solo si hay confirmación manual
+    const pcTab = document.getElementById('qtab-pending_confirmation');
+    // Realtime
+    db.channel('quotes-' + BIZ_ID)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        if (payload.new.type !== 'quote') return;
+        allQuotes.unshift(payload.new);
+        updateQuoteCounts(); renderQuotes();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        if (payload.new.type !== 'quote') return;
+        const idx = allQuotes.findIndex(q => q.id === payload.new.id);
+        if (idx !== -1) allQuotes[idx] = { ...allQuotes[idx], ...payload.new };
+        updateQuoteCounts(); renderQuotes();
+      })
+      .subscribe();
+  } catch(e) {
+    console.error('loadQuotes error:', e);
+    if (loadingEl) loadingEl.textContent = 'Error cargando cotizaciones.';
+  }
+}
+
 const ORDER_STATUS = {
   pending_confirmation: { label: 'Por confirmar', color: '#f59e0b', next: null, nextLabel: null },
   pending:   { label: 'Pendiente',      color: '#f59e0b', next: 'preparing', nextLabel: '▶ En preparación' },
@@ -2305,8 +2448,9 @@ async function loadOrders() {
   const loadingEl = document.getElementById('orders-loading');
   try {
     const { data } = await db.from('orders')
-      .select('id,client_name,client_phone,items,total,delivery_mode,requested_date,requested_time,status,notes,created_at')
+      .select('id,client_name,client_phone,items,total,delivery_mode,requested_date,requested_time,status,notes,type,created_at')
       .eq('business_id', BIZ_ID)
+      .eq('type', 'product')
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -2412,8 +2556,10 @@ async function loadDashboard() {
       // Nav items: mostrar si hay servicios/productos registrados
       const navAppts = document.getElementById('nav-appts');
       const navOrders = document.getElementById('nav-orders');
-      if (navAppts)  navAppts.style.display  = hasServices ? '' : 'none';
-      if (navOrders) navOrders.style.display = hasProducts ? '' : 'none';
+      const navQuotes = document.getElementById('nav-quotes');
+      if (navAppts)  navAppts.style.display  = biz.accepts_appointments ? '' : 'none';
+      if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
+      if (navQuotes) navQuotes.style.display = biz.config?.order_fields ? '' : 'none';
       // Profile tabs: Citas si hay servicios, Pedidos si hay productos
       const tabCitas   = document.getElementById('orgtab-citas');
       const tabPedidos = document.getElementById('orgtab-pedidos');
