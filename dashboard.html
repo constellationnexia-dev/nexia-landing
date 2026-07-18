@@ -823,7 +823,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Pedidos recibidos por tu asistente. Actualiza el estado en tiempo real.</p>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-      <button id="otab-pending_confirmation" onclick="switchOrderTab('pending_confirmation')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="ocount-pending_confirmation"></span></button>
+      <button id="otab-pending_confirmation" onclick="switchOrderTab('pending_confirmation')" style="display:none;padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="ocount-pending_confirmation"></span></button>
       <button id="otab-pending"   onclick="switchOrderTab('pending')"   style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Pendientes <span id="ocount-pending"></span></button>
       <button id="otab-preparing" onclick="switchOrderTab('preparing')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">En preparación <span id="ocount-preparing"></span></button>
       <button id="otab-ready"     onclick="switchOrderTab('ready')"     style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Listos <span id="ocount-ready"></span></button>
@@ -2410,6 +2410,9 @@ async function loadDashboard() {
       if (tabPedidos) tabPedidos.style.display = hasProducts ? '' : 'none';
       // Si el tab activo quedó oculto, ir a info
       if (currentOrgTab === 'pedidos' && !hasProducts) switchOrgTab('info');
+      // Tab "Por confirmar" en pedidos: solo si confirmación manual
+      const tabOrderConfirm = document.getElementById('otab-pending_confirmation');
+      if (tabOrderConfirm) tabOrderConfirm.style.display = biz.config?.orders?.confirm === 'manual' ? '' : 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
