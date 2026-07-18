@@ -470,12 +470,12 @@ input[type=checkbox]{accent-color:var(--accent)}
 
     <!-- Tabs de sección -->
     <div class="org-tabs" id="org-tabs-row">
-      <button class="org-tab active" data-panel="info"      onclick="switchOrgTab('info')">📍 Negocio</button>
-      <button class="org-tab"        data-panel="items"     onclick="switchOrgTab('items')">🛍️ Servicios</button>
-      <button class="org-tab"        data-panel="citas"     id="orgtab-citas"   onclick="switchOrgTab('citas')"   style="display:none">📅 Citas</button>
+      <button class="org-tab active" data-panel="info"      onclick="switchOrgTab('info')">📍 Información</button>
+      <button class="org-tab"        data-panel="items"     onclick="switchOrgTab('items')">🛍️ Oferta</button>
+      <button class="org-tab"        data-panel="citas"     id="orgtab-citas"   onclick="switchOrgTab('citas')">📅 Agendamiento</button>
       <button class="org-tab"        data-panel="pedidos"   id="orgtab-pedidos" onclick="switchOrgTab('pedidos')" style="display:none">📦 Pedidos</button>
       <button class="org-tab"        data-panel="pagos"     onclick="switchOrgTab('pagos')">💳 Pagos</button>
-      <button class="org-tab"        data-panel="asistente" onclick="switchOrgTab('asistente')">🤖 Asistente</button>
+      <button class="org-tab"        data-panel="asistente" onclick="switchOrgTab('asistente')">🤖 Personalidad</button>
     </div>
 
     <!-- SECCIÓN 0: Información del negocio -->
@@ -633,9 +633,10 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="field"><label for="u-noshow">¿Qué pasa si el cliente no aparece?</label><textarea id="u-noshow" rows="2" placeholder="Ej: Si el cliente no se presenta y no avisa con al menos 2 horas de anticipación, pierde el anticipo pagado y deberá reagendar. Para citas sin anticipo, después de 2 inasistencias seguidas se requiere pago por adelantado."></textarea><p class="f-hint">💡 El bot informará esta política antes de confirmar la cita y si alguien pregunta</p></div>
       <div style="border-top:1px solid var(--line);margin:20px 0 16px"></div>
       <div class="field">
-        <label for="u-order-fields-svc">¿Tu servicio implica fechas específicas que el cliente elige? (viajes, eventos, proyectos, etc.)</label>
-        <textarea id="u-order-fields-svc" rows="2" placeholder="Si aplica, pon qué datos necesitas recopilar. Ej: destino del viaje, fechas de salida y regreso, número de viajeros, presupuesto por persona"></textarea>
-        <p class="f-hint">💡 <strong>¿Cuándo usarlo?</strong> Solo si tus clientes te piden algo para una fecha que ellos escogen y que NO es una visita a tu local — por ejemplo: un viaje, un evento, una entrega a domicilio, una remodelación. Si lo que haces es atender personas en tu local o a domicilio en horarios específicos (peluquería, médico, fotógrafo), déjalo vacío y usa el sistema de citas normal de arriba.</p>
+        <label for="u-order-fields-svc" style="font-weight:700">¿Tus clientes necesitan cotizar antes de agendar?</label>
+        <p style="font-size:.82rem;color:var(--muted);margin:4px 0 10px;line-height:1.5">Actívalo si el cliente primero da información del servicio (ej: destino de viaje, tipo de evento, medidas de un proyecto) y <em>luego</em> agendas una reunión para cerrar los detalles. Si solo agendas citas directamente, déjalo vacío.</p>
+        <textarea id="u-order-fields-svc" rows="2" placeholder="¿Qué datos necesita recopilar el bot? Ej: destino del viaje, fechas de salida y regreso, número de viajeros, presupuesto estimado"></textarea>
+        <p class="f-hint">Ejemplos: agencia de viajes → destino, fechas, viajeros · arquitecto → tipo de proyecto, metros, presupuesto · fotógrafo de eventos → tipo de evento, fecha, lugar</p>
       </div>
       </div><!-- /citas-body -->
     </div>
@@ -677,7 +678,7 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-rtime">¿En cuánto tiempo estará listo el pedido para retirar?</label><input type="text" id="u-rtime" placeholder="Ej: 30 min"></div>
       </div>
       <div class="u-grid">
-        <div class="field"><label for="u-order-fields">¿Qué información necesita recopilar el bot para cada pedido o cotización?</label><textarea id="u-order-fields" rows="2" placeholder="Ej: destino del viaje, fechas de viaje, número de viajeros, presupuesto por persona&#10;Ej: sabor de torta, diseño, porciones, fecha de entrega"></textarea><p class="f-hint">💡 El bot preguntará estos datos antes de confirmar el pedido</p></div>
+        <div class="field"><label for="u-order-fields">¿Qué información necesita recopilar el bot para todos los pedidos?</label><textarea id="u-order-fields" rows="2" placeholder="Ej: sabor de torta, diseño, porciones, fecha de entrega&#10;Ej: talla, color, dirección de envío"></textarea><p class="f-hint">💡 Aplica a todos los pedidos en general. Si un producto específico necesita datos extra (ej: solo las tortas personalizadas necesitan diseño, no el pan normal), ponlo en la <strong>descripción de ese producto</strong> en la pestaña Oferta — el bot lo leerá y pedirá esa info solo para ese producto.</p></div>
         <div class="field"><label for="u-custom">¿Requieren anticipo o pago adelantado?</label><textarea id="u-custom" rows="2" placeholder="Ej: Se requiere el 30% de anticipo para reservar citas de más de 1 hora"></textarea><p class="f-hint">💡 El bot lo informará automáticamente al confirmar</p></div>
         <div class="field"><label for="u-custom-ant">¿Hacen pedidos o productos personalizados?</label><input type="text" id="u-custom-ant" placeholder="Ej: Tortas con dedicatoria con 2 días de anticipación"></div>
         <div class="field"><label for="u-max-day">¿Máximo de pedidos por día?</label><input type="number" id="u-max-day" min="1" placeholder="20"><p class="f-hint">💡 El bot cerrará pedidos automáticamente al llegar al límite</p></div>
@@ -1150,7 +1151,7 @@ function addItemRow(container, it, timePh){
       <input type="text" class="it-time" placeholder="${timePh}">
       <button type="button" class="item-del" aria-label="Eliminar">✕</button>
     </div>
-    <input type="text" class="it-desc" placeholder="Descripción opcional — Ej: Incluye corte, lavado y secado">`;
+    <input type="text" class="it-desc" placeholder="Descripción — Ej: Incluye corte, lavado y secado · Para productos personalizados añade qué datos necesitas: sabor, diseño, talla, etc.">`;
   card.querySelector('.it-name').value = it.name || '';
   card.querySelector('.it-price').value = it.price || '';
   card.querySelector('.it-time').value = it.time || '';
@@ -2357,11 +2358,10 @@ async function loadDashboard() {
       // Profile tabs: Citas si hay servicios, Pedidos si hay productos
       const tabCitas   = document.getElementById('orgtab-citas');
       const tabPedidos = document.getElementById('orgtab-pedidos');
-      if (tabCitas)   tabCitas.style.display   = hasServices ? '' : 'none';
+      if (tabCitas)   tabCitas.style.display   = ''; // Agendamiento siempre visible
       if (tabPedidos) tabPedidos.style.display = hasProducts ? '' : 'none';
       // Si el tab activo quedó oculto, ir a info
-      if ((currentOrgTab === 'citas'   && !hasServices) ||
-          (currentOrgTab === 'pedidos' && !hasProducts)) switchOrgTab('info');
+      if (currentOrgTab === 'pedidos' && !hasProducts) switchOrgTab('info');
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
