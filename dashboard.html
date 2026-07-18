@@ -1690,6 +1690,16 @@ document.getElementById('u-save').addEventListener('click', async () => {
     saveBizSnapshot(savedBiz, svcs.map(s => ({ name:s.name, price:s.price, duration:s.time, description:s.desc })), prods.map(p => ({ name:p.name, price:p.price, description:p.desc })));
   }
   unmarkDirty();
+  // Refrescar visibilidad de nav tras guardar
+  const navAppts2 = document.getElementById('nav-appts');
+  const navOrders2 = document.getElementById('nav-orders');
+  const navQuotes2 = document.getElementById('nav-quotes');
+  const savedAcceptsAppts = data['u-accepts-appt'] !== 'no';
+  const savedAcceptsOrders = data['u-accepts-orders'] === 'si';
+  const savedServiceFields = data['u-order-fields-svc'];
+  if (navAppts2)  navAppts2.style.display  = savedAcceptsAppts  ? '' : 'none';
+  if (navOrders2) navOrders2.style.display = savedAcceptsOrders ? '' : 'none';
+  if (navQuotes2) navQuotes2.style.display = savedServiceFields  ? '' : 'none';
   const note = document.getElementById('u-save-note');
   note.style.opacity = '1';
   setTimeout(() => { note.style.opacity = '0'; }, 2500);
