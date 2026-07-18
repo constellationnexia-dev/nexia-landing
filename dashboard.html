@@ -2055,18 +2055,18 @@ const TODAY = new Date().toISOString().split('T')[0];
 
 // Limpieza de registros con confirmación de doble clic (sin popups)
 async function cleanRecords(panel, mode, btn) {
+  if (!btn.dataset.label) btn.dataset.label = btn.textContent.trim();
   if (!btn.dataset.confirming) {
     btn.dataset.confirming = '1';
-    btn.dataset.orig = btn.innerHTML;
-    btn.innerHTML = '¿Seguro? Clic de nuevo para borrar';
+    btn.textContent = '¿Seguro? Clic de nuevo para borrar';
     btn.style.color = '#ef4444'; btn.style.borderColor = '#ef4444';
     setTimeout(() => {
-      if (btn.dataset.confirming) { delete btn.dataset.confirming; btn.innerHTML = btn.dataset.orig; btn.style.color = ''; btn.style.borderColor = ''; }
+      if (btn.dataset.confirming) { delete btn.dataset.confirming; btn.textContent = btn.dataset.label; btn.style.color = ''; btn.style.borderColor = ''; }
     }, 4000);
     return;
   }
   delete btn.dataset.confirming;
-  btn.innerHTML = btn.dataset.orig;
+  btn.textContent = btn.dataset.label;
   btn.style.color = ''; btn.style.borderColor = '';
   try {
     if (panel === 'appts') {
@@ -2297,8 +2297,12 @@ function updateQuoteCounts() {
     if (el) el.textContent = c > 0 ? ` (${c})` : '';
   });
   const pcTab = document.getElementById('qtab-pending_confirmation');
-  if (pcTab && counts.pending_confirmation > 0) {
-    pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+  if (pcTab && currentQuoteTab !== 'pending_confirmation') {
+    if (counts.pending_confirmation > 0) {
+      pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+    } else {
+      pcTab.style.borderColor = ''; pcTab.style.color = '';
+    }
   }
 }
 
