@@ -1552,6 +1552,7 @@ let _isSaving = false;
 document.getElementById('u-save').addEventListener('click', async () => {
   if (_isSaving) return;
   _isSaving = true;
+  try {
   const data = {};
   U_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
   data.profs = collectProfs();
@@ -1571,6 +1572,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
   localStorage.setItem('nexiaSvcCount', svcs.length);
   localStorage.setItem('nexiaProdCount', prods.length);
   /* Sync Supabase services, products & config */
+  let config = null;
   if (BIZ_ID) {
     try {
       await db.from('services').delete().eq('business_id', BIZ_ID);
@@ -1584,7 +1586,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
         price: parseFloat(p.price) || null, is_available: true
       })));
       /* Config JSONB — toda la personalización del negocio */
-      const config = {
+      config = {
         scheduling: {
           break: data['u-break'], breakFrom: data['u-break-from'], breakTo: data['u-break-to'],
           maxDays: data['u-max-days'], maxDay: data['u-max-day'], maxHour: data['u-max-hour'],
@@ -1653,7 +1655,11 @@ document.getElementById('u-save').addEventListener('click', async () => {
   const note = document.getElementById('u-save-note');
   note.style.opacity = '1';
   setTimeout(() => { note.style.opacity = '0'; }, 2500);
-  _isSaving = false;
+  } catch(saveErr) {
+    console.error('Error al guardar:', saveErr);
+  } finally {
+    _isSaving = false;
+  }
 });
 (function loadUltra(){
   const data = JSON.parse(localStorage.getItem('nexiaUltra') || 'null');
