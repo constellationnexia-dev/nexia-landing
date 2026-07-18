@@ -1084,6 +1084,9 @@ document.getElementById('u-confirm').addEventListener('change', function() {
 document.getElementById('u-orders-confirm').addEventListener('change', function() {
   const tab = document.getElementById('otab-pending_confirmation');
   if (tab) tab.style.display = this.value === 'manual' ? '' : 'none';
+  const qtab = document.getElementById('qtab-pending_confirmation');
+  const hasSvcFields = document.getElementById('u-order-fields-svc')?.value?.trim();
+  if (qtab) qtab.style.display = (this.value === 'manual' && hasSvcFields) ? '' : 'none';
 });
 // Por defecto ON si hay servicios, OFF si no hay
 if (!hasServices) useDurationToggle.checked = false;
@@ -2728,9 +2731,9 @@ async function loadDashboard() {
       if (tabOrderConfirm) tabOrderConfirm.style.display = biz.config?.orders?.confirm === 'manual' ? '' : 'none';
       const tabApptConfirm = document.getElementById('tab-pending_confirmation');
       if (tabApptConfirm) tabApptConfirm.style.display = biz.config?.scheduling?.confirm === 'manual' ? '' : 'none';
-      // Cotizaciones: "Por confirmar" siempre visible si el negocio tiene service_fields
+      // Cotizaciones: "Por confirmar" solo si hay service_fields Y confirmación manual
       const tabQuoteConfirm = document.getElementById('qtab-pending_confirmation');
-      if (tabQuoteConfirm) tabQuoteConfirm.style.display = biz.config?.service_fields ? '' : 'none';
+      if (tabQuoteConfirm) tabQuoteConfirm.style.display = (biz.config?.service_fields && biz.config?.orders?.confirm === 'manual') ? '' : 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
