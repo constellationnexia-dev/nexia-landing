@@ -635,7 +635,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <div class="field">
         <label for="u-order-fields-svc">¿Tu servicio implica fechas específicas que el cliente elige? (viajes, eventos, proyectos, etc.)</label>
         <textarea id="u-order-fields-svc" rows="2" placeholder="Si aplica, pon qué datos necesitas recopilar. Ej: destino del viaje, fechas de salida y regreso, número de viajeros, presupuesto por persona"></textarea>
-        <p class="f-hint">💡 Úsalo si tus clientes piden servicios para una fecha futura que ellos eligen (no una cita en tu oficina). El bot recopilará esa info antes de confirmar y no confundirá esas fechas con tu horario de atención.</p>
+        <p class="f-hint">💡 <strong>¿Cuándo usarlo?</strong> Solo si tus clientes te piden algo para una fecha que ellos escogen y que NO es una visita a tu local — por ejemplo: un viaje, un evento, una entrega a domicilio, una remodelación. Si lo que haces es atender personas en tu local o a domicilio en horarios específicos (peluquería, médico, fotógrafo), déjalo vacío y usa el sistema de citas normal de arriba.</p>
       </div>
       </div><!-- /citas-body -->
     </div>
@@ -798,6 +798,7 @@ input[type=checkbox]{accent-color:var(--accent)}
     </div>
     <!-- Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button id="tab-pending_confirmation" onclick="switchApptTab('pending_confirmation')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="count-pending_confirmation"></span></button>
       <button id="tab-upcoming" onclick="switchApptTab('upcoming')" style="padding:7px 18px;border-radius:20px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;background:var(--accent);color:white">Próximas <span id="count-upcoming"></span></button>
       <button id="tab-done" onclick="switchApptTab('done')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Realizadas <span id="count-done"></span></button>
       <button id="tab-cancelled" onclick="switchApptTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Canceladas <span id="count-cancelled"></span></button>
@@ -1981,14 +1982,15 @@ let allAppts = [];
 let currentApptTab = 'upcoming';
 const TODAY = new Date().toISOString().split('T')[0];
 
-function isUpcoming(a) { return a.status !== 'cancelled' && a.appointment_date >= TODAY; }
-function isDone(a)     { return a.status !== 'cancelled' && a.appointment_date < TODAY; }
-function isCancelled(a){ return a.status === 'cancelled'; }
+function isPending(a)   { return a.status === 'pending_confirmation'; }
+function isUpcoming(a) { return a.status === 'confirmed' && a.appointment_date >= TODAY; }
+function isDone(a)     { return a.status === 'confirmed' && a.appointment_date < TODAY; }
+function isCancelled(a){ return a.status === 'cancelled' || a.status === 'rejected'; }
 
 function switchApptTab(tab) {
   currentApptTab = tab;
-  const tabs = { upcoming: '#7c3aed', done: '#22c55e', cancelled: '#ef4444', all: '#6b7280' };
-  ['upcoming','done','cancelled','all'].forEach(t => {
+  const tabs = { pending_confirmation: '#f59e0b', upcoming: '#7c3aed', done: '#22c55e', cancelled: '#ef4444', all: '#6b7280' };
+  ['pending_confirmation','upcoming','done','cancelled','all'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (!el) return;
     const active = t === tab;
@@ -2005,42 +2007,51 @@ function renderAppts() {
   const emptyTxt = document.getElementById('appts-empty-text');
 
   const emptyMsgs = {
+    pending_confirmation: 'No hay citas pendientes de confirmación.',
     upcoming:  'No hay citas próximas. Cuando un cliente agende por WhatsApp aparecerán aquí.',
     done:      'No hay citas realizadas aún.',
     cancelled: 'No hay citas canceladas.',
     all:       'No hay citas registradas aún.',
   };
-  const filterFn = { upcoming: isUpcoming, done: isDone, cancelled: isCancelled, all: () => true };
-  const filtered = allAppts.filter(filterFn[currentApptTab]);
+  const filterFn = {
+    pending_confirmation: isPending,
+    upcoming: isUpcoming,
+    done: isDone,
+    cancelled: isCancelled,
+    all: () => true,
+  };
+  const filtered = allAppts.filter(filterFn[currentApptTab] || (() => true));
 
   if (!filtered.length) {
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
-    emptyTxt.textContent = emptyMsgs[currentApptTab];
+    emptyTxt.textContent = emptyMsgs[currentApptTab] || '';
     return;
   }
   emptyEl.style.display = 'none';
 
   const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
 
-  // Próximas: orden ascendente (la más próxima arriba); Realizadas y Canceladas: descendente
   const sorted = [...filtered].sort((a, b) => {
     const d = a.appointment_date.localeCompare(b.appointment_date);
-    return currentApptTab === 'upcoming' ? d : -d;
+    return currentApptTab === 'upcoming' || currentApptTab === 'pending_confirmation' ? d : -d;
   });
 
   listEl.innerHTML = sorted.map(a => `
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;${isCancelled(a)||isDone(a)?'opacity:.75':''}">
+    <div style="background:var(--card);border:1px solid ${isPending(a) ? '#f59e0b55' : 'var(--line)'};border-radius:14px;padding:16px 18px;${isCancelled(a)||isDone(a)?'opacity:.75':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
           <div style="font-weight:700;color:var(--text);font-size:.95rem;margin-bottom:3px">${a.client_name || 'Cliente'}</div>
           <div style="font-size:.8rem;color:var(--muted)">${a.client_phone || ''}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${isUpcoming(a) ? `
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${isPending(a) ? `
+            <button onclick="confirmAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:#22c55e;color:white;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
+            <button onclick="rejectAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
+          ` : isUpcoming(a) ? `
             <button onclick="cancelAppointment('${a.id}')" style="padding:5px 12px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.75rem;font-weight:600;cursor:pointer">Cancelar</button>
           ` : isCancelled(a) ? `
-            <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#ef444422;color:#ef4444">Cancelada</span>
+            <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#ef444422;color:#ef4444">${a.status === 'rejected' ? 'Rechazada' : 'Cancelada'}</span>
           ` : `
             <span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#22c55e22;color:#22c55e">Realizada</span>
           `}
@@ -2056,34 +2067,67 @@ function renderAppts() {
     </div>`).join('');
 }
 
+const APPTS_BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+
+async function confirmAppointment(apptId) {
+  if (!confirm('¿Confirmar esta cita? El cliente recibirá un WhatsApp de confirmación.')) return;
+  try {
+    const res = await fetch(`${APPTS_BACKEND}/appointments/${apptId}/confirm`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID }),
+    });
+    if (!res.ok) throw new Error();
+    const appt = allAppts.find(a => a.id === apptId);
+    if (appt) appt.status = 'confirmed';
+    updateApptCounts(); renderAppts();
+  } catch { alert('No se pudo confirmar. Intenta de nuevo.'); }
+}
+
+async function rejectAppointment(apptId) {
+  const reason = prompt('Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp):');
+  if (reason === null) return; // canceló el prompt
+  try {
+    const res = await fetch(`${APPTS_BACKEND}/appointments/${apptId}/reject`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID, reason }),
+    });
+    if (!res.ok) throw new Error();
+    const appt = allAppts.find(a => a.id === apptId);
+    if (appt) appt.status = 'rejected';
+    updateApptCounts(); renderAppts();
+  } catch { alert('No se pudo rechazar. Intenta de nuevo.'); }
+}
+
 async function cancelAppointment(apptId) {
   if (!confirm('¿Cancelar esta cita? Se eliminará también del Google Calendar.')) return;
   try {
-    const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
-    const res = await fetch(`${BACKEND}/appointments/${apptId}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${APPTS_BACKEND}/appointments/${apptId}/cancel`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ businessId: BIZ_ID }),
     });
-    if (!res.ok) throw new Error('Error del servidor');
+    if (!res.ok) throw new Error();
     const appt = allAppts.find(a => a.id === apptId);
     if (appt) appt.status = 'cancelled';
-    updateApptCounts();
-    renderAppts();
-  } catch(e) {
-    alert('No se pudo cancelar la cita. Intenta de nuevo.');
-    console.error(e);
-  }
+    updateApptCounts(); renderAppts();
+  } catch { alert('No se pudo cancelar la cita. Intenta de nuevo.'); }
 }
 
 function updateApptCounts() {
+  const pending   = allAppts.filter(isPending).length;
   const upcoming  = allAppts.filter(isUpcoming).length;
   const done      = allAppts.filter(isDone).length;
   const cancelled = allAppts.filter(isCancelled).length;
-  document.getElementById('count-upcoming').textContent  = upcoming        ? `(${upcoming})`        : '';
-  document.getElementById('count-done').textContent      = done            ? `(${done})`            : '';
-  document.getElementById('count-cancelled').textContent = cancelled       ? `(${cancelled})`       : '';
+  document.getElementById('count-pending_confirmation').textContent = pending   ? `(${pending})`   : '';
+  document.getElementById('count-upcoming').textContent  = upcoming  ? `(${upcoming})`  : '';
+  document.getElementById('count-done').textContent      = done      ? `(${done})`      : '';
+  document.getElementById('count-cancelled').textContent = cancelled ? `(${cancelled})` : '';
   document.getElementById('count-all').textContent       = allAppts.length ? `(${allAppts.length})` : '';
+  // Si hay pendientes, highlight tab
+  const pendingTab = document.getElementById('tab-pending_confirmation');
+  if (pendingTab && pending > 0 && currentApptTab !== 'pending_confirmation') {
+    pendingTab.style.borderColor = '#f59e0b';
+    pendingTab.style.color = '#f59e0b';
+  }
 }
 
 /* ── PEDIDOS ── */
@@ -2162,12 +2206,22 @@ function renderOrders() {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
-  const { error } = await db.from('orders').update({ status: newStatus }).eq('id', orderId);
-  if (error) { alert('Error actualizando estado'); return; }
-  const order = allOrders.find(o => o.id === orderId);
-  if (order) order.status = newStatus;
-  updateOrderCounts();
-  renderOrders();
+  try {
+    const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+    const res = await fetch(`${BACKEND}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID, status: newStatus }),
+    });
+    if (!res.ok) throw new Error('Error del servidor');
+    const order = allOrders.find(o => o.id === orderId);
+    if (order) order.status = newStatus;
+    updateOrderCounts();
+    renderOrders();
+  } catch(e) {
+    alert('Error actualizando estado. Intenta de nuevo.');
+    console.error(e);
+  }
 }
 
 function updateOrderCounts() {
