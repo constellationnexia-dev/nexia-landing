@@ -2160,6 +2160,7 @@ let currentOrderTab = 'pending';
 const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
 
 const ORDER_STATUS = {
+  pending_confirmation: { label: 'Por confirmar', color: '#f59e0b', next: null, nextLabel: null },
   pending:   { label: 'Pendiente',      color: '#f59e0b', next: 'preparing', nextLabel: '▶ En preparación' },
   preparing: { label: 'En preparación', color: '#3b82f6', next: 'ready',     nextLabel: '✓ Marcar listo' },
   ready:     { label: 'Listo',          color: '#22c55e', next: 'delivered',  nextLabel: '📦 Entregado' },
