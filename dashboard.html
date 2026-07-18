@@ -1761,10 +1761,19 @@ function doNavigate(btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + btn.dataset.page).classList.add('active');
   window.scrollTo({ top: 0 });
+  currentPage = btn.dataset.page;
   if (btn.dataset.page === 'appts' && !apptsLoaded) { apptsLoaded = true; loadAppointments(); }
   if (btn.dataset.page === 'orders' && !ordersLoaded) { ordersLoaded = true; loadOrders(); switchOrderTab('pending'); }
   if (btn.dataset.page === 'quotes' && !quotesLoaded) { quotesLoaded = true; loadQuotes(); switchQuoteTab('pending'); }
 }
+
+// Polling cada 30s para sincronizar aunque Supabase Realtime no esté activo
+let currentPage = 'stats';
+setInterval(() => {
+  if (currentPage === 'appts' && apptsLoaded) loadAppointments();
+  if (currentPage === 'orders' && ordersLoaded) loadOrders();
+  if (currentPage === 'quotes' && quotesLoaded) loadQuotes();
+}, 30000);
 
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', async () => {
@@ -2035,6 +2044,7 @@ function populateFormFromConfig(biz) {
    CARGA INICIAL DESDE SUPABASE
    ============================================================ */
 let allAppts = [];
+let apptQuotesMap = {};
 let currentApptTab = 'upcoming';
 const TODAY = new Date().toISOString().split('T')[0];
 
@@ -2123,8 +2133,22 @@ function renderAppts() {
         const lines = a.notes.split('\n');
         const quoteRef = lines.find(l => l.startsWith('Cotización vinculada:'));
         const otherNotes = lines.filter(l => !l.startsWith('Cotización vinculada:')).join(' ').trim();
-        return `${otherNotes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${otherNotes}</div>` : ''}
-        ${quoteRef ? `<div style="margin-top:6px;font-size:.78rem;color:var(--accent);font-weight:600">📋 Cita de consulta vinculada a cotización</div>` : ''}`;
+        let quoteBlock = '';
+        if (quoteRef) {
+          const quoteId = quoteRef.replace('Cotización vinculada:', '').trim();
+          const q = apptQuotesMap[quoteId];
+          if (q) {
+            const qDetails = q.notes || (q.items||[]).map(i => `${i.quantity > 1 ? i.quantity + 'x ' : ''}${i.name}`).join(', ') || '';
+            quoteBlock = `<div style="margin-top:8px;padding:10px 12px;background:rgba(var(--accent-rgb),.07);border-left:3px solid var(--accent);border-radius:6px">
+              <div style="font-size:.76rem;color:var(--accent);font-weight:700;margin-bottom:4px">📋 Cotización vinculada</div>
+              ${qDetails ? `<div style="font-size:.78rem;color:var(--text);opacity:.85">${qDetails}</div>` : ''}
+              ${q.total > 0 ? `<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-top:3px">💰 Presupuesto: $${q.total.toFixed(2)}</div>` : ''}
+            </div>`;
+          } else {
+            quoteBlock = `<div style="margin-top:6px;font-size:.78rem;color:var(--accent);font-weight:600">📋 Cita de consulta vinculada a cotización</div>`;
+          }
+        }
+        return `${otherNotes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${otherNotes}</div>` : ''}${quoteBlock}`;
       })() : ''}
     </div>`).join('');
 }
@@ -2239,7 +2263,7 @@ function renderQuotes() {
   filtered.forEach(q => {
     const date = new Date(q.created_at).toLocaleDateString('es-EC', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
     const details = q.notes || (q.items||[]).map(i => `${i.quantity}x ${i.name}`).join(', ') || '—';
-    const reqDate = q.requested_date ? `🗓️ Cita de consulta: ${q.requested_date}${q.requested_time ? ' a las ' + q.requested_time : ''}` : '';
+    const reqDate = q.requested_date ? `🗓️ Cita de consulta: ${fmtDate(q.requested_date)}${q.requested_time ? ' a las ' + q.requested_time.slice(0,5) : ''}` : '';
     const statusLabel = { pending_confirmation:'⏳ Por confirmar', pending:'✅ Recibida', cancelled:'❌ Rechazada' }[q.status] || q.status;
     const card = document.createElement('div');
     card.style.cssText = 'background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px';
@@ -2510,6 +2534,18 @@ async function loadAppointments() {
       .order('appointment_date', { ascending: false })
       .order('appointment_time', { ascending: false })
       .limit(100);
+
+    // Cargar cotizaciones vinculadas para mostrar su info en las tarjetas de cita
+    try {
+      const { data: linkedQuotes } = await db
+        .from('orders')
+        .select('id,notes,total,items,client_name')
+        .eq('business_id', BIZ_ID)
+        .eq('type', 'quote')
+        .limit(100);
+      apptQuotesMap = {};
+      (linkedQuotes || []).forEach(q => { apptQuotesMap[q.id] = q; });
+    } catch(e) { console.error('Error cargando cotizaciones vinculadas:', e); }
 
     if (loadingEl) loadingEl.style.display = 'none';
 
