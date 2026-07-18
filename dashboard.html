@@ -2388,8 +2388,9 @@ async function loadQuotes() {
     renderQuotes();
     // Tab Por confirmar visible solo si hay confirmación manual
     const pcTab = document.getElementById('qtab-pending_confirmation');
-    // Realtime
-    db.channel('quotes-' + BIZ_ID)
+    // Realtime — suscribir una sola vez
+    if (window._quotesChannel) return;
+    window._quotesChannel = db.channel('quotes-' + BIZ_ID)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
         if (payload.new.type !== 'quote') return;
         allQuotes.unshift(payload.new);
@@ -2577,8 +2578,9 @@ async function loadOrders() {
     updateOrderCounts();
     renderOrders();
 
-    // Realtime: actualizar si entra un pedido nuevo
-    db.channel('orders-' + BIZ_ID)
+    // Realtime: actualizar si entra un pedido nuevo — suscribir una sola vez
+    if (window._ordersChannel) return;
+    window._ordersChannel = db.channel('orders-' + BIZ_ID)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
         allOrders.unshift(payload.new);
         updateOrderCounts();
@@ -2634,8 +2636,9 @@ async function loadAppointments() {
       renderAppts();
     }
 
-    // Realtime: INSERT y UPDATE en tiempo real
-    db.channel('appts-' + BIZ_ID)
+    // Realtime: INSERT y UPDATE en tiempo real — suscribir una sola vez
+    if (window._apptsChannel) return;
+    window._apptsChannel = db.channel('appts-' + BIZ_ID)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${BIZ_ID}` }, payload => {
         allAppts.unshift(payload.new);
         updateApptCounts(); renderAppts();
