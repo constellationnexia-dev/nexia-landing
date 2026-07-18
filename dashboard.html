@@ -678,6 +678,10 @@ input[type=checkbox]{accent-color:var(--accent)}
         <div class="field"><label for="u-rtime">¿En cuánto tiempo estará listo el pedido para retirar?</label><input type="text" id="u-rtime" placeholder="Ej: 30 min"></div>
       </div>
       <div class="u-grid">
+        <div class="field"><label for="u-orders-confirm">¿Los pedidos requieren confirmación manual?</label>
+          <select id="u-orders-confirm"><option value="auto">No, se confirman automáticamente</option><option value="manual">Sí, necesito aprobar cada pedido</option></select>
+          <p class="f-hint">💡 Si es manual, el cliente recibe un aviso de que su pedido está pendiente de aprobación. Cuando lo apruebes desde el panel, le llega la confirmación por WhatsApp.</p>
+        </div>
         <div class="field"><label for="u-order-fields">¿Qué información necesita recopilar el bot para todos los pedidos?</label><textarea id="u-order-fields" rows="2" placeholder="Ej: sabor de torta, diseño, porciones, fecha de entrega&#10;Ej: talla, color, dirección de envío"></textarea><p class="f-hint">💡 Aplica a todos los pedidos en general. Si un producto específico necesita datos extra (ej: solo las tortas personalizadas necesitan diseño, no el pan normal), ponlo en la <strong>descripción de ese producto</strong> en la pestaña Oferta — el bot lo leerá y pedirá esa info solo para ese producto.</p></div>
         <div class="field"><label for="u-custom">¿Requieren anticipo o pago adelantado?</label><textarea id="u-custom" rows="2" placeholder="Ej: Se requiere el 30% de anticipo para reservar citas de más de 1 hora"></textarea><p class="f-hint">💡 El bot lo informará automáticamente al confirmar</p></div>
         <div class="field"><label for="u-custom-ant">¿Hacen pedidos o productos personalizados?</label><input type="text" id="u-custom-ant" placeholder="Ej: Tortas con dedicatoria con 2 días de anticipación"></div>
@@ -819,6 +823,7 @@ input[type=checkbox]{accent-color:var(--accent)}
       <p>Pedidos recibidos por tu asistente. Actualiza el estado en tiempo real.</p>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button id="otab-pending_confirmation" onclick="switchOrderTab('pending_confirmation')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Por confirmar <span id="ocount-pending_confirmation"></span></button>
       <button id="otab-pending"   onclick="switchOrderTab('pending')"   style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Pendientes <span id="ocount-pending"></span></button>
       <button id="otab-preparing" onclick="switchOrderTab('preparing')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">En preparación <span id="ocount-preparing"></span></button>
       <button id="otab-ready"     onclick="switchOrderTab('ready')"     style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Listos <span id="ocount-ready"></span></button>
@@ -1456,7 +1461,7 @@ document.getElementById('pay-apply-btn').addEventListener('click', () => {
 });
 
 /* Guardar y cargar */
-const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-order-fields', 'u-order-fields-svc', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-emoji-freq', 'u-client-id'];
+const U_IDS = ['u-bizname', 'u-city', 'u-address', 'u-phone', 'u-desc', 'u-extra-info', 'u-welcome', 'u-online', 'u-tone', 'u-ig', 'u-fb', 'u-tt', 'u-web', 'u-email-contact', 'u-accepts-appt', 'u-accepts-walkin', 'u-accepts-orders', 'u-appt-duration', 'u-profs', 'u-break', 'u-break-from', 'u-break-to', 'u-max-days', 'u-min-hours', 'u-confirm', 'u-reminder', 'u-reminder-hours', 'u-cancel', 'u-reprog', 'u-cr-time', 'u-noshow', 'u-delivery-mode', 'u-zone', 'u-dcost', 'u-dmin', 'u-dtime', 'u-rtime', 'u-orders-confirm', 'u-order-fields', 'u-order-fields-svc', 'u-custom', 'u-custom-ant', 'u-max-day', 'u-max-hour', 'u-stock', 'u-afterhours', 'u-waitlist', 'u-lastmin', 'u-pay-other', 'u-receipts', 'u-warranty', 'u-emergency', 'u-human', 'u-rude', 'u-emojis', 'u-emoji-freq', 'u-client-id'];
 /* ===== Plantillas de ejemplo ===== */
 const TEMPLATES = {
   viajes: {
@@ -1615,6 +1620,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
           afterhours: data['u-afterhours'], stock: data['u-stock']
         },
         order_fields: data['u-order-fields-svc'] || data['u-order-fields'] || null,
+        orders: { confirm: data['u-orders-confirm'] || 'auto' },
         custom: { notes: data['u-custom'], ant: data['u-custom-ant'], extra: data['u-extra-info'] }
       };
       await db.from('businesses').update({
@@ -1938,6 +1944,7 @@ function populateFormFromConfig(biz) {
     'u-client-id':      sc.clientId,
     'u-afterhours':     pol.afterhours,
     'u-stock':          pol.stock,
+    'u-orders-confirm':   cfg.orders?.confirm || 'auto',
     'u-order-fields':     cfg.order_fields,
     'u-order-fields-svc': cfg.order_fields,
     'u-custom':         cst.notes,
@@ -2152,13 +2159,14 @@ const ORDER_STATUS = {
 
 function switchOrderTab(tab) {
   currentOrderTab = tab;
-  ['pending','preparing','ready','delivered','all'].forEach(t => {
+  ['pending_confirmation','pending','preparing','ready','delivered','all'].forEach(t => {
     const el = document.getElementById('otab-' + t);
     if (!el) return;
     const active = t === tab;
-    el.style.background = active ? 'rgba(var(--accent-rgb),.12)' : 'none';
-    el.style.color      = active ? 'var(--accent)' : 'var(--muted)';
-    el.style.border     = active ? '1px solid rgba(var(--accent-rgb),.28)' : '1px solid var(--line)';
+    const isConfirm = t === 'pending_confirmation';
+    el.style.background = active ? (isConfirm ? 'rgba(245,158,11,.15)' : 'rgba(var(--accent-rgb),.12)') : 'none';
+    el.style.color      = active ? (isConfirm ? '#f59e0b' : 'var(--accent)') : 'var(--muted)';
+    el.style.border     = active ? `1px solid ${isConfirm ? '#f59e0b55' : 'rgba(var(--accent-rgb),.28)'}` : '1px solid var(--line)';
   });
   renderOrders();
 }
@@ -2205,8 +2213,13 @@ function renderOrders() {
       </div>
       ${o.notes ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px">📝 ${o.notes}</div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${st.next ? `<button onclick="updateOrderStatus('${o.id}','${st.next}')" style="padding:6px 14px;border-radius:8px;border:none;background:${ORDER_STATUS[st.next].color};color:white;font-size:.78rem;font-weight:600;cursor:pointer">${st.nextLabel}</button>` : ''}
-        ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button onclick="updateOrderStatus('${o.id}','cancelled')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>` : ''}
+        ${o.status === 'pending_confirmation' ? `
+          <button onclick="confirmOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#22c55e;color:white;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
+          <button onclick="rejectOrder('${o.id}')"  style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
+        ` : `
+          ${st.next ? `<button onclick="updateOrderStatus('${o.id}','${st.next}')" style="padding:6px 14px;border-radius:8px;border:none;background:${ORDER_STATUS[st.next].color};color:white;font-size:.78rem;font-weight:600;cursor:pointer">${st.nextLabel}</button>` : ''}
+          ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button onclick="updateOrderStatus('${o.id}','cancelled')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>` : ''}
+        `}
       </div>
     </div>`;
   }).join('');
@@ -2231,14 +2244,49 @@ async function updateOrderStatus(orderId, newStatus) {
   }
 }
 
+async function confirmOrder(orderId) {
+  if (!confirm('¿Confirmar este pedido? El cliente recibirá un WhatsApp de confirmación.')) return;
+  try {
+    const res = await fetch(`${BACKEND}/orders/${orderId}/confirm`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID }),
+    });
+    if (!res.ok) throw new Error();
+    const order = allOrders.find(o => o.id === orderId);
+    if (order) order.status = 'pending';
+    updateOrderCounts(); renderOrders();
+  } catch { alert('No se pudo confirmar. Intenta de nuevo.'); }
+}
+
+async function rejectOrder(orderId) {
+  const reason = prompt('Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp):');
+  if (reason === null) return;
+  try {
+    const res = await fetch(`${BACKEND}/orders/${orderId}/reject`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId: BIZ_ID, reason }),
+    });
+    if (!res.ok) throw new Error();
+    const order = allOrders.find(o => o.id === orderId);
+    if (order) order.status = 'cancelled';
+    updateOrderCounts(); renderOrders();
+  } catch { alert('No se pudo rechazar. Intenta de nuevo.'); }
+}
+
 function updateOrderCounts() {
-  ['pending','preparing','ready','delivered'].forEach(s => {
+  ['pending_confirmation','pending','preparing','ready','delivered'].forEach(s => {
     const n = allOrders.filter(o => o.status === s).length;
     const el = document.getElementById('ocount-' + s);
     if (el) el.textContent = n ? `(${n})` : '';
   });
   const allEl = document.getElementById('ocount-all');
   if (allEl) allEl.textContent = allOrders.length ? `(${allOrders.length})` : '';
+  // Highlight tab si hay pedidos por confirmar
+  const pc = allOrders.filter(o => o.status === 'pending_confirmation').length;
+  const pcTab = document.getElementById('otab-pending_confirmation');
+  if (pcTab && pc > 0 && currentOrderTab !== 'pending_confirmation') {
+    pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+  }
 }
 
 async function loadOrders() {
