@@ -2119,7 +2119,13 @@ function renderAppts() {
         <span>⏰ ${(a.appointment_time||'').slice(0,5)}</span>
         ${a.assigned_professional ? `<span style="color:var(--accent)">👤 ${a.assigned_professional}</span>` : ''}
       </div>
-      ${a.notes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>` : ''}
+      ${a.notes ? (() => {
+        const lines = a.notes.split('\n');
+        const quoteRef = lines.find(l => l.startsWith('Cotización vinculada:'));
+        const otherNotes = lines.filter(l => !l.startsWith('Cotización vinculada:')).join(' ').trim();
+        return `${otherNotes ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${otherNotes}</div>` : ''}
+        ${quoteRef ? `<div style="margin-top:6px;font-size:.78rem;color:var(--accent);font-weight:600">📋 Cita de consulta vinculada a cotización</div>` : ''}`;
+      })() : ''}
     </div>`).join('');
 }
 
@@ -2233,7 +2239,7 @@ function renderQuotes() {
   filtered.forEach(q => {
     const date = new Date(q.created_at).toLocaleDateString('es-EC', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
     const details = q.notes || (q.items||[]).map(i => `${i.quantity}x ${i.name}`).join(', ') || '—';
-    const reqDate = q.requested_date ? `📅 ${q.requested_date}${q.requested_time ? ' ' + q.requested_time : ''}` : '';
+    const reqDate = q.requested_date ? `🗓️ Cita de consulta: ${q.requested_date}${q.requested_time ? ' a las ' + q.requested_time : ''}` : '';
     const statusLabel = { pending_confirmation:'⏳ Por confirmar', pending:'✅ Recibida', cancelled:'❌ Rechazada' }[q.status] || q.status;
     const card = document.createElement('div');
     card.style.cssText = 'background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px';
