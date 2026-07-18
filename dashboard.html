@@ -2517,9 +2517,27 @@ async function loadAppointments() {
 
     if (!allAppts.length) {
       if (emptyEl) emptyEl.style.display = 'block';
-      return;
+    } else {
+      renderAppts();
     }
-    renderAppts();
+
+    // Realtime: INSERT y UPDATE en tiempo real
+    db.channel('appts-' + BIZ_ID)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        allAppts.unshift(payload.new);
+        updateApptCounts(); renderAppts();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        const idx = allAppts.findIndex(a => a.id === payload.new.id);
+        if (idx !== -1) allAppts[idx] = { ...allAppts[idx], ...payload.new };
+        else allAppts.unshift(payload.new);
+        updateApptCounts(); renderAppts();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'appointments', filter: `business_id=eq.${BIZ_ID}` }, payload => {
+        allAppts = allAppts.filter(a => a.id !== payload.old.id);
+        updateApptCounts(); renderAppts();
+      })
+      .subscribe();
   } catch(e) {
     console.error('loadAppointments error:', e);
     if (loadingEl) loadingEl.textContent = 'Error cargando citas.';
