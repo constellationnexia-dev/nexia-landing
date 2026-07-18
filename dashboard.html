@@ -2142,7 +2142,7 @@ function renderAppts() {
             quoteBlock = `<div style="margin-top:8px;padding:10px 12px;background:rgba(var(--accent-rgb),.07);border-left:3px solid var(--accent);border-radius:6px">
               <div style="font-size:.76rem;color:var(--accent);font-weight:700;margin-bottom:4px">📋 Cotización vinculada</div>
               ${qDetails ? `<div style="font-size:.78rem;color:var(--text);opacity:.85">${qDetails}</div>` : ''}
-              ${q.total > 0 ? `<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-top:3px">💰 Presupuesto: $${q.total.toFixed(2)}</div>` : ''}
+              ${Number(q.total) > 0 ? `<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-top:3px">💰 Presupuesto: $${Number(q.total).toFixed(2)}</div>` : ''}
             </div>`;
           } else {
             quoteBlock = `<div style="margin-top:6px;font-size:.78rem;color:var(--accent);font-weight:600">📋 Cita de consulta vinculada a cotización</div>`;
@@ -2273,7 +2273,7 @@ function renderQuotes() {
         <span style="font-size:.78rem;color:var(--muted)">${date}</span>
       </div>
       <div style="font-size:.87rem;color:var(--text);opacity:.85">${details}</div>
-      ${q.total > 0 ? `<div style="font-size:.83rem;color:var(--accent);font-weight:600">💰 Presupuesto: $${q.total.toFixed(2)}</div>` : ''}
+      ${Number(q.total) > 0 ? `<div style="font-size:.83rem;color:var(--accent);font-weight:600">💰 Presupuesto: $${Number(q.total).toFixed(2)}</div>` : ''}
       ${reqDate ? `<div style="font-size:.82rem;color:var(--muted)">${reqDate}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px">
         <span style="font-size:.8rem;color:var(--muted)">${statusLabel}</span>
