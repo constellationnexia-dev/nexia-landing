@@ -2277,13 +2277,21 @@ function renderQuotes() {
       ${reqDate ? `<div style="font-size:.82rem;color:var(--muted)">${reqDate}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px">
         <span style="font-size:.8rem;color:var(--muted)">${statusLabel}</span>
-        ${q.status === 'pending_confirmation' ? `
+        ${q.status === 'pending_confirmation' ? (rejectingQuoteId === q.id ? '' : `
           <div style="display:flex;gap:8px">
             <button onclick="confirmQuote('${q.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#04140b;font-size:.8rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
-            <button onclick="rejectQuote('${q.id}')"  style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.8rem;font-weight:600;cursor:pointer">❌ Rechazar</button>
-          </div>` : ''}
+            <button onclick="startRejectQuote('${q.id}')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.8rem;font-weight:600;cursor:pointer">❌ Rechazar</button>
+          </div>`) : ''}
         ${q.status === 'pending' ? `<span style="font-size:.8rem;color:var(--accent)">📱 ${q.client_phone || '—'}</span>` : ''}
-      </div>`;
+      </div>
+      ${rejectingQuoteId === q.id ? `
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)">
+        <textarea id="reject-reason-${q.id}" rows="2" placeholder="Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp)" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.85rem;font-family:inherit;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button onclick="cancelRejectQuote()" style="padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer">Cancelar</button>
+          <button onclick="sendRejectQuote('${q.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.8rem;font-weight:700;cursor:pointer">❌ Rechazar cotización</button>
+        </div>
+      </div>` : ''}`;
     listEl.appendChild(card);
   });
 }
@@ -2298,14 +2306,18 @@ async function confirmQuote(quoteId) {
   } catch { alert('No se pudo confirmar. Intenta de nuevo.'); }
 }
 
-async function rejectQuote(quoteId) {
-  const reason = prompt('Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp):');
-  if (reason === null) return;
+let rejectingQuoteId = null;
+function startRejectQuote(quoteId) { rejectingQuoteId = quoteId; renderQuotes(); const ta = document.getElementById('reject-reason-' + quoteId); if (ta) ta.focus(); }
+function cancelRejectQuote() { rejectingQuoteId = null; renderQuotes(); }
+
+async function sendRejectQuote(quoteId) {
+  const reason = (document.getElementById('reject-reason-' + quoteId)?.value || '').trim();
   try {
     const res = await fetch(`${BACKEND}/orders/${quoteId}/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ businessId: BIZ_ID, reason }) });
     if (!res.ok) throw new Error();
     const q = allQuotes.find(q => q.id === quoteId);
     if (q) q.status = 'cancelled';
+    rejectingQuoteId = null;
     updateQuoteCounts(); renderQuotes();
   } catch { alert('No se pudo rechazar. Intenta de nuevo.'); }
 }
@@ -2411,14 +2423,22 @@ function renderOrders() {
       </div>
       ${o.notes ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px">📝 ${o.notes}</div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${o.status === 'pending_confirmation' ? `
+        ${o.status === 'pending_confirmation' ? (rejectingOrderId === o.id ? '' : `
           <button onclick="confirmOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#22c55e;color:white;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
-          <button onclick="rejectOrder('${o.id}')"  style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
-        ` : `
+          <button onclick="startRejectOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
+        `) : `
           ${st.next ? `<button onclick="updateOrderStatus('${o.id}','${st.next}')" style="padding:6px 14px;border-radius:8px;border:none;background:${ORDER_STATUS[st.next].color};color:white;font-size:.78rem;font-weight:600;cursor:pointer">${st.nextLabel}</button>` : ''}
           ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button onclick="updateOrderStatus('${o.id}','cancelled')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>` : ''}
         `}
       </div>
+      ${rejectingOrderId === o.id ? `
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)">
+        <textarea id="reject-reason-o-${o.id}" rows="2" placeholder="Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp)" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.85rem;font-family:inherit;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button onclick="cancelRejectOrder()" style="padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>
+          <button onclick="sendRejectOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar pedido</button>
+        </div>
+      </div>` : ''}
     </div>`;
   }).join('');
 }
@@ -2456,9 +2476,12 @@ async function confirmOrder(orderId) {
   } catch { alert('No se pudo confirmar. Intenta de nuevo.'); }
 }
 
-async function rejectOrder(orderId) {
-  const reason = prompt('Motivo del rechazo (opcional — el cliente lo recibirá por WhatsApp):');
-  if (reason === null) return;
+let rejectingOrderId = null;
+function startRejectOrder(orderId) { rejectingOrderId = orderId; renderOrders(); const ta = document.getElementById('reject-reason-o-' + orderId); if (ta) ta.focus(); }
+function cancelRejectOrder() { rejectingOrderId = null; renderOrders(); }
+
+async function sendRejectOrder(orderId) {
+  const reason = (document.getElementById('reject-reason-o-' + orderId)?.value || '').trim();
   try {
     const res = await fetch(`${BACKEND}/orders/${orderId}/reject`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2467,6 +2490,7 @@ async function rejectOrder(orderId) {
     if (!res.ok) throw new Error();
     const order = allOrders.find(o => o.id === orderId);
     if (order) order.status = 'cancelled';
+    rejectingOrderId = null;
     updateOrderCounts(); renderOrders();
   } catch { alert('No se pudo rechazar. Intenta de nuevo.'); }
 }
