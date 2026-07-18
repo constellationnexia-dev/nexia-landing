@@ -2320,7 +2320,7 @@ async function loadOrders() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
         allOrders.unshift(payload.new);
         updateOrderCounts();
-        if (currentOrderTab === 'all' || currentOrderTab === payload.new.status) renderOrders();
+        renderOrders();
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `business_id=eq.${BIZ_ID}` }, payload => {
         const idx = allOrders.findIndex(o => o.id === payload.new.id);
