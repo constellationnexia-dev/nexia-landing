@@ -1794,12 +1794,30 @@ function refreshLiveData() {
 }
 setInterval(refreshLiveData, 30000);
 
-// Refrescar al volver a la pestaña (sin pisar ediciones sin guardar)
+// Refrescar al volver a la pestaña — silencioso, solo datos en sitio, sin redibujar la página
+async function silentBizRefresh() {
+  if (!BIZ_ID) return;
+  try {
+    const { data: biz } = await db.from('businesses')
+      .select('accepts_appointments, accepts_orders, config')
+      .eq('id', BIZ_ID).single();
+    if (!biz) return;
+    // Actualizar solo visibilidad de nav y flags de tabs
+    const navAppts = document.getElementById('nav-appts');
+    const navOrders = document.getElementById('nav-orders');
+    const navQuotes = document.getElementById('nav-quotes');
+    if (navAppts)  navAppts.style.display  = biz.accepts_appointments ? '' : 'none';
+    if (navOrders) navOrders.style.display = biz.accepts_orders ? '' : 'none';
+    if (navQuotes) navQuotes.style.display = biz.config?.service_fields ? '' : 'none';
+    window._orderManualConfirm = biz.config?.orders?.confirm === 'manual';
+    window._apptManualConfirm  = biz.config?.scheduling?.confirm === 'manual';
+    window._quoteManualConfirm = !!(biz.config?.service_fields && biz.config?.orders?.confirm === 'manual');
+  } catch(e) {}
+}
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   refreshLiveData();
-  // Recargar config del negocio (nav, tabs, datos del perfil) solo si no hay cambios sin guardar
-  if (!_isDirty && BIZ_ID) loadDashboard();
+  silentBizRefresh();
 });
 
 document.querySelectorAll('.nav-item').forEach(btn => {
