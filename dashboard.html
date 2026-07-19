@@ -599,6 +599,15 @@ input[type=checkbox]{accent-color:var(--accent)}
         </div>
       </div>
       <div id="prof-list"></div>
+      <div class="field" id="pick-prof-wrap" style="display:none">
+        <label for="u-pick-prof">¿El cliente puede elegir con qué profesional atenderse?</label>
+        <select id="u-pick-prof">
+          <option value="">Selecciona una opción</option>
+          <option value="si">Sí, puede elegir</option>
+          <option value="no">No, se asigna automáticamente</option>
+        </select>
+        <p class="f-hint">💡 Si está activo, el bot menciona los nombres de los profesionales y agenda con quien el cliente prefiera (según su disponibilidad)</p>
+      </div>
       <div class="field">
         <label for="u-break">¿Tienen descanso o almuerzo?</label>
         <select id="u-break"><option value="">Selecciona una opción</option><option value="si">Sí</option><option value="no">No</option></select>
@@ -1273,8 +1282,10 @@ function collectProfSchedule(card) {
 function renderProfs(n, saved){
   profList.innerHTML = '';
   const toggleWrap = document.getElementById('prof-horarios-toggle-wrap');
-  if (n < 2) { if (toggleWrap) toggleWrap.style.display = 'none'; return; }
+  const pickWrap = document.getElementById('pick-prof-wrap');
+  if (n < 2) { if (toggleWrap) toggleWrap.style.display = 'none'; if (pickWrap) pickWrap.style.display = 'none'; return; }
   if (toggleWrap) toggleWrap.style.display = 'block';
+  if (pickWrap) pickWrap.style.display = 'block';
   const diffHours = document.getElementById('u-profs-diff-hours').checked;
   // Fallback: si Supabase no tiene working_hours aún, usar localStorage
   let lsProfs = [];
@@ -1648,6 +1659,7 @@ document.getElementById('u-save').addEventListener('click', async () => {
           reminder: data['u-reminder'], reminderHours: data['u-reminder-hours'],
           cancel: data['u-cancel'], reprog: data['u-reprog'], crTime: data['u-cr-time'],
           noshow: data['u-noshow'], waitlist: data['u-waitlist'], lastmin: data['u-lastmin'],
+          pickProf: data['u-pick-prof'],
           useDuration: document.getElementById('u-use-duration').checked
         },
         delivery: {
@@ -2015,6 +2027,7 @@ function populateFormFromConfig(biz) {
     'u-max-hour':       sc.maxHour,
     'u-min-hours':      sc.minHours,
     'u-confirm':        sc.confirm,
+    'u-pick-prof':      sc.pickProf,
     'u-reminder':       sc.reminder,
     'u-reminder-hours': sc.reminderHours,
     'u-cancel':         sc.cancel,
