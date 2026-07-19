@@ -2335,7 +2335,8 @@ function renderQuotes() {
   filtered.forEach(q => {
     const date = new Date(q.created_at).toLocaleDateString('es-EC', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
     const details = q.notes || (q.items||[]).map(i => `${i.quantity}x ${i.name}`).join(', ') || '—';
-    const reqDate = q.requested_date ? `🗓️ Cita de consulta: ${new Date(q.requested_date + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short' })}${q.requested_time ? ' a las ' + q.requested_time.slice(0,5) : ''}` : '';
+    const hasConsultAppt = (q.notes || '').includes('Cita de consulta:');
+    const reqDate = q.requested_date ? `${hasConsultAppt ? '🗓️ Cita de consulta' : '📅 Fecha del servicio'}: ${new Date(q.requested_date + 'T12:00:00').toLocaleDateString('es-EC', { weekday:'short', day:'numeric', month:'short' })}${q.requested_time && hasConsultAppt ? ' a las ' + q.requested_time.slice(0,5) : ''}` : '';
     const statusLabel = { pending_confirmation:'⏳ Por confirmar', pending:'✅ Recibida', cancelled:'❌ Rechazada' }[q.status] || q.status;
     const card = document.createElement('div');
     card.style.cssText = 'background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px';
