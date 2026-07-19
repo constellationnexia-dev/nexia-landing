@@ -2122,10 +2122,9 @@ function switchApptTab(tab) {
     const el = document.getElementById('tab-' + t);
     if (!el) return;
     const active = t === tab;
-    const isConfirm = t === 'pending_confirmation';
-    el.style.background = active ? (isConfirm ? 'rgba(245,158,11,.15)' : 'rgba(var(--accent-rgb),.12)') : 'none';
-    el.style.color      = active ? (isConfirm ? '#f59e0b' : 'var(--accent)') : 'var(--muted)';
-    el.style.border     = active ? `1px solid ${isConfirm ? '#f59e0b55' : 'rgba(var(--accent-rgb),.28)'}` : '1px solid var(--line)';
+    el.style.background = active ? 'rgba(var(--accent-rgb),.12)' : 'none';
+    el.style.color      = active ? 'var(--accent)' : 'var(--muted)';
+    el.style.border     = active ? '1px solid rgba(var(--accent-rgb),.28)' : '1px solid var(--line)';
   });
   renderAppts();
 }
@@ -2276,13 +2275,9 @@ function updateApptCounts() {
   if (pendingTab) {
     if (pending > 0) {
       pendingTab.style.display = '';
-      if (currentApptTab !== 'pending_confirmation') { pendingTab.style.border = '1px solid #f59e0b55'; pendingTab.style.color = '#f59e0b'; }
-    } else {
-      if (currentApptTab !== 'pending_confirmation') { pendingTab.style.border = '1px solid var(--line)'; pendingTab.style.color = 'var(--muted)'; }
-      if (window._apptManualConfirm === false) {
-        pendingTab.style.display = 'none';
-        if (currentApptTab === 'pending_confirmation') switchApptTab('upcoming');
-      }
+    } else if (window._apptManualConfirm === false) {
+      pendingTab.style.display = 'none';
+      if (currentApptTab === 'pending_confirmation') switchApptTab('upcoming');
     }
   }
 }
@@ -2322,13 +2317,9 @@ function updateQuoteCounts() {
     // Mostrar si hay pendientes (aunque la config sea automática); ocultar al llegar a 0 si es automática
     if (counts.pending_confirmation > 0) {
       pcTab.style.display = '';
-      if (currentQuoteTab !== 'pending_confirmation') { pcTab.style.border = '1px solid #f59e0b55'; pcTab.style.color = '#f59e0b'; }
-    } else {
-      if (currentQuoteTab !== 'pending_confirmation') { pcTab.style.border = '1px solid var(--line)'; pcTab.style.color = 'var(--muted)'; }
-      if (window._quoteManualConfirm === false) {
-        pcTab.style.display = 'none';
-        if (currentQuoteTab === 'pending_confirmation') switchQuoteTab('pending');
-      }
+    } else if (window._quoteManualConfirm === false) {
+      pcTab.style.display = 'none';
+      if (currentQuoteTab === 'pending_confirmation') switchQuoteTab('pending');
     }
   }
 }
@@ -2455,10 +2446,9 @@ function switchOrderTab(tab) {
     const el = document.getElementById('otab-' + t);
     if (!el) return;
     const active = t === tab;
-    const isConfirm = t === 'pending_confirmation';
-    el.style.background = active ? (isConfirm ? 'rgba(245,158,11,.15)' : 'rgba(var(--accent-rgb),.12)') : 'none';
-    el.style.color      = active ? (isConfirm ? '#f59e0b' : 'var(--accent)') : 'var(--muted)';
-    el.style.border     = active ? `1px solid ${isConfirm ? '#f59e0b55' : 'rgba(var(--accent-rgb),.28)'}` : '1px solid var(--line)';
+    el.style.background = active ? 'rgba(var(--accent-rgb),.12)' : 'none';
+    el.style.color      = active ? 'var(--accent)' : 'var(--muted)';
+    el.style.border     = active ? '1px solid rgba(var(--accent-rgb),.28)' : '1px solid var(--line)';
   });
   renderOrders();
 }
@@ -2591,13 +2581,9 @@ function updateOrderCounts() {
   if (pcTab) {
     if (pc > 0) {
       pcTab.style.display = '';
-      if (currentOrderTab !== 'pending_confirmation') { pcTab.style.border = '1px solid #f59e0b55'; pcTab.style.color = '#f59e0b'; }
-    } else {
-      if (currentOrderTab !== 'pending_confirmation') { pcTab.style.border = '1px solid var(--line)'; pcTab.style.color = 'var(--muted)'; }
-      if (window._orderManualConfirm === false) {
-        pcTab.style.display = 'none';
-        if (currentOrderTab === 'pending_confirmation') switchOrderTab('pending');
-      }
+    } else if (window._orderManualConfirm === false) {
+      pcTab.style.display = 'none';
+      if (currentOrderTab === 'pending_confirmation') switchOrderTab('pending');
     }
   }
 }
