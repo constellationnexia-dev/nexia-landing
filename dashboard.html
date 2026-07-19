@@ -2265,13 +2265,15 @@ function updateApptCounts() {
   // Si hay pendientes, highlight tab
   const pendingTab = document.getElementById('tab-pending_confirmation');
   if (pendingTab) {
-    if (pending > 0) pendingTab.style.display = '';
-    if (pending > 0 && currentApptTab !== 'pending_confirmation') {
-      pendingTab.style.borderColor = '#f59e0b';
-      pendingTab.style.color = '#f59e0b';
-    } else if (pending === 0 && currentApptTab !== 'pending_confirmation') {
-      pendingTab.style.borderColor = '';
-      pendingTab.style.color = '';
+    if (pending > 0) {
+      pendingTab.style.display = '';
+      if (currentApptTab !== 'pending_confirmation') { pendingTab.style.borderColor = '#f59e0b'; pendingTab.style.color = '#f59e0b'; }
+    } else {
+      pendingTab.style.borderColor = ''; pendingTab.style.color = '';
+      if (!window._apptManualConfirm) {
+        pendingTab.style.display = 'none';
+        if (currentApptTab === 'pending_confirmation') switchApptTab('upcoming');
+      }
     }
   }
 }
@@ -2308,13 +2310,15 @@ function updateQuoteCounts() {
   });
   const pcTab = document.getElementById('qtab-pending_confirmation');
   if (pcTab) {
-    // Mostrar el tab si hay pendientes, aunque la config sea automática
-    if (counts.pending_confirmation > 0) pcTab.style.display = '';
-    if (currentQuoteTab !== 'pending_confirmation') {
-      if (counts.pending_confirmation > 0) {
-        pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
-      } else {
-        pcTab.style.borderColor = ''; pcTab.style.color = '';
+    // Mostrar si hay pendientes (aunque la config sea automática); ocultar al llegar a 0 si es automática
+    if (counts.pending_confirmation > 0) {
+      pcTab.style.display = '';
+      if (currentQuoteTab !== 'pending_confirmation') { pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b'; }
+    } else {
+      pcTab.style.borderColor = ''; pcTab.style.color = '';
+      if (!window._quoteManualConfirm) {
+        pcTab.style.display = 'none';
+        if (currentQuoteTab === 'pending_confirmation') switchQuoteTab('pending');
       }
     }
   }
@@ -2576,11 +2580,15 @@ function updateOrderCounts() {
   const pc = allOrders.filter(o => o.status === 'pending_confirmation').length;
   const pcTab = document.getElementById('otab-pending_confirmation');
   if (pcTab) {
-    if (pc > 0) pcTab.style.display = '';
-    if (pc > 0 && currentOrderTab !== 'pending_confirmation') {
-      pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
-    } else if (pc === 0 && currentOrderTab !== 'pending_confirmation') {
+    if (pc > 0) {
+      pcTab.style.display = '';
+      if (currentOrderTab !== 'pending_confirmation') { pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b'; }
+    } else {
       pcTab.style.borderColor = ''; pcTab.style.color = '';
+      if (!window._orderManualConfirm) {
+        pcTab.style.display = 'none';
+        if (currentOrderTab === 'pending_confirmation') switchOrderTab('pending');
+      }
     }
   }
 }
@@ -2741,14 +2749,16 @@ async function loadDashboard() {
       if (tabPedidos) tabPedidos.style.display = hasProducts ? '' : 'none';
       // Si el tab activo quedó oculto, ir a info
       if (currentOrgTab === 'pedidos' && !hasProducts) switchOrgTab('info');
-      // Tabs "Por confirmar": solo si confirmación manual
+      // Tabs "Por confirmar": solo si confirmación manual (guardamos flags para los updates de contadores)
+      window._orderManualConfirm = biz.config?.orders?.confirm === 'manual';
+      window._apptManualConfirm  = biz.config?.scheduling?.confirm === 'manual';
+      window._quoteManualConfirm = !!(biz.config?.service_fields && biz.config?.orders?.confirm === 'manual');
       const tabOrderConfirm = document.getElementById('otab-pending_confirmation');
-      if (tabOrderConfirm) tabOrderConfirm.style.display = biz.config?.orders?.confirm === 'manual' ? '' : 'none';
+      if (tabOrderConfirm) tabOrderConfirm.style.display = window._orderManualConfirm ? '' : 'none';
       const tabApptConfirm = document.getElementById('tab-pending_confirmation');
-      if (tabApptConfirm) tabApptConfirm.style.display = biz.config?.scheduling?.confirm === 'manual' ? '' : 'none';
-      // Cotizaciones: "Por confirmar" solo si hay service_fields Y confirmación manual
+      if (tabApptConfirm) tabApptConfirm.style.display = window._apptManualConfirm ? '' : 'none';
       const tabQuoteConfirm = document.getElementById('qtab-pending_confirmation');
-      if (tabQuoteConfirm) tabQuoteConfirm.style.display = (biz.config?.service_fields && biz.config?.orders?.confirm === 'manual') ? '' : 'none';
+      if (tabQuoteConfirm) tabQuoteConfirm.style.display = window._quoteManualConfirm ? '' : 'none';
       document.querySelector('#page-config .config-card p').textContent = `Plan ${PLAN_NAMES[biz.plan]||biz.plan} — $${PLAN_PRICES[biz.plan]||'?'}/mes · ${limit.toLocaleString()} mensajes`;
 
       // Mensajes este mes (real)
