@@ -2175,8 +2175,8 @@ function renderAppts() {
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           ${isPending(a) ? `
-            <button onclick="confirmAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:#22c55e;color:white;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
-            <button onclick="rejectAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
+            <button onclick="confirmAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:none;background:var(--accent);color:#04140b;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
+            <button onclick="rejectAppointment('${a.id}')" style="padding:5px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">❌ Rechazar</button>
           ` : isUpcoming(a) ? `
             <button onclick="cancelAppointment('${a.id}')" style="padding:5px 12px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.75rem;font-weight:600;cursor:pointer">Cancelar</button>
           ` : isCancelled(a) ? `
@@ -2506,8 +2506,8 @@ function renderOrders() {
       ${o.notes ? `<div style="font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px">📝 ${o.notes}</div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${o.status === 'pending_confirmation' ? (rejectingOrderId === o.id ? '' : `
-          <button onclick="confirmOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#22c55e;color:white;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
-          <button onclick="startRejectOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:.78rem;font-weight:700;cursor:pointer">❌ Rechazar</button>
+          <button onclick="confirmOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--accent);color:#04140b;font-size:.78rem;font-weight:700;cursor:pointer">✅ Confirmar</button>
+          <button onclick="startRejectOrder('${o.id}')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">❌ Rechazar</button>
         `) : `
           ${st.next ? `<button onclick="updateOrderStatus('${o.id}','${st.next}')" style="padding:6px 14px;border-radius:8px;border:none;background:${ORDER_STATUS[st.next].color};color:white;font-size:.78rem;font-weight:600;cursor:pointer">${st.nextLabel}</button>` : ''}
           ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button onclick="updateOrderStatus('${o.id}','cancelled')" style="padding:6px 14px;border-radius:8px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:.78rem;font-weight:600;cursor:pointer">Cancelar</button>` : ''}
