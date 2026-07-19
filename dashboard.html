@@ -1787,11 +1787,20 @@ function doNavigate(btn) {
 
 // Polling cada 30s para sincronizar aunque Supabase Realtime no esté activo
 let currentPage = 'stats';
-setInterval(() => {
+function refreshLiveData() {
   if (currentPage === 'appts' && apptsLoaded) loadAppointments();
   if (currentPage === 'orders' && ordersLoaded) loadOrders();
   if (currentPage === 'quotes' && quotesLoaded) loadQuotes();
-}, 30000);
+}
+setInterval(refreshLiveData, 30000);
+
+// Refrescar al volver a la pestaña (sin pisar ediciones sin guardar)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  refreshLiveData();
+  // Recargar config del negocio (nav, tabs, datos del perfil) solo si no hay cambios sin guardar
+  if (!_isDirty && BIZ_ID) loadDashboard();
+});
 
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', async () => {
