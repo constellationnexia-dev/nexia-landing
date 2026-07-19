@@ -810,8 +810,10 @@ input[type=checkbox]{accent-color:var(--accent)}
       <button id="tab-done" onclick="switchApptTab('done')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Realizadas <span id="count-done"></span></button>
       <button id="tab-cancelled" onclick="switchApptTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Canceladas <span id="count-cancelled"></span></button>
       <button id="tab-all" onclick="switchApptTab('all')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todas <span id="count-all"></span></button>
-      <button onclick="cleanRecords('appts','old',this)" style="margin-left:auto;padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar realizadas y canceladas</button>
-      <button onclick="cleanRecords('appts','cancelled',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar canceladas</button>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end">
+        <button onclick="cleanRecords('appts','old',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar realizadas y canceladas</button>
+        <button onclick="cleanRecords('appts','cancelled',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar canceladas</button>
+      </div>
     </div>
     <div id="appts-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando citas...</div>
     <div id="appts-list" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -833,8 +835,10 @@ input[type=checkbox]{accent-color:var(--accent)}
       <button id="otab-ready"     onclick="switchOrderTab('ready')"     style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Listos <span id="ocount-ready"></span></button>
       <button id="otab-delivered" onclick="switchOrderTab('delivered')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Entregados <span id="ocount-delivered"></span></button>
       <button id="otab-all"       onclick="switchOrderTab('all')"       style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todos <span id="ocount-all"></span></button>
-      <button onclick="cleanRecords('orders','old',this)" style="margin-left:auto;padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar entregados y cancelados</button>
-      <button onclick="cleanRecords('orders','cancelled',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar cancelados</button>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end">
+        <button onclick="cleanRecords('orders','old',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar entregados y cancelados</button>
+        <button onclick="cleanRecords('orders','cancelled',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar cancelados</button>
+      </div>
     </div>
     <div id="orders-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando pedidos...</div>
     <div id="orders-list" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -854,7 +858,9 @@ input[type=checkbox]{accent-color:var(--accent)}
       <button id="qtab-pending" onclick="switchQuoteTab('pending')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Nuevas <span id="qcount-pending"></span></button>
       <button id="qtab-cancelled" onclick="switchQuoteTab('cancelled')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Rechazadas <span id="qcount-cancelled"></span></button>
       <button id="qtab-all" onclick="switchQuoteTab('all')" style="padding:7px 18px;border-radius:20px;border:1px solid var(--line);font-size:.83rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">Todas <span id="qcount-all"></span></button>
-      <button onclick="cleanRecords('quotes','cancelled',this)" style="margin-left:auto;padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar rechazadas</button>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end">
+        <button onclick="cleanRecords('quotes','cancelled',this)" style="padding:7px 14px;border-radius:20px;border:1px solid var(--line);font-size:.78rem;font-weight:600;cursor:pointer;background:none;color:var(--muted)">🗑️ Borrar rechazadas</button>
+      </div>
     </div>
     <div id="quotes-loading" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem">Cargando cotizaciones...</div>
     <div id="quotes-list" style="display:flex;flex-direction:column;gap:10px"></div>
