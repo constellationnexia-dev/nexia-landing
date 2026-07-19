@@ -1078,15 +1078,18 @@ useDurationToggle.addEventListener('change', () => { syncDurationToggle(); markD
 
 // Mostrar/ocultar tabs "Por confirmar" en tiempo real al cambiar los selects
 document.getElementById('u-confirm').addEventListener('change', function() {
+  window._apptManualConfirm = this.value === 'manual';
   const tab = document.getElementById('tab-pending_confirmation');
-  if (tab) tab.style.display = this.value === 'manual' ? '' : 'none';
+  if (tab) tab.style.display = window._apptManualConfirm ? '' : 'none';
 });
 document.getElementById('u-orders-confirm').addEventListener('change', function() {
-  const tab = document.getElementById('otab-pending_confirmation');
-  if (tab) tab.style.display = this.value === 'manual' ? '' : 'none';
-  const qtab = document.getElementById('qtab-pending_confirmation');
+  window._orderManualConfirm = this.value === 'manual';
   const hasSvcFields = document.getElementById('u-order-fields-svc')?.value?.trim();
-  if (qtab) qtab.style.display = (this.value === 'manual' && hasSvcFields) ? '' : 'none';
+  window._quoteManualConfirm = !!(window._orderManualConfirm && hasSvcFields);
+  const tab = document.getElementById('otab-pending_confirmation');
+  if (tab) tab.style.display = window._orderManualConfirm ? '' : 'none';
+  const qtab = document.getElementById('qtab-pending_confirmation');
+  if (qtab) qtab.style.display = window._quoteManualConfirm ? '' : 'none';
 });
 // Por defecto ON si hay servicios, OFF si no hay
 if (!hasServices) useDurationToggle.checked = false;
@@ -2270,7 +2273,7 @@ function updateApptCounts() {
       if (currentApptTab !== 'pending_confirmation') { pendingTab.style.borderColor = '#f59e0b'; pendingTab.style.color = '#f59e0b'; }
     } else {
       pendingTab.style.borderColor = ''; pendingTab.style.color = '';
-      if (!window._apptManualConfirm) {
+      if (window._apptManualConfirm === false) {
         pendingTab.style.display = 'none';
         if (currentApptTab === 'pending_confirmation') switchApptTab('upcoming');
       }
@@ -2316,7 +2319,7 @@ function updateQuoteCounts() {
       if (currentQuoteTab !== 'pending_confirmation') { pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b'; }
     } else {
       pcTab.style.borderColor = ''; pcTab.style.color = '';
-      if (!window._quoteManualConfirm) {
+      if (window._quoteManualConfirm === false) {
         pcTab.style.display = 'none';
         if (currentQuoteTab === 'pending_confirmation') switchQuoteTab('pending');
       }
@@ -2585,7 +2588,7 @@ function updateOrderCounts() {
       if (currentOrderTab !== 'pending_confirmation') { pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b'; }
     } else {
       pcTab.style.borderColor = ''; pcTab.style.color = '';
-      if (!window._orderManualConfirm) {
+      if (window._orderManualConfirm === false) {
         pcTab.style.display = 'none';
         if (currentOrderTab === 'pending_confirmation') switchOrderTab('pending');
       }
