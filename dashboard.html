@@ -2264,9 +2264,15 @@ function updateApptCounts() {
   document.getElementById('count-all').textContent       = allAppts.length ? `(${allAppts.length})` : '';
   // Si hay pendientes, highlight tab
   const pendingTab = document.getElementById('tab-pending_confirmation');
-  if (pendingTab && pending > 0 && currentApptTab !== 'pending_confirmation') {
-    pendingTab.style.borderColor = '#f59e0b';
-    pendingTab.style.color = '#f59e0b';
+  if (pendingTab) {
+    if (pending > 0) pendingTab.style.display = '';
+    if (pending > 0 && currentApptTab !== 'pending_confirmation') {
+      pendingTab.style.borderColor = '#f59e0b';
+      pendingTab.style.color = '#f59e0b';
+    } else if (pending === 0 && currentApptTab !== 'pending_confirmation') {
+      pendingTab.style.borderColor = '';
+      pendingTab.style.color = '';
+    }
   }
 }
 
@@ -2301,11 +2307,15 @@ function updateQuoteCounts() {
     if (el) el.textContent = c > 0 ? ` (${c})` : '';
   });
   const pcTab = document.getElementById('qtab-pending_confirmation');
-  if (pcTab && currentQuoteTab !== 'pending_confirmation') {
-    if (counts.pending_confirmation > 0) {
-      pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
-    } else {
-      pcTab.style.borderColor = ''; pcTab.style.color = '';
+  if (pcTab) {
+    // Mostrar el tab si hay pendientes, aunque la config sea automática
+    if (counts.pending_confirmation > 0) pcTab.style.display = '';
+    if (currentQuoteTab !== 'pending_confirmation') {
+      if (counts.pending_confirmation > 0) {
+        pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+      } else {
+        pcTab.style.borderColor = ''; pcTab.style.color = '';
+      }
     }
   }
 }
@@ -2565,8 +2575,13 @@ function updateOrderCounts() {
   // Highlight tab si hay pedidos por confirmar
   const pc = allOrders.filter(o => o.status === 'pending_confirmation').length;
   const pcTab = document.getElementById('otab-pending_confirmation');
-  if (pcTab && pc > 0 && currentOrderTab !== 'pending_confirmation') {
-    pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+  if (pcTab) {
+    if (pc > 0) pcTab.style.display = '';
+    if (pc > 0 && currentOrderTab !== 'pending_confirmation') {
+      pcTab.style.borderColor = '#f59e0b'; pcTab.style.color = '#f59e0b';
+    } else if (pc === 0 && currentOrderTab !== 'pending_confirmation') {
+      pcTab.style.borderColor = ''; pcTab.style.color = '';
+    }
   }
 }
 
