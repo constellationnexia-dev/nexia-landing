@@ -285,7 +285,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .tech-card .t-logo{min-height:40px}
 
 /* ===== Hero ===== */
-#hero{min-height:88vh;display:flex;align-items:center;padding-top:135px;padding-bottom:70px;background:
+#hero{min-height:88vh;min-height:88dvh;display:flex;align-items:center;padding-top:135px;padding-bottom:70px;background:
   radial-gradient(ellipse 110% 75% at 80%  -8%, rgba(var(--accent-rgb),.32), transparent 60%),
   radial-gradient(ellipse  70% 45% at 80%   5%, rgba(var(--accent-rgb),.12), transparent 45%),
   radial-gradient(ellipse 100% 55% at -15% 115%,rgba(var(--accent2-rgb),.06),transparent 65%)}
@@ -2420,7 +2420,15 @@ function initMarquee(id, speed) {
     tick();
   }));
 
-  window.addEventListener('resize', measure);
+  /* Solo remedir si cambió el ANCHO — en mobile la barra de direcciones se
+     esconde/aparece al hacer scroll y dispara "resize" solo por el alto,
+     lo cual no debería afectar nada acá y causaba recálculos innecesarios. */
+  let lastMeasureWidth = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastMeasureWidth) return;
+    lastMeasureWidth = window.innerWidth;
+    measure();
+  });
 }
 
 initMarquee('testi-track', 0.4);
@@ -2489,7 +2497,14 @@ function drawParts(){
 }
 initParts();
 drawParts();
-window.addEventListener('resize', initParts);
+/* Mismo motivo que el marquee: ignorar resize que solo cambia el alto
+   (barra de direcciones del navegador mobile apareciendo/escondiéndose) */
+let lastPartsWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === lastPartsWidth) return;
+  lastPartsWidth = window.innerWidth;
+  initParts();
+});
 </script>
 </body>
 </html>
