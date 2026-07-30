@@ -2290,6 +2290,12 @@ function closeBanner(){
 /* ============================================================
    Reveal on scroll (Intersection Observer)
    ============================================================ */
+/* En mobile disparamos el reveal ANTES de que el elemento entre en pantalla
+   (rootMargin positivo abajo), para que con scroll rápido ya esté visible
+   cuando el usuario lo ve, en vez de "aparecer" en pleno scroll (eso causaba
+   la sensación de que la página se reordena). En desktop se deja EXACTAMENTE
+   como estaba antes — ahí ya se veía bien y no queremos tocarlo. */
+const isMobileViewport = window.matchMedia('(max-width:640px)').matches;
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -2298,11 +2304,7 @@ const io = new IntersectionObserver(entries => {
       io.unobserve(e.target);
     }
   });
-}, { threshold: 0.01, rootMargin: '0px 0px 150px 0px' });
-/* rootMargin positivo abajo: dispara el reveal ANTES de que el elemento entre
-   en pantalla (mientras aún está 150px por debajo), para que en mobile (scroll
-   rápido) ya esté visible cuando el usuario lo ve, en vez de "aparecer" en
-   pleno scroll (esto causaba la sensación de que la página se reordena). */
+}, isMobileViewport ? { threshold: 0.01, rootMargin: '0px 0px 150px 0px' } : { threshold: 0.18 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 /* ============================================================
