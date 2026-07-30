@@ -1146,50 +1146,25 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 
       <!-- Paso 2: pago -->
       <div class="wiz-panel" id="wiz-2" style="display:none">
-        <h3>Confirma tu pago</h3>
-        <p class="modal-sub">Pago seguro · Encriptado SSL</p>
+        <h3>Tu prueba gratis de 7 días</h3>
+        <p class="modal-sub">Sin tarjeta · Sin compromiso</p>
         <div class="pay-summary" id="pay-summary"></div>
 
-        <form id="pay-form" autocomplete="off" onsubmit="return false">
-          <div class="field" style="margin-bottom:12px">
-            <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Número de tarjeta</label>
-            <div style="position:relative">
-              <input id="card-number" type="text" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" style="padding-right:48px;letter-spacing:.08em">
-              <span id="card-brand" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none">💳</span>
-            </div>
-          </div>
+        <div style="background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.25);border-radius:12px;padding:14px 16px;margin:16px 0;font-size:.85rem;line-height:1.6;color:var(--text)">
+          🎁 <strong>Empiezas gratis hoy, sin ingresar tarjeta.</strong> Tienes 7 días para probar tu asistente con clientes reales. Antes de que termine el trial, nuestro equipo te va a contactar para coordinar el pago y seguir activo — nada se cobra automáticamente.
+        </div>
 
-          <div class="field" style="margin-bottom:12px">
-            <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Nombre en la tarjeta</label>
-            <input id="card-name" type="text" placeholder="NOMBRE APELLIDO" style="text-transform:uppercase;letter-spacing:.04em">
-          </div>
+        <button type="button" class="btn btn-primary" id="pay-btn" style="width:100%;font-size:.97rem">
+          🚀 Empezar prueba gratis
+        </button>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-            <div class="field" style="margin-bottom:0">
-              <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">Vencimiento</label>
-              <input id="card-expiry" type="text" inputmode="numeric" placeholder="MM / AA" maxlength="7">
-            </div>
-            <div class="field" style="margin-bottom:0">
-              <label style="font-size:.78rem;color:var(--muted);margin-bottom:4px;display:block">CVV</label>
-              <input id="card-cvv" type="text" inputmode="numeric" placeholder="123" maxlength="4">
-            </div>
-          </div>
-
-          <button type="button" class="btn btn-primary" id="pay-btn" style="width:100%;font-size:.97rem">
-            🔒 Pagar ahora
-          </button>
-        </form>
-
-        <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:10px">
-          Tus datos están encriptados y nunca se almacenan en nuestros servidores.
-        </p>
-        <button class="wiz-back" data-back="1" style="margin-top:4px">← Cambiar plan</button>
+        <button class="wiz-back" data-back="1" style="margin-top:10px">← Cambiar plan</button>
       </div>
 
       <!-- Paso 3: crear cuenta -->
       <div class="wiz-panel" id="wiz-3" style="display:none">
         <h3>Crea tu cuenta</h3>
-        <p class="modal-sub" style="color:var(--accent)">✓ Pago confirmado — tu plan está activo.</p>
+        <p class="modal-sub" style="color:var(--accent)">✓ Prueba gratis activada — 7 días, sin tarjeta.</p>
         <form id="account-form">
           <div class="field"><label for="a-email">Correo electrónico</label><input type="email" id="a-email" placeholder="tu@correo.com" required></div>
           <div class="field"><label for="a-pass">Contraseña</label><input type="password" id="a-pass" placeholder="Mínimo 6 caracteres" minlength="6" required></div>
@@ -1328,6 +1303,9 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
           <h3>¡Tu asistente está listo!</h3>
           <p>Hemos enviado los pasos finales a tu correo: conectar tu Google Calendar, ver tu número de WhatsApp asignado y abrir tu panel de control en Telegram.</p>
           <a href="dashboard.html" class="btn btn-primary" style="width:100%">Ir a mi panel →</a>
+          <div style="background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.25);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:.82rem;line-height:1.55;color:var(--text);text-align:left">
+            🎁 <strong>Tu prueba gratis dura 7 días.</strong> Antes de que termine, nuestro equipo te contacta para coordinar el pago y que tu asistente siga activo — no se cobra nada automáticamente.
+          </div>
           <div style="background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.25);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:.82rem;line-height:1.55;color:var(--text);text-align:left">
             💡 <strong>Recuerda:</strong> puedes seguir personalizando tu asistente en cualquier momento desde tu <strong>panel personal</strong> o enviando comandos a tu <strong>bot de Telegram</strong>. Mientras más información tenga, mejor atenderá a tus clientes.
           </div>
@@ -1787,44 +1765,23 @@ document.getElementById('to-pay').addEventListener('click', () => { if (selected
 function renderPaySummary(){
   if (!selectedPlan) return;
   const p = selectedPlan;
-  const offer = p.m1 < p.price;
   document.getElementById('pay-summary').innerHTML = `
-    <div class="row"><span>Plan ${p.name}</span><strong>$${p.m1} USD</strong></div>
-    <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes · renovación mensual</span><span>${offer ? 'luego $' + p.price + '/mes' : ''}</span></div>`;
-  const btn = document.getElementById('pay-btn');
-  btn.innerHTML = `🔒 Pagar $${p.m1} ahora`;
+    <div class="row"><span>Plan ${p.name}</span><strong>Gratis por 7 días</strong></div>
+    <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes</span><span>luego $${p.price}/mes</span></div>`;
 }
 
-/* Formateo automático de campos de tarjeta */
-document.getElementById('card-number').addEventListener('input', function(){
-  let v = this.value.replace(/\D/g,'').substring(0,16);
-  this.value = v.replace(/(.{4})/g,'$1 ').trim();
-  const brand = document.getElementById('card-brand');
-  if (v.startsWith('4')) brand.textContent = '💳'; // Visa
-  else if (/^5[1-5]/.test(v)) brand.textContent = '💳'; // MC
-  else if (v.startsWith('34') || v.startsWith('37')) brand.textContent = '💳'; // Amex
-  else brand.textContent = '💳';
-});
-document.getElementById('card-expiry').addEventListener('input', function(){
-  let v = this.value.replace(/\D/g,'').substring(0,4);
-  if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
-  this.value = v;
-});
-document.getElementById('card-cvv').addEventListener('input', function(){
-  this.value = this.value.replace(/\D/g,'').substring(0,4);
-});
-
 document.getElementById('pay-btn').addEventListener('click', function(){
-  /* Aquí irá la integración real con Payphone/Stripe cuando esté lista */
-  /* Por ahora simula el procesamiento */
+  /* No se cobra nada acá — el pago real (Payphone) se coordina manualmente
+     con el negocio antes de que termine el trial de 7 días. Ver payphone.js /
+     sendTrialEndingEmail para el aviso automático cuando vence el trial. */
   const btn = this;
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></span> Procesando…';
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></span> Activando…';
   setTimeout(() => {
     btn.disabled = false;
-    btn.innerHTML = `🔒 Pagar ahora`;
+    btn.innerHTML = `🚀 Empezar prueba gratis`;
     goStep(3);
-  }, 2000);
+  }, 800);
 });
 
 /* Navegación principal */
