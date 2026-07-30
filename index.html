@@ -575,7 +575,10 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
 
   /* Botón de continuar fijo abajo, siempre visible mientras se comparan
      planes — así no hay que llegar al final de la lista para avanzar. */
-  #wiz-1 #to-pay{position:fixed;left:16px;right:16px;bottom:14px;width:auto;z-index:110;box-shadow:0 10px 28px rgba(0,0,0,.5)}
+  /* #to-pay trae style="width:100%" inline en el HTML (gana por especificidad),
+     que con position:fixed se calcula sobre el viewport completo y no sobre el
+     espacio entre left/right — por eso se salía de la pantalla por la derecha. */
+  #wiz-1 #to-pay{position:fixed!important;left:16px;right:16px;bottom:14px;width:auto!important;max-width:calc(100vw - 32px);z-index:110;box-shadow:0 10px 28px rgba(0,0,0,.5)}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -856,8 +859,8 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="trial-badge">🎁 7 días gratis</div>
         <h3>Starter</h3>
         <p class="who">Para empezar</p>
-        <div><span class="price-old">$49</span> <span class="price">$29<small>/mes 1</small></span></div>
-        <p class="offer-note">Luego $49/mes</p>
+        <div><span class="price-old">$39</span> <span class="price">$25<small>/mes 1</small></span></div>
+        <p class="offer-note">Luego $29/mes</p>
         <div class="plan-msgs"><b>500</b><span>mensajes al mes</span></div>
         <ul>
           <li>Respuestas con IA 24/7</li>
@@ -871,8 +874,8 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="trial-badge">🎁 7 días gratis</div>
         <h3>Básico</h3>
         <p class="who">Negocios en crecimiento</p>
-        <div><span class="price-old">$99</span> <span class="price">$59<small>/mes 1</small></span></div>
-        <p class="offer-note">Luego $99/mes</p>
+        <div><span class="price">$49<small>/mes</small></span></div>
+        <p class="offer-note"></p>
         <div class="plan-msgs"><b>1.500</b><span>mensajes al mes</span></div>
         <ul>
           <li>Respuestas con IA 24/7</li>
@@ -887,7 +890,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="trial-badge">🎁 7 días gratis</div>
         <h3>Pro</h3>
         <p class="who">Negocio establecido</p>
-        <div><span class="price">$149<small>/mes</small></span></div>
+        <div><span class="price">$100<small>/mes</small></span></div>
         <p class="offer-note"></p>
         <div class="plan-msgs"><b>3.000</b><span>mensajes al mes</span></div>
         <ul>
@@ -903,7 +906,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="trial-badge">🎁 7 días gratis</div>
         <h3>Business</h3>
         <p class="who">Equipos y sucursales</p>
-        <div><span class="price">$199<small>/mes</small></span></div>
+        <div><span class="price">$150<small>/mes</small></span></div>
         <p class="offer-note"></p>
         <div class="plan-msgs"><b>5.000</b><span>mensajes al mes</span></div>
         <ul>
@@ -919,7 +922,7 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
         <div class="trial-badge">🎁 7 días gratis</div>
         <h3>Enterprise</h3>
         <p class="who">Corporativo · alto volumen</p>
-        <div><span class="price">$299<small>/mes</small></span></div>
+        <div><span class="price">$189<small>/mes</small></span></div>
         <p class="offer-note"></p>
         <div class="plan-msgs"><b>7.000+</b><span>mensajes al mes</span></div>
         <ul>
@@ -1707,15 +1710,15 @@ document.getElementById('support-fab').href =
    Cuando tengas los links de suscripción reales, pégalos en MP_LINKS.
    ============================================================ */
 const PLANS = [
-  { id: 'starter',    name: 'Starter',    m1: 29,  price: 49,  msgs: '500',
+  { id: 'starter',    name: 'Starter',    m1: 25,  price: 29,  msgs: '500',
     feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram'] },
-  { id: 'basico',     name: 'Básico',     m1: 59,  price: 99,  msgs: '1,500',
+  { id: 'basico',     name: 'Básico',     m1: 49,  price: 49,  msgs: '1,500',
     feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram'] },
-  { id: 'pro',        name: 'Pro',        m1: 149, price: 149, msgs: '3,000', popular: true,
+  { id: 'pro',        name: 'Pro',        m1: 100, price: 100, msgs: '3,000', popular: true,
     feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] },
-  { id: 'business',   name: 'Business',   m1: 199, price: 199, msgs: '5,000',
+  { id: 'business',   name: 'Business',   m1: 150, price: 150, msgs: '5,000',
     feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] },
-  { id: 'enterprise', name: 'Enterprise', m1: 299, price: 299, msgs: '7,000+',
+  { id: 'enterprise', name: 'Enterprise', m1: 189, price: 189, msgs: '7,000+',
     feats: ['Respuestas con IA 24/7', 'Agenda y recordatorios automáticos', 'Número WhatsApp dedicado', 'Panel desde Telegram', 'Soporte prioritario'] }
 ];
 const MP_LINKS = {
