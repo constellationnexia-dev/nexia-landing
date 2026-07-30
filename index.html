@@ -553,6 +553,30 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
   .nav-right .nav-link{font-size:.72rem}
   .nav-right .btn-sm{padding:7px 12px;font-size:.72rem}
 }
+
+/* ===== Wizard de compra: mobile ===== */
+@media(max-width:640px){
+  /* Header del panel (Regresar + logo) apachurrado: el back-btn era muy
+     grande y el spacer de balanceo (104px, solo para centrar en PC) le
+     quitaba todo el espacio al logo, forzándolo a partirse en 2 líneas. */
+  .panel-top{padding:12px 14px;gap:10px}
+  .back-btn{padding:7px 12px;font-size:.78rem;gap:5px}
+  .panel-top .logo{font-size:.85rem;white-space:nowrap;gap:6px}
+  .panel-top .spacer{display:none}
+
+  /* Paso 1 (elegir plan): en vez del grid ancho de PC, tarjetas compactas
+     apiladas — sin eso, min-height forzaba cada tarjeta a casi una pantalla
+     completa y tocaba bajar mucho para ver el botón de continuar. */
+  #wiz-1{padding-bottom:78px}
+  #plan-options{margin-bottom:0}
+  .plan-option{padding:12px 14px}
+  .po-feats{gap:3px 12px;margin-top:8px;padding-top:8px}
+  .po-feats li{font-size:.68rem}
+
+  /* Botón de continuar fijo abajo, siempre visible mientras se comparan
+     planes — así no hay que llegar al final de la lista para avanzar. */
+  #wiz-1 #to-pay{position:fixed;left:16px;right:16px;bottom:14px;width:auto;z-index:110;box-shadow:0 10px 28px rgba(0,0,0,.5)}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
@@ -1708,10 +1732,19 @@ let selectedPlan = null;
 function closeAuth(){
   authModal.classList.remove('open');
   document.body.style.overflow = '';
+  const fab = document.getElementById('support-fab');
+  if (fab) fab.style.display = '';
 }
 function showModal(){
   authModal.classList.add('open');
   document.body.style.overflow = 'hidden';
+  /* En mobile el botón fijo "Empezar prueba gratis" del paso 1 y el fab de
+     "Servicio al cliente" ocupan la misma esquina inferior — se ocultan
+     mutuamente. Escondemos el fab mientras el wizard está abierto. */
+  if (window.matchMedia('(max-width:640px)').matches) {
+    const fab = document.getElementById('support-fab');
+    if (fab) fab.style.display = 'none';
+  }
 }
 function openLogin(){
   if (LOGIN_URL) { window.location.href = LOGIN_URL; return; }
@@ -1732,8 +1765,12 @@ function goStep(n){
   for (let i = 1; i <= 5; i++) {
     document.getElementById('wiz-' + i).style.display = (i === n) ? 'block' : 'none';
   }
-  /* el paso de planes usa todo el ancho en PC */
-  document.querySelector('#auth-modal .modal').classList.toggle('wide', n === 1);
+  /* el paso de planes usa todo el ancho en PC (grid de tarjetas grandes lado a
+     lado). En mobile eso hace que cada tarjeta ocupe casi toda la pantalla y
+     haya que bajar mucho para ver el botón — ahí usamos el layout compacto
+     apilado en vez del grid ancho. */
+  const isMobile = window.matchMedia('(max-width:640px)').matches;
+  document.querySelector('#auth-modal .modal').classList.toggle('wide', n === 1 && !isMobile);
   document.querySelectorAll('.wstep').forEach(s => {
     const sn = parseInt(s.dataset.s, 10);
     s.classList.toggle('active', sn === n);
