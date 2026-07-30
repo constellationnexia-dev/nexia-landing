@@ -263,9 +263,11 @@ input[type=checkbox]{accent-color:var(--accent)}
   .side-head{padding:0 8px 0 4px}
   .welcome{font-size:.85rem;white-space:nowrap}
   .biz-sub{display:none}
-  .nav-item{width:auto;margin-bottom:0;padding:9px 11px;white-space:nowrap;font-size:.8rem}
-  .nav-item .label{display:none}
-  .nav-item .ico{width:auto}
+  /* Barra de pestañas tipo app móvil: ícono arriba + texto chico debajo, en vez de
+     ocultar el texto y dejar solo el emoji (no se entendía qué hacía cada botón) */
+  .nav-item{width:auto;margin-bottom:0;padding:7px 9px;white-space:nowrap;font-size:.62rem;flex-direction:column;gap:3px;min-width:54px}
+  .nav-item .label{display:block;font-size:.62rem;line-height:1.05;font-weight:500}
+  .nav-item .ico{width:auto;font-size:1.15rem}
   .sidebar .bottom{margin-top:0;margin-left:auto;padding:0;border-top:none;display:flex;align-items:center;gap:10px}
   .bot-status{margin-bottom:0}
   .bot-status .bs-text{display:none}

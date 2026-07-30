@@ -44,6 +44,13 @@ h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;margin-bottom:16px}
 .reveal.visible{opacity:1;transform:translateY(0)}
 .reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
 .reveal-d4{transition-delay:.4s}.reveal-d5{transition-delay:.5s}
+@media (max-width:640px){
+  /* En mobile: menos movimiento y menos delay entre elementos, para que el
+     scroll rápido no se sienta como que la pagina se va "rearmando" */
+  .reveal{transform:translateY(10px);transition:opacity .35s ease-out,transform .35s ease-out}
+  .reveal-d1{transition-delay:.04s}.reveal-d2{transition-delay:.08s}.reveal-d3{transition-delay:.12s}
+  .reveal-d4{transition-delay:.16s}.reveal-d5{transition-delay:.2s}
+}
 
 /* ===== Promo banner ===== */
 #promo-banner{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--banner-grad,linear-gradient(90deg,#6D28D9,var(--accent)));color:var(--banner-text,#100822);font-weight:600;font-size:.9rem;text-align:center;padding:9px 40px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -2291,7 +2298,11 @@ const io = new IntersectionObserver(entries => {
       io.unobserve(e.target);
     }
   });
-}, { threshold: 0.18 });
+}, { threshold: 0.01, rootMargin: '0px 0px 150px 0px' });
+/* rootMargin positivo abajo: dispara el reveal ANTES de que el elemento entre
+   en pantalla (mientras aún está 150px por debajo), para que en mobile (scroll
+   rápido) ya esté visible cuando el usuario lo ve, en vez de "aparecer" en
+   pleno scroll (esto causaba la sensación de que la página se reordena). */
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 /* ============================================================
