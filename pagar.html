@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagar tu plan — Constellation Nexia</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.css">
+<script type="module" src="https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.js"></script>
+<style>
+:root{
+  --bg:#050508;
+  --card:#12121E;
+  --accent:#8B5CF6;
+  --accent-rgb:139,92,246;
+  --text:#FFFFFF;
+  --muted:#A0A0B0;
+  --line:#1E1E2E;
+  --font-title:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.6;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:32px 16px}
+h1,h2,h3{font-family:var(--font-title);line-height:1.2}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--font-title);font-weight:700;font-size:1.15rem;margin-bottom:28px;text-decoration:none;color:var(--text)}
+.logo .star{color:var(--accent)}
+.card{width:100%;max-width:480px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 24px;margin-bottom:16px}
+.biz-name{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.biz-plan{color:var(--accent);font-weight:600;font-size:.95rem;margin-bottom:2px}
+.biz-amount{font-size:2rem;font-weight:800;margin:12px 0 4px}
+.biz-amount small{font-size:.9rem;color:var(--muted);font-weight:500}
+.loading,.error{text-align:center;color:var(--muted);padding:40px 0}
+.error{color:#FF8A8A}
+.tabs{display:flex;gap:8px;background:#0b0b12;border:1px solid var(--line);border-radius:12px;padding:5px;margin:20px 0}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:none;color:var(--muted);font-family:var(--font-body);font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--accent);color:#100822}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+#pp-button{margin-top:8px}
+.transfer-box{background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.25);border-radius:12px;padding:16px;font-size:.88rem;line-height:1.7;margin-bottom:14px}
+.transfer-box b{color:var(--text)}
+.btn{display:block;width:100%;text-align:center;padding:13px 20px;border-radius:12px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;font-family:var(--font-body);text-decoration:none;margin-top:10px}
+.btn-whatsapp{background:#25D366;color:#04120a}
+.btn-confirm{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-confirm:hover{border-color:var(--accent)}
+.status-box{text-align:center;padding:20px 0}
+.status-ok{color:#7CFFB2}
+.status-fail{color:#FF8A8A}
+.status-icon{font-size:2.4rem;display:block;margin-bottom:10px}
+.footer-note{color:var(--muted);font-size:.78rem;text-align:center;max-width:400px;margin-top:8px}
+.pending-tag{display:inline-block;background:rgba(255,180,60,.15);color:#ffb43c;border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:700;margin-left:6px}
+</style>
+</head>
+<body>
+
+<a href="https://constellationnexia.com" class="logo"><span class="star">✦</span> Constellation Nexia</a>
+
+<div class="card" id="checkout-card">
+  <div class="loading" id="loading">Cargando información de tu plan…</div>
+</div>
+
+<p class="footer-note" id="footer-note" style="display:none">¿Problemas con el pago? Escríbenos por WhatsApp y te ayudamos directo.</p>
+
+<script>
+const BACKEND = 'https://nexia-backend-production-c65e.up.railway.app';
+
+function getParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+const businessId = getParam('businessId');
+const paymentId = getParam('id');
+const clientTransactionId = getParam('clientTransactionId');
+
+const card = document.getElementById('checkout-card');
+const loading = document.getElementById('loading');
+
+if (!businessId) {
+  card.innerHTML = `<div class="error">Falta el identificador del negocio en el link. Pídele a Constellation Nexia que te reenvíe el link de pago.</div>`;
+} else {
+  init();
+}
+
+async function init(){
+  try {
+    const resp = await fetch(`${BACKEND}/payments/checkout-info/${businessId}`);
+    if (!resp.ok) throw new Error('No se encontró el negocio');
+    const info = await resp.json();
+
+    // Si Payphone ya nos redirigió de vuelta con id + clientTransactionId,
+    // significa que el usuario ya intentó pagar con tarjeta — confirmamos.
+    if (paymentId && clientTransactionId) {
+      renderConfirming(info);
+      await confirmPayment(info);
+      return;
+    }
+
+    renderCheckout(info);
+  } catch (e) {
+    card.innerHTML = `<div class="error">No pudimos cargar tu información de pago. Escríbenos por WhatsApp para ayudarte.</div>`;
+  }
+}
+
+function renderCheckout(info){
+  document.getElementById('footer-note').style.display = 'block';
+  card.innerHTML = `
+    <div class="biz-name">${info.businessName}</div>
+    <div class="biz-plan">Plan ${info.planName}</div>
+    <div class="biz-amount">$${(info.amount/100).toFixed(2)} <small>/mes</small></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-card-btn">💳 Tarjeta</button>
+      <button class="tab-btn" id="tab-transfer-btn">🏦 Transferencia</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-card">
+      <div id="pp-button"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-transfer">
+      <div class="transfer-box">
+        🏦 <b>Transferencia bancaria</b><br>
+        Banco: <b>[pendiente — pídele a Ronny los datos]</b><br>
+        Cuenta: <b>[pendiente]</b><br>
+        Titular: <b>[pendiente]</b><br>
+        Monto: <b>$${(info.amount/100).toFixed(2)}</b><br>
+        Referencia: <b>${info.businessName}</b>
+      </div>
+      <a class="btn btn-whatsapp" id="whatsapp-link" target="_blank" rel="noopener">💬 Coordinar por WhatsApp</a>
+      <button class="btn btn-confirm" id="notify-transfer-btn">Ya transferí, avisar a Constellation Nexia</button>
+    </div>
+  `;
+
+  setupTabs();
+  setupWhatsapp(info);
+  setupTransferNotify(info);
+  setupCajita(info);
+}
+
+function setupTabs(){
+  const cardBtn = document.getElementById('tab-card-btn');
+  const transferBtn = document.getElementById('tab-transfer-btn');
+  const cardPanel = document.getElementById('tab-card');
+  const transferPanel = document.getElementById('tab-transfer');
+  cardBtn.addEventListener('click', () => {
+    cardBtn.classList.add('active'); transferBtn.classList.remove('active');
+    cardPanel.classList.add('active'); transferPanel.classList.remove('active');
+  });
+  transferBtn.addEventListener('click', () => {
+    transferBtn.classList.add('active'); cardBtn.classList.remove('active');
+    transferPanel.classList.add('active'); cardPanel.classList.remove('active');
+  });
+}
+
+function setupWhatsapp(info){
+  const msg = encodeURIComponent(`Hola! Quiero pagar mi plan ${info.planName} de Nexia ($${(info.amount/100).toFixed(2)}) por transferencia. Negocio: ${info.businessName}`);
+  document.getElementById('whatsapp-link').href = `https://wa.me/593961696915?text=${msg}`;
+}
+
+function setupTransferNotify(info){
+  const btn = document.getElementById('notify-transfer-btn');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Avisando…';
+    try {
+      await fetch(`${BACKEND}/payments/notify-transfer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId }),
+      });
+      btn.textContent = '✓ Avisado — te contactamos para confirmar';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Ya transferí, avisar a Constellation Nexia';
+    }
+  });
+}
+
+function setupCajita(info){
+  const clientTxId = `${businessId}-${Date.now()}`;
+  window.addEventListener('load', () => {
+    new PPaymentButtonBox({
+      token: info.payphoneToken,
+      storeId: info.payphoneStoreId,
+      clientTransactionId: clientTxId,
+      amount: info.amount,
+      amountWithoutTax: info.amount,
+      currency: 'USD',
+      reference: `Nexia ${info.planName} — ${info.businessName}`,
+      lang: 'es',
+      defaultMethod: 'card',
+      email: info.ownerEmail || undefined,
+      phoneNumber: info.ownerPhone ? `+${info.ownerPhone}` : undefined,
+    }).render('pp-button');
+  });
+}
+
+function renderConfirming(info){
+  document.getElementById('footer-note').style.display = 'block';
+  card.innerHTML = `<div class="status-box"><span class="status-icon">⏳</span>Confirmando tu pago…</div>`;
+}
+
+async function confirmPayment(info){
+  try {
+    const resp = await fetch(`${BACKEND}/payments/confirm-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId, id: paymentId, clientTransactionId }),
+    });
+    const result = await resp.json();
+
+    if (result.success) {
+      card.innerHTML = `
+        <div class="status-box">
+          <span class="status-icon">✅</span>
+          <div class="status-ok" style="font-size:1.1rem;font-weight:700">¡Pago confirmado!</div>
+          <p style="color:var(--muted);margin-top:8px">Tu plan ${info.planName} de ${info.businessName} ya está activo por 1 mes más. Tu asistente sigue funcionando normal.</p>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="status-box">
+          <span class="status-icon">⚠️</span>
+          <div class="status-fail" style="font-size:1.1rem;font-weight:700">El pago no se completó</div>
+          <p style="color:var(--muted);margin-top:8px">${result.message || 'La transacción fue cancelada o rechazada.'} Puedes intentar de nuevo o escribirnos por WhatsApp.</p>
+        </div>`;
+    }
+  } catch (e) {
+    card.innerHTML = `<div class="error">No pudimos confirmar tu pago automáticamente. Escríbenos por WhatsApp con el número de tu transacción y lo revisamos a mano.</div>`;
+  }
+}
+</script>
+
+</body>
+</html>
