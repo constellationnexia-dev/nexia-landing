@@ -107,6 +107,13 @@ async function init(){
       return;
     }
 
+    // Ya está pagado/vigente — no dejamos pagar de nuevo por accidente
+    // (ej. el cliente abre el link dos veces, o paga tarjeta y transferencia).
+    if (info.alreadyPaid) {
+      renderAlreadyPaid(info);
+      return;
+    }
+
     renderCheckout(info);
   } catch (e) {
     card.innerHTML = `<div class="error">No pudimos cargar tu información de pago. Escríbenos por WhatsApp para ayudarte.</div>`;
@@ -218,6 +225,15 @@ function setupCajita(info){
     }).render('pp-button');
   }
   render();
+}
+
+function renderAlreadyPaid(info){
+  card.innerHTML = `
+    <div class="status-box">
+      <span class="status-icon">✅</span>
+      <div class="status-ok" style="font-size:1.1rem;font-weight:700">Ya estás al día</div>
+      <p style="color:var(--muted);margin-top:8px">${info.businessName} tiene el plan ${info.planName} activo hasta <b>${info.subscriptionEnd}</b>. No hace falta pagar de nuevo todavía.</p>
+    </div>`;
 }
 
 function renderConfirming(info){

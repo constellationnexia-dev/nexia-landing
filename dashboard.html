@@ -70,6 +70,9 @@ button{font-family:var(--font-body)}
 .page-head p{color:var(--muted);font-size:.9rem}
 
 /* ===== Estadísticas ===== */
+#payment-banner{justify-content:space-between}
+#payment-banner.pb-warning{background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);color:#ffb43c}
+#payment-banner.pb-expired{background:rgba(255,90,90,.12);border:1px solid rgba(255,90,90,.35);color:#FF8A8A}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:14px}
 .metric{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .3s}
 .metric:hover{border-color:rgba(var(--accent-rgb),.35)}
@@ -356,6 +359,12 @@ input[type=checkbox]{accent-color:var(--accent)}
 
 <!-- MAIN -->
 <main class="main">
+
+  <!-- Banner de pago: se muestra si el plan está vencido o por vencer -->
+  <a id="payment-banner" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none;margin-bottom:20px;padding:14px 18px;border-radius:12px;font-size:.88rem;line-height:1.5;align-items:center;gap:10px">
+    <span id="payment-banner-text"></span>
+    <strong style="white-space:nowrap">Pagar ahora →</strong>
+  </a>
 
   <!-- PÁGINA: ESTADÍSTICAS -->
   <section class="page active" id="page-stats">
@@ -1000,6 +1009,38 @@ if (!hasProducts)  document.getElementById('metric-orders').style.display  = 'no
    ============================================================ */
 const PLAN_PRICES = { starter:29, basico:49, pro:100, business:179, enterprise:279 };
 const PLAN_NAMES  = { starter:'Starter', basico:'Básico', pro:'Pro', business:'Business', enterprise:'Enterprise' };
+
+/**
+ * Banner de pago: aparece si el plan ya venció (rojo, "paga ya") o está por
+ * vencer en los próximos 3 días (ámbar, aviso preventivo). Lleva directo a
+ * pagar.html con el businessId — mismo link que le llega a Ronny para
+ * reenviar por WhatsApp, pero el cliente también lo puede usar solo desde
+ * su panel sin esperar a que se lo manden.
+ */
+function renderPaymentBanner(biz){
+  const banner = document.getElementById('payment-banner');
+  const textEl = document.getElementById('payment-banner-text');
+  if (!banner || !biz.subscription_end) { if (banner) banner.style.display = 'none'; return; }
+
+  const today = new Date().toISOString().split('T')[0];
+  const end = biz.subscription_end;
+  const daysLeft = Math.ceil((new Date(end) - new Date(today)) / 86400000);
+
+  banner.classList.remove('pb-warning', 'pb-expired');
+  banner.href = `https://constellationnexia.com/pagar.html?businessId=${BIZ_ID}`;
+
+  if (!biz.subscription_active || daysLeft < 0) {
+    banner.classList.add('pb-expired');
+    textEl.textContent = `⚠️ Tu plan venció el ${end}. Paga para seguir activo sin interrupciones.`;
+    banner.style.display = 'flex';
+  } else if (daysLeft <= 3) {
+    banner.classList.add('pb-warning');
+    textEl.textContent = `🔔 Tu plan vence el ${end} (en ${daysLeft} día${daysLeft === 1 ? '' : 's'}).`;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
 
 
 function formatTime(iso, showHour) {
@@ -2747,7 +2788,7 @@ async function loadDashboard() {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
     const currentMonth = now.toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
-      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours,phone_number').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours,phone_number,subscription_active,subscription_end').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
@@ -2757,6 +2798,7 @@ async function loadDashboard() {
     ]);
     if (biz) {
       document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
+      renderPaymentBanner(biz);
       if (biz.phone_number) {
         const el = document.getElementById('wa-number-display');
         if (el) el.textContent = biz.phone_number;
