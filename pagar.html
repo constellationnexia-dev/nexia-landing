@@ -185,7 +185,17 @@ function setupTransferNotify(info){
 
 function setupCajita(info){
   const clientTxId = `${businessId}-${Date.now()}`;
-  window.addEventListener('load', () => {
+  // El SDK de Payphone se carga como <script type="module">, que puede tardar
+  // en definir window.PPaymentButtonBox. Antes esto esperaba el evento 'load'
+  // de la página, pero para cuando llegábamos aquí (después del fetch async
+  // de checkout-info) ese evento ya había pasado hace rato — el listener nunca
+  // se disparaba y el botón nunca se dibujaba. Ahora reintentamos hasta que
+  // el SDK esté listo.
+  function render(){
+    if (typeof PPaymentButtonBox === 'undefined') {
+      setTimeout(render, 150);
+      return;
+    }
     new PPaymentButtonBox({
       token: info.payphoneToken,
       storeId: info.payphoneStoreId,
@@ -199,7 +209,8 @@ function setupCajita(info){
       email: info.ownerEmail || undefined,
       phoneNumber: info.ownerPhone ? `+${info.ownerPhone}` : undefined,
     }).render('pp-button');
-  });
+  }
+  render();
 }
 
 function renderConfirming(info){
