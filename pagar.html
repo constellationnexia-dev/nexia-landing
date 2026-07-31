@@ -73,9 +73,16 @@ function getParam(name){
   return new URLSearchParams(window.location.search).get(name);
 }
 
-const businessId = getParam('businessId');
 const paymentId = getParam('id');
 const clientTransactionId = getParam('clientTransactionId');
+
+// Cuando Payphone redirige de vuelta después del pago, reemplaza toda la URL
+// con SUS parámetros (id, clientTransactionId) y el ?businessId= original se
+// pierde. Por eso el clientTransactionId se arma como "{businessId}-{timestamp}"
+// (ver setupCajita) — un UUID siempre mide 36 caracteres, así que si no hay
+// businessId en la URL pero sí clientTransactionId, lo recuperamos de ahí.
+const businessId = getParam('businessId') ||
+  (clientTransactionId && clientTransactionId.length >= 36 ? clientTransactionId.slice(0, 36) : null);
 
 const card = document.getElementById('checkout-card');
 const loading = document.getElementById('loading');
