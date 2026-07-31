@@ -1168,11 +1168,25 @@ footer{border-top:1px solid var(--line);padding:64px 24px 40px;background:var(--
       <form id="login-form">
         <div class="field"><label for="l-email">Correo electrónico</label><input type="email" id="l-email" placeholder="tu@correo.com" required></div>
         <div class="field"><label for="l-pass">Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" required></div>
+        <p style="text-align:right;margin:-4px 0 4px"><a href="#" id="go-forgot" style="color:var(--accent);font-size:.82rem">¿Olvidaste tu contraseña?</a></p>
         <button type="submit" class="btn btn-primary" style="width:100%">Iniciar sesión →</button>
         <p id="login-error" style="display:none;color:#FF5C5C;font-size:.84rem;margin-top:8px"></p>
       </form>
       <p class="modal-alt" id="login-note" style="display:none;color:var(--accent)">El acceso a tu panel llega a tu correo al activar tu plan.</p>
       <p class="modal-alt">¿No tienes cuenta? <a href="#" id="go-signup">Elige tu plan y crea una →</a></p>
+    </div>
+
+    <!-- Vista: recuperar contraseña -->
+    <div id="view-forgot" style="display:none">
+      <h3>Recuperar contraseña</h3>
+      <p class="modal-sub">Te mandamos un link a tu correo para crear una nueva.</p>
+      <form id="forgot-form">
+        <div class="field"><label for="f-email">Correo electrónico</label><input type="email" id="f-email" placeholder="tu@correo.com" required></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Enviar link de recuperación →</button>
+        <p id="forgot-error" style="display:none;color:#FF5C5C;font-size:.84rem;margin-top:8px"></p>
+        <p id="forgot-ok" style="display:none;color:#7CFFB2;font-size:.84rem;margin-top:8px">✓ Listo, revisa tu correo (y spam) para el link.</p>
+      </form>
+      <p class="modal-alt"><a href="#" id="back-to-login">← Volver a iniciar sesión</a></p>
     </div>
 
     <!-- Vista: wizard de registro -->
@@ -1752,7 +1766,15 @@ function showModal(){
 function openLogin(){
   if (LOGIN_URL) { window.location.href = LOGIN_URL; return; }
   document.getElementById('view-login').style.display = 'block';
+  document.getElementById('view-forgot').style.display = 'none';
   document.getElementById('view-wizard').style.display = 'none';
+  document.querySelector('#auth-modal .modal').classList.remove('wide');
+  showModal();
+}
+function openForgot(){
+  document.getElementById('view-login').style.display = 'none';
+  document.getElementById('view-wizard').style.display = 'none';
+  document.getElementById('view-forgot').style.display = 'block';
   document.querySelector('#auth-modal .modal').classList.remove('wide');
   showModal();
 }
@@ -2318,6 +2340,44 @@ document.querySelectorAll('input[name=org]').forEach(r => r.addEventListener('ch
   localStorage.setItem('nexiaOrg', r.value);
 }));
 document.getElementById('go-signup').addEventListener('click', e => { e.preventDefault(); openWizard(); });
+document.getElementById('go-forgot').addEventListener('click', e => { e.preventDefault(); openForgot(); });
+
+/* Si venimos de reset-password.html (contraseña ya cambiada), abrir el login */
+if (new URLSearchParams(window.location.search).get('login') === '1') {
+  openLogin();
+}
+document.getElementById('back-to-login').addEventListener('click', e => { e.preventDefault(); openLogin(); });
+
+/* RECUPERAR CONTRASEÑA */
+document.getElementById('forgot-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('f-email').value.trim();
+  const errEl = document.getElementById('forgot-error');
+  const okEl = document.getElementById('forgot-ok');
+  const btn = e.target.querySelector('button[type=submit]');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  try {
+    const { error } = await auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://constellationnexia.com/reset-password.html',
+    });
+    if (error) {
+      errEl.textContent = 'No pudimos enviar el correo. Intenta de nuevo.';
+      errEl.style.display = 'block';
+    } else {
+      okEl.style.display = 'block';
+      e.target.reset();
+    }
+  } catch (err) {
+    console.error('Error recuperando contraseña:', err);
+    errEl.textContent = 'Error al conectar. Intenta de nuevo.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar link de recuperación →';
+  }
+});
 
 document.querySelectorAll('.js-login').forEach(b => b.addEventListener('click', openLogin));
 document.querySelectorAll('.js-signup').forEach(b => b.addEventListener('click', () => openWizard(b.dataset.plan)));
