@@ -898,13 +898,13 @@ input[type=checkbox]{accent-color:var(--accent)}
     <div class="config-grid">
       <div class="config-card">
         <h3>💳 Plan actual</h3>
-        <p>Plan Básico — $99/mes · 1.500 mensajes</p>
+        <p id="cfg-plan-text">Cargando...</p>
         <span class="soon">Próximamente: cambiar de plan</span>
       </div>
       <div class="config-card">
         <h3>🧾 Facturación</h3>
-        <p>Historial de pagos, facturas y método de pago.</p>
-        <span class="soon">Próximamente</span>
+        <p id="cfg-billing-text">Estado de tu suscripción y pagos.</p>
+        <button type="button" id="billing-toggle" style="margin-top:10px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.3);color:var(--accent);border-radius:9px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:var(--font-body)">Ver historial de pagos</button>
       </div>
       <div class="config-card">
         <h3>👤 Datos de cuenta</h3>
@@ -930,6 +930,18 @@ input[type=checkbox]{accent-color:var(--accent)}
           <span id="pause-msg-saved" style="display:none;color:#22c55e;font-size:.8rem;margin-left:10px">✓ Guardado</span>
         </div>
       </div>
+    </div>
+
+    <!-- Panel de facturación: estado + historial de pagos -->
+    <div class="u-section" id="billing-panel" style="display:none;margin-top:16px">
+      <h3>🧾 Facturación</h3>
+      <div id="billing-status" style="background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:.86rem"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+        <a id="billing-pay-btn" href="#" target="_blank" rel="noopener" style="background:var(--accent);color:#04140b;border:none;border-radius:20px;padding:10px 22px;font-weight:700;font-family:var(--font-body);font-size:.85rem;cursor:pointer;text-decoration:none">Pagar ahora</a>
+        <button type="button" disabled style="background:none;border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:10px 22px;font-weight:600;font-family:var(--font-body);font-size:.85rem;cursor:not-allowed" title="Próximamente">Cambiar método de pago</button>
+      </div>
+      <div class="items-title" style="margin-bottom:10px">Historial de pagos</div>
+      <div id="billing-history"><p class="f-hint">Cargando historial...</p></div>
     </div>
   </section>
 <!-- ── Diálogo temático: salir sin guardar ── -->
@@ -1042,6 +1054,67 @@ function renderPaymentBanner(biz){
   }
 }
 
+/**
+ * Tarjeta "Plan actual" + "Facturación" en Configuración: precio real del
+ * plan, estado de la suscripción y botón para abrir el historial de pagos.
+ * El historial se pide a demanda (al abrir el panel), no en cada carga.
+ */
+function renderBillingSummary(biz){
+  const planName = PLAN_NAMES[biz.plan] || biz.plan;
+  const price = PLAN_PRICES[biz.plan];
+  const planEl = document.getElementById('cfg-plan-text');
+  if (planEl) planEl.textContent = price ? `Plan ${planName} — $${price}/mes` : `Plan ${planName}`;
+
+  const billingEl = document.getElementById('cfg-billing-text');
+  const payBtn = document.getElementById('billing-pay-btn');
+  if (payBtn) payBtn.href = `https://constellationnexia.com/pagar.html?businessId=${BIZ_ID}`;
+
+  if (billingEl) {
+    if (biz.subscription_active && biz.subscription_end) {
+      billingEl.textContent = `Activo hasta ${biz.subscription_end}.`;
+    } else {
+      billingEl.textContent = 'Sin pago registrado todavía.';
+    }
+  }
+}
+
+let billingHistoryLoaded = false;
+async function loadBillingHistory(){
+  const box = document.getElementById('billing-history');
+  if (!box) return;
+  try {
+    const res = await fetch(`${BACKEND_URL}/payments/history/${BIZ_ID}`);
+    const data = await res.json();
+    const payments = data.payments || [];
+    if (!payments.length) {
+      box.innerHTML = '<p class="f-hint">Todavía no hay pagos registrados.</p>';
+      return;
+    }
+    box.innerHTML = payments.map(p => {
+      const date = p.paid_at ? new Date(p.paid_at).toLocaleDateString('es-EC', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+      const amount = p.amount != null ? `$${Number(p.amount).toFixed(2)}` : '—';
+      const ok = (p.status || '').toLowerCase() === 'approved' || (p.status || '').toLowerCase() === 'aprobado';
+      return `<div class="pay-row" style="justify-content:space-between">
+        <span class="pay-name" style="flex:none">${date}</span>
+        <span style="color:var(--muted);font-size:.8rem">${amount}</span>
+        <span style="font-size:.74rem;color:${ok ? '#22c55e' : 'var(--muted)'};font-weight:600">${ok ? '✓ Pagado' : (p.status || '—')}</span>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<p class="f-hint">No se pudo cargar el historial. Intenta de nuevo más tarde.</p>';
+  }
+}
+
+document.getElementById('billing-toggle')?.addEventListener('click', () => {
+  const panel = document.getElementById('billing-panel');
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  document.getElementById('billing-toggle').textContent = open ? 'Ver historial de pagos' : 'Ocultar historial';
+  if (!open && !billingHistoryLoaded) {
+    billingHistoryLoaded = true;
+    loadBillingHistory();
+  }
+});
 
 function formatTime(iso, showHour) {
   if (!iso) return '';
@@ -2799,6 +2872,7 @@ async function loadDashboard() {
     if (biz) {
       document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
       renderPaymentBanner(biz);
+      renderBillingSummary(biz);
       if (biz.phone_number) {
         const el = document.getElementById('wa-number-display');
         if (el) el.textContent = biz.phone_number;

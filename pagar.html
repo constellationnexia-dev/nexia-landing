@@ -145,7 +145,8 @@ function renderCheckout(info){
         Titular: <b>Ronny Sebastian Erazo Pacheco</b><br>
         Cédula: <b>1750086306</b><br>
         Monto: <b>$${(info.amount/100).toFixed(2)}</b><br>
-        Referencia: <b>${info.businessName}</b>
+        Referencia: <b>${info.businessName}</b><br>
+        📱 WhatsApp: <b>+593 96 169 6915</b>
       </div>
       <a class="btn btn-whatsapp" id="whatsapp-link" target="_blank" rel="noopener">💬 Coordinar por WhatsApp</a>
       <button class="btn btn-confirm" id="notify-transfer-btn">Ya transferí, avisar a Constellation Nexia</button>
@@ -223,8 +224,29 @@ function setupCajita(info){
       email: info.ownerEmail || undefined,
       phoneNumber: info.ownerPhone ? `+${info.ownerPhone}` : undefined,
     }).render('pp-button');
+    guardDoubleClick();
   }
   render();
+}
+
+// Protección extra contra doble cobro: si el cliente hace doble clic/doble
+// tap sobre el widget de Payphone (ej. por lag de red), bloqueamos el
+// segundo clic si llega a menos de 800ms del primero. No molesta el uso
+// normal (abrir el formulario, escribir la tarjeta, confirmar) porque esos
+// pasos no son clics seguidos — solo frena el "doble tap" accidental.
+function guardDoubleClick(){
+  const container = document.getElementById('pp-button');
+  if (!container) return;
+  let lastClick = 0;
+  container.addEventListener('click', (e) => {
+    const now = Date.now();
+    if (now - lastClick < 800) {
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
+    lastClick = now;
+  }, true);
 }
 
 function renderAlreadyPaid(info){
