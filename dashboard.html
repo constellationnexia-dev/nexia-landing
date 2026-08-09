@@ -911,6 +911,15 @@ input[type=checkbox]{accent-color:var(--accent)}
         <p>Correo, contraseña y datos de contacto.</p>
         <span class="soon">Próximamente</span>
       </div>
+      <div class="config-card">
+        <h3>📱 Tu propio WhatsApp Business</h3>
+        <p id="own-wa-text">¿Ya tienes tu propio número de WhatsApp Business? Úsalo en vez del número que te asignamos.</p>
+        <div id="own-wa-form" style="margin-top:10px">
+          <input type="tel" id="own-wa-input" placeholder="+593 99 999 9999" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--text);font-family:var(--font-body);font-size:.84rem;outline:none;margin-bottom:8px">
+          <button type="button" id="own-wa-btn" style="background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.3);color:var(--accent);border-radius:9px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:var(--font-body);width:100%">Solicitar cambio</button>
+          <p class="f-hint" style="margin-top:6px">Tu número tiene que estar migrado a Twilio primero — te contactamos para coordinarlo antes de activarlo.</p>
+        </div>
+      </div>
       <div class="config-card" id="gcal-card">
         <h3>📅 Google Calendar</h3>
         <p id="gcal-status">Verificando conexión...</p>
@@ -1104,6 +1113,54 @@ async function loadBillingHistory(){
     box.innerHTML = '<p class="f-hint">No se pudo cargar el historial. Intenta de nuevo más tarde.</p>';
   }
 }
+
+/**
+ * Tarjeta "Tu propio WhatsApp Business" en Configuración: si ya tiene número
+ * propio activo lo muestra; si tiene una solicitud pendiente avisa que está
+ * en revisión; si no, deja el formulario para pedirlo.
+ */
+function renderOwnWhatsapp(biz){
+  const textEl = document.getElementById('own-wa-text');
+  const formEl = document.getElementById('own-wa-form');
+  if (!textEl || !formEl) return;
+
+  if (biz.own_whatsapp_number) {
+    textEl.textContent = `✅ Estás usando tu propio número: ${biz.phone_number}.`;
+    formEl.style.display = 'none';
+  } else if (biz.own_whatsapp_requested) {
+    textEl.textContent = `🕓 Pediste conectar ${biz.own_whatsapp_requested}. Te contactamos para coordinar la migración a Twilio antes de activarlo.`;
+    formEl.style.display = 'none';
+  } else {
+    textEl.textContent = '¿Ya tienes tu propio número de WhatsApp Business? Úsalo en vez del número que te asignamos.';
+    formEl.style.display = 'block';
+  }
+}
+
+document.getElementById('own-wa-btn')?.addEventListener('click', async () => {
+  const input = document.getElementById('own-wa-input');
+  const btn = document.getElementById('own-wa-btn');
+  const num = input.value.trim();
+  if (!/^\+?[0-9]{8,15}$/.test(num.replace(/\s/g, ''))) {
+    alert('Escribe el número en formato internacional, ej: +593999999999');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    const resp = await fetch(`${BACKEND_URL}/businesses/${BIZ_ID}/request-own-number`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber: num }),
+    });
+    if (!resp.ok) throw new Error('request failed');
+    document.getElementById('own-wa-text').textContent = `🕓 Pediste conectar ${num}. Te contactamos para coordinar la migración a Twilio antes de activarlo.`;
+    document.getElementById('own-wa-form').style.display = 'none';
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Solicitar cambio';
+    alert('No se pudo enviar la solicitud. Intenta de nuevo o escríbenos.');
+  }
+});
 
 document.getElementById('billing-toggle')?.addEventListener('click', () => {
   const panel = document.getElementById('billing-panel');
@@ -2861,7 +2918,7 @@ async function loadDashboard() {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
     const currentMonth = now.toISOString().slice(0, 7);
     const [{ data: biz }, { count: clientCount }, { count: apptCount }, { count: orderCount }, { data: counter }, { count: msgsThisMonth }, { count: msgsLastMonth }] = await Promise.all([
-      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours,phone_number,subscription_active,subscription_end').eq('id', BIZ_ID).single(),
+      db.from('businesses').select('business_name,business_description,city,plan,bot_active,bot_pause_message,messages_used,plan_messages_limit,accepts_appointments,accepts_orders,accepts_walkins,config,payment_methods,appointment_window_days,appointment_duration,address,city,is_online,only_online,bot_tone,welcome_message,social_links,owner_phone,owner_name,working_hours,phone_number,subscription_active,subscription_end,own_whatsapp_number,own_whatsapp_requested').eq('id', BIZ_ID).single(),
       db.from('conversations').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID),
       db.from('appointments').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
       db.from('orders').select('id', { count:'exact', head:true }).eq('business_id', BIZ_ID).gte('created_at', startOfMonth),
@@ -2873,6 +2930,7 @@ async function loadDashboard() {
       document.getElementById('biz-sub').textContent = 'Asistente de ' + biz.business_name;
       renderPaymentBanner(biz);
       renderBillingSummary(biz);
+      renderOwnWhatsapp(biz);
       if (biz.phone_number) {
         const el = document.getElementById('wa-number-display');
         if (el) el.textContent = biz.phone_number;
