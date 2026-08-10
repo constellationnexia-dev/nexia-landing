@@ -1849,9 +1849,10 @@ document.getElementById('to-pay').addEventListener('click', () => { if (selected
 function renderPaySummary(){
   if (!selectedPlan) return;
   const p = selectedPlan;
+  const offer = p.m1 < p.price;
   document.getElementById('pay-summary').innerHTML = `
     <div class="row"><span>Plan ${p.name}</span><strong>Gratis por 7 días</strong></div>
-    <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes</span><span>luego $${p.price}/mes</span></div>`;
+    <div class="row" style="color:var(--muted);font-size:.82rem"><span>${p.msgs} mensajes/mes</span><span>${offer ? `luego $${p.m1} el primer mes, después $${p.price}/mes` : `luego $${p.price}/mes`}</span></div>`;
 }
 
 document.getElementById('pay-btn').addEventListener('click', function(){
